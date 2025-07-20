@@ -44,10 +44,10 @@ function App() {
         <div className="max-w-6xl mx-auto ">
           <div className="grid lg:grid-cols-2 gap-12 items-center ">
             {/* Left side - Content */}
-            <div className="backdrop-blur-xl bg-gradient-to-br from-white/90 via-white/60 to-white/70 rounded-3xl p-8 border border-white/40 shadow-2xl ring-1 ring-white/20">
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <div className="backdrop-blur-xl bg-gradient-to-br from-white/90 via-white/60 to-white/70 rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/40 shadow-2xl ring-1 ring-white/20">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
                 Want to understand every
-                <span className="block relative overflow-hidden h-20 md:h-24">
+                <span className="block relative overflow-hidden h-14 md:h-20 lg:h-24">
                   <span
                     key={currentWord}
                     className="absolute inset-0 flex items-center"
@@ -63,17 +63,17 @@ function App() {
                   </span>
                 </span>
               </h1>
-              <p className="text-xl text-gray-700 mb-6 leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-700 mb-4 md:mb-6 leading-relaxed">
                 AI-powered real-time translation app that breaks down language
                 barriers instantly.
               </p>
 
               {/* Social Proof */}
-              <div className="mb-8 backdrop-blur-lg bg-white/25 rounded-2xl p-4 border border-white/30 ring-1 ring-white/10">
-                <p className="text-sm text-gray-600 mb-2">
+              <div className="mb-6 md:mb-8 backdrop-blur-lg bg-white/25 rounded-xl md:rounded-2xl p-3 md:p-4 border border-white/30 ring-1 ring-white/10">
+                <p className="text-xs md:text-sm text-gray-600 mb-2">
                   Join thousands of users worldwide
                 </p>
-                <div className="flex items-center space-x-6 text-xs text-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 md:space-x-6 text-xs text-gray-700">
                   <div className="flex items-center">
                     <span className="font-semibold text-blue-600">37+</span>
                     <span className="ml-1">Languages</span>
@@ -97,7 +97,7 @@ function App() {
                 <img
                   src={appStoreButton}
                   alt="Download on the App Store"
-                  className="w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
+                  className="w-3/4 sm:w-2/3 md:w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
                 />
               </a>
             </div>
