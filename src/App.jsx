@@ -1,49 +1,289 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useState, useEffect } from "react";
+import appStoreButton from "./assets/download-on-the-app-store.svg";
+import appIcon from "./assets/AppIcon.jpg";
+import mockupImage from "./assets/mockuppromax.png";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [currentWord, setCurrentWord] = useState(0);
+  const words = ["conversation", "lecture", "meeting", "appointment", "sermon"];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWord((prev) => (prev + 1) % words.length);
+    }, 3000); // Change word every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [words.length]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="max-w-screen-lg w-full text-center">
-        <div>
-          <a href="https://vite.dev" target="_blank" rel="noopener noreferrer">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header */}
+      <header className="px-6 py-4 backdrop-blur-xl bg-white/40 border-b border-white/40 sticky top-0 z-50 ring-1 ring-white/20">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-3">
             <img
-              src={viteLogo}
-              className="h-24 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#646cffaa] inline-block"
-              alt="Vite logo"
+              src={appIcon}
+              alt="Ekto Captions"
+              className="w-10 h-10 rounded-lg shadow-lg"
             />
-          </a>
-          <a href="https://react.dev" target="_blank" rel="noopener noreferrer">
-            <img
-              src={reactLogo}
-              className="h-24 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#61dafbaa] inline-block animate-spin motion-reduce:animate-none [animation-duration:20s]"
-              alt="React logo"
-            />
+            <span className="text-xl font-bold text-gray-800">
+              ekto captions
+            </span>
+          </div>
+          <a
+            href="https://apps.apple.com/app/id6740196773"
+            className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all duration-300 shadow-lg backdrop-blur-sm"
+          >
+            Download
           </a>
         </div>
-        <h1 className="text-5xl font-bold leading-tight mb-8">Vite + React</h1>
-        <div className="p-8">
-          <button
-            onClick={() => setCount((count) => count + 1)}
-            className="px-5 py-3 text-base font-medium bg-gray-800 dark:bg-gray-100 text-white dark:text-gray-900 border border-transparent rounded-lg cursor-pointer transition-colors duration-250 hover:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
-          >
-            count is {count}
-          </button>
-          <p className="mt-4">
-            Edit{" "}
-            <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">
-              src/App.jsx
-            </code>{" "}
-            and save to test HMR
+      </header>
+
+      {/* Hero Section */}
+      <section className="px-6 py-20 bg-gradient-to-bl from-blue-400 via-blue-500 to-blue-600">
+        <div className="max-w-6xl mx-auto ">
+          <div className="grid lg:grid-cols-2 gap-12 items-center ">
+            {/* Left side - Content */}
+            <div className="backdrop-blur-xl bg-gradient-to-br from-white/90 via-white/60 to-white/70 rounded-3xl p-8 border border-white/40 shadow-2xl ring-1 ring-white/20">
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                Want to understand every
+                <span className="block relative overflow-hidden h-20 md:h-24">
+                  <span
+                    key={currentWord}
+                    className="absolute inset-0 flex items-center"
+                    style={{
+                      animation: "fadeInUp 3s ease-in-out",
+                      background: "linear-gradient(135deg, #ef4444, #f97316)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    {words[currentWord]}?
+                  </span>
+                </span>
+              </h1>
+              <p className="text-xl text-gray-700 mb-6 leading-relaxed">
+                ekto captions is the AI-powered real-time translation app that
+                breaks down language barriers instantly. Perfect for meetings,
+                conversations, and connecting with people worldwide.
+              </p>
+
+              {/* Social Proof */}
+              <div className="mb-8 backdrop-blur-lg bg-white/25 rounded-2xl p-4 border border-white/30 ring-1 ring-white/10">
+                <p className="text-sm text-gray-600 mb-2">
+                  Join thousands of users worldwide
+                </p>
+                <div className="flex items-center space-x-6 text-xs text-gray-700">
+                  <div className="flex items-center">
+                    <span className="font-semibold text-blue-600">37+</span>
+                    <span className="ml-1">Languages</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="font-semibold text-blue-600">
+                      Real-time
+                    </span>
+                    <span className="ml-1">Translation</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="font-semibold text-blue-600">
+                      AI-powered
+                    </span>
+                    <span className="ml-1">Accuracy</span>
+                  </div>
+                </div>
+              </div>
+
+              <a href="https://apps.apple.com/app/id6740196773">
+                <img
+                  src={appStoreButton}
+                  alt="Download on the App Store"
+                  className="h-14 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
+                />
+              </a>
+            </div>
+
+            {/* Right side - Mockup Image */}
+            <div className="flex justify-center lg:justify-end">
+              <img
+                src={mockupImage}
+                alt="Ekto Captions App Mockup"
+                className="w-full h-[600px] object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works Section */}
+      <section className="px-6 py-16 bg-blue-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              How it works
+            </h2>
+            <p className="text-lg text-gray-600">
+              Three simple steps to break language barriers
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center backdrop-blur-xl bg-white/25 rounded-2xl p-6 border border-white/30 shadow-xl hover:bg-white/35 transition-all duration-300 ring-1 ring-white/15">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">
+                1
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Open the App
+              </h3>
+              <p className="text-gray-700">
+                Launch ekto captions and select your languages
+              </p>
+            </div>
+
+            <div className="text-center backdrop-blur-xl bg-white/25 rounded-2xl p-6 border border-white/30 shadow-xl hover:bg-white/35 transition-all duration-300 ring-1 ring-white/15">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">
+                2
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Transcribe
+              </h3>
+              <p className="text-gray-700">
+                The app captures and transcribes speech in real-time
+              </p>
+            </div>
+
+            <div className="text-center backdrop-blur-xl bg-white/25 rounded-2xl p-6 border border-white/30 shadow-xl hover:bg-white/35 transition-all duration-300 ring-1 ring-white/15">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-lg">
+                3
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Get Translations
+              </h3>
+              <p className="text-gray-700">
+                Instant captions and translations appear on screen
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="px-6 py-16 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            Powerful Features
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-8 backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-xl hover:bg-white/40 transition-all duration-300 ring-1 ring-white/20">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Real-Time Captions
+              </h3>
+              <p className="text-gray-700">
+                Get instant captions for any conversation, meeting, or audio
+                content with high accuracy.
+              </p>
+            </div>
+
+            <div className="text-center p-8 backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-xl hover:bg-white/40 transition-all duration-300 ring-1 ring-white/20">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Converse Mode
+              </h3>
+              <p className="text-gray-700">
+                Have natural conversations with instant back-and-forth
+                translation. Perfect for real-time dialogue.
+              </p>
+            </div>
+
+            <div className="text-center p-8 backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-xl hover:bg-white/40 transition-all duration-300 ring-1 ring-white/20">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Multi-Language Support
+              </h3>
+              <p className="text-gray-700">
+                Translate between 37+ languages instantly. Perfect for
+                international communication.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Download Section */}
+      <section id="download" className="px-6 py-20 bg-gray-900">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Never miss another conversation again
+          </h2>
+          <p className="text-xl text-gray-300 mb-8">
+            Join thousands of users breaking down language barriers every day.
+            Get started in seconds.
+          </p>
+          <a href="https://apps.apple.com/app/id6740196773">
+            <img
+              src={appStoreButton}
+              alt="Download on the App Store"
+              className="h-16 mx-auto hover:scale-105 transition-transform cursor-pointer"
+            />
+          </a>
+          <p className="text-gray-400 mt-6 text-sm">
+            Available on iOS • Free to download • No signup required
           </p>
         </div>
-        <p className="text-gray-500">
-          Click on the Vite and React logos to learn more
-        </p>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="px-6 py-8 bg-gray-800">
+        <div className="max-w-6xl mx-auto text-center text-gray-400">
+          <p>
+            &copy; {new Date().getFullYear()} ekto captions. All rights
+            reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
