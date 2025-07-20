@@ -64,9 +64,8 @@ function App() {
                 </span>
               </h1>
               <p className="text-xl text-gray-700 mb-6 leading-relaxed">
-                ekto captions is the AI-powered real-time translation app that
-                breaks down language barriers instantly. Perfect for meetings,
-                conversations, and connecting with people worldwide.
+                AI-powered real-time translation app that breaks down language
+                barriers instantly.
               </p>
 
               {/* Social Proof */}
@@ -98,7 +97,7 @@ function App() {
                 <img
                   src={appStoreButton}
                   alt="Download on the App Store"
-                  className="h-14 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
+                  className="w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
                 />
               </a>
             </div>
