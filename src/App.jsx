@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import appStoreButton from "./assets/download-on-the-app-store.svg";
+import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/AppIcon.jpg";
 import mockupImage from "./assets/mockuppromax.png";
 
