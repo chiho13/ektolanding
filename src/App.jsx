@@ -233,12 +233,11 @@ function App() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Live Voice Translator Mode
+                Language Exchange Mode
               </h3>
               <p className="text-gray-700">
-                Experience natural conversations with instant back-and-forth
-                voice translation. Perfect AI interpreter for real-time
-                dialogue.
+                The Perfect AI interpreter for face to face conversations.
+                Effortless collaboration with native speakers.
               </p>
             </div>
 
