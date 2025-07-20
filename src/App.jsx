@@ -5,7 +5,13 @@ import mockupImage from "./assets/mockuppromax.png";
 
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
-  const words = ["conversation", "lecture", "meeting", "appointment", "sermon"];
+  const words = [
+    "conversation?",
+    "lecture?",
+    "meeting?",
+    "appointment?",
+    "sermon?",
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -23,7 +29,7 @@ function App() {
           <div className="flex items-center space-x-3">
             <img
               src={appIcon}
-              alt="Ekto Captions"
+              alt="Ekto Captions - AI Voice Translator and Live Interpreter App"
               className="w-10 h-10 rounded-lg shadow-lg"
             />
             <span className="text-xl font-bold text-gray-800">
@@ -33,6 +39,7 @@ function App() {
           <a
             href="https://apps.apple.com/app/id6740196773"
             className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all duration-300 shadow-lg backdrop-blur-sm"
+            aria-label="Download AI Voice Translator App"
           >
             Download
           </a>
@@ -46,7 +53,7 @@ function App() {
             {/* Left side - Content */}
             <div className="backdrop-blur-xl bg-gradient-to-br from-white/90 via-white/60 to-white/70 rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/40 shadow-2xl ring-1 ring-white/20">
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
-                Want to understand every
+                Struggling to understand every
                 <span className="block relative overflow-hidden h-14 md:h-20 lg:h-24">
                   <span
                     key={currentWord}
@@ -59,19 +66,22 @@ function App() {
                       backgroundClip: "text",
                     }}
                   >
-                    {words[currentWord]}?
+                    {words[currentWord]}
                   </span>
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-gray-700 mb-4 md:mb-6 leading-relaxed">
-                AI-powered real-time translation app that breaks down language
-                barriers instantly.
+                Experience continuous live translation powered by the latest AI
+                models. Our live voice translator provides uninterrupted,
+                real-time translation that flows seamlessly throughout entire
+                conversations, interactions, and long speeches.
               </p>
 
               {/* Social Proof */}
               <div className="mb-6 md:mb-8 backdrop-blur-lg bg-white/25 rounded-xl md:rounded-2xl p-3 md:p-4 border border-white/30 ring-1 ring-white/10">
                 <p className="text-xs md:text-sm text-gray-600 mb-2">
-                  Join thousands of users worldwide
+                  Trusted by thousands of users worldwide for AI voice
+                  translation
                 </p>
                 <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 md:space-x-6 text-xs text-gray-700">
                   <div className="flex items-center">
@@ -80,9 +90,9 @@ function App() {
                   </div>
                   <div className="flex items-center">
                     <span className="font-semibold text-blue-600">
-                      Real-time
+                      Live Translation
                     </span>
-                    <span className="ml-1">Translation</span>
+                    <span className="ml-1">Technology</span>
                   </div>
                   <div className="flex items-center">
                     <span className="font-semibold text-blue-600">
@@ -93,10 +103,13 @@ function App() {
                 </div>
               </div>
 
-              <a href="https://apps.apple.com/app/id6740196773">
+              <a
+                href="https://apps.apple.com/app/id6740196773"
+                aria-label="Download AI Voice Translator on App Store"
+              >
                 <img
                   src={appStoreButton}
-                  alt="Download on the App Store"
+                  alt="Download AI Voice Translator - Ekto Captions on the App Store"
                   className="w-3/4 sm:w-2/3 md:w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
                 />
               </a>
@@ -106,7 +119,7 @@ function App() {
             <div className="flex justify-center lg:justify-end">
               <img
                 src={mockupImage}
-                alt="Ekto Captions App Mockup"
+                alt="AI Voice Translator App Interface - Live Voice Translation in Real-Time"
                 className="w-full h-[600px] object-contain"
               />
             </div>
@@ -119,10 +132,10 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How it works
+              How Our AI Interpreter Works
             </h2>
             <p className="text-lg text-gray-600">
-              Three simple steps to break language barriers
+              Three simple steps to activate your live voice translator
             </p>
           </div>
 
@@ -132,10 +145,11 @@ function App() {
                 1
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Open the App
+                Launch Your AI Voice Translator
               </h3>
               <p className="text-gray-700">
-                Launch ekto captions and select your languages
+                Open the ekto captions app and select your preferred languages
+                for translation
               </p>
             </div>
 
@@ -144,10 +158,11 @@ function App() {
                 2
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Transcribe
+                AI-Powered Live Transcription
               </h3>
               <p className="text-gray-700">
-                The app captures and transcribes speech in real-time
+                Our AI interpreter captures and transcribes speech in real-time
+                with incredible accuracy
               </p>
             </div>
 
@@ -156,10 +171,11 @@ function App() {
                 3
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Get Translations
+                Instant Live Voice Translation
               </h3>
               <p className="text-gray-700">
-                Instant captions and translations appear on screen
+                Receive immediate captions and translations on screen - your
+                personal AI interpreter
               </p>
             </div>
           </div>
@@ -170,7 +186,7 @@ function App() {
       <section className="px-6 py-16 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            Powerful Features
+            Advanced AI Voice Translator Features
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-8 backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-xl hover:bg-white/40 transition-all duration-300 ring-1 ring-white/20">
@@ -180,6 +196,7 @@ function App() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -190,11 +207,11 @@ function App() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Real-Time Captions
+                Real-Time AI Captions
               </h3>
               <p className="text-gray-700">
-                Get instant captions for any conversation, meeting, or audio
-                content with high accuracy.
+                Get instant captions powered by advanced AI for any
+                conversation, meeting, or audio content with superior accuracy.
               </p>
             </div>
 
@@ -205,6 +222,7 @@ function App() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -215,11 +233,12 @@ function App() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Converse Mode
+                Live Voice Translator Mode
               </h3>
               <p className="text-gray-700">
-                Have natural conversations with instant back-and-forth
-                translation. Perfect for real-time dialogue.
+                Experience natural conversations with instant back-and-forth
+                voice translation. Perfect AI interpreter for real-time
+                dialogue.
               </p>
             </div>
 
@@ -230,6 +249,7 @@ function App() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path
                     strokeLinecap="round"
@@ -240,11 +260,11 @@ function App() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Multi-Language Support
+                37+ Language AI Translation
               </h3>
               <p className="text-gray-700">
-                Translate between 37+ languages instantly. Perfect for
-                international communication.
+                Our AI voice translator supports instant translation between 37+
+                languages. The ultimate multilingual communication solution.
               </p>
             </div>
           </div>
@@ -255,21 +275,25 @@ function App() {
       <section id="download" className="px-6 py-20 bg-gray-900">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Never miss another conversation again
+            Start Using the Most Advanced AI Voice Translator
           </h2>
           <p className="text-xl text-gray-300 mb-8">
-            Join thousands of users breaking down language barriers every day.
-            Get started in seconds.
+            Join thousands of users worldwide who trust our AI interpreter for
+            breaking down language barriers every day. Experience live voice
+            translation in seconds.
           </p>
-          <a href="https://apps.apple.com/app/id6740196773">
+          <a
+            href="https://apps.apple.com/app/id6740196773"
+            aria-label="Download AI Voice Translator App"
+          >
             <img
               src={appStoreButton}
-              alt="Download on the App Store"
+              alt="Download AI Voice Translator and Live Interpreter - Ekto Captions on the App Store"
               className="h-16 mx-auto hover:scale-105 transition-transform cursor-pointer"
             />
           </a>
           <p className="text-gray-400 mt-6 text-sm">
-            Available on iOS • Free to download • No signup required
+            Available on iOS • Free AI Voice Translator • No signup required
           </p>
         </div>
       </section>
@@ -278,8 +302,8 @@ function App() {
       <footer className="px-6 py-8 bg-gray-800">
         <div className="max-w-6xl mx-auto text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} ekto captions. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} Live Translator: Ekto Captions.
+            All rights reserved.
           </p>
         </div>
       </footer>
