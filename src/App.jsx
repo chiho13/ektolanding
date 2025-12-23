@@ -2,15 +2,16 @@ import { useState, useEffect } from "react";
 import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/AppIcon.jpg";
 import mockupImage from "./assets/mockuppromax.png";
+import backgroundImage from "./assets/ektolanding3.png";
 
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
   const words = [
-    "conversation?",
-    "lecture?",
-    "meeting?",
-    "appointment?",
-    "sermon?",
+    "conversations",
+    "lectures",
+    "meetings",
+    "conferences",
+    "seminars",
   ];
 
   useEffect(() => {
@@ -21,6 +22,48 @@ function App() {
     return () => clearInterval(interval);
   }, [words.length]);
 
+  // Star rating component with proper half-star support
+  const StarRating = ({ rating = 4.5, reviews = 16 }) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    const starPath = "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z";
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex gap-0.5">
+          {/* Full stars */}
+          {[...Array(fullStars)].map((_, i) => (
+            <svg key={`full-${i}`} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d={starPath} />
+            </svg>
+          ))}
+          {/* Half star */}
+          {hasHalfStar && (
+            <svg key="half" className="w-5 h-5" viewBox="0 0 20 20">
+              <defs>
+                <linearGradient id="halfGradient">
+                  <stop offset="50%" stopColor="#FACC15" />
+                  <stop offset="50%" stopColor="#bcc0c7ff" />
+                </linearGradient>
+              </defs>
+              <path d={starPath} fill="url(#halfGradient)" />
+            </svg>
+          )}
+          {/* Empty stars */}
+          {[...Array(emptyStars)].map((_, i) => (
+            <svg key={`empty-${i}`} className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+              <path d={starPath} />
+            </svg>
+          ))}
+        </div>
+        <span className="text-sm font-semibold text-gray-200">{rating}</span>
+        <span className="text-xs text-gray-300">on App Store</span>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -29,11 +72,11 @@ function App() {
           <div className="flex items-center space-x-3">
             <img
               src={appIcon}
-              alt="Ekto Captions - AI Voice Translator and Live Interpreter App"
+              alt="Live Translator Captions AI App"
               className="w-10 h-10 rounded-lg shadow-lg"
             />
             <span className="text-xl font-bold text-gray-800">
-              ekto captions
+              Live Translator: Captions AI
             </span>
           </div>
           <a
@@ -47,20 +90,30 @@ function App() {
       </header>
 
       {/* Hero Section */}
-      <section className="px-6 py-20 bg-gradient-to-bl from-blue-400 via-blue-500 to-blue-600">
+      <section 
+        className="px-6 py-20"
+        style={{
+          backgroundColor: '#1362BF',
+          // backgroundImage: `url(${backgroundImage})`,
+          // backgroundSize: 'cover',
+          // backgroundPosition: 'center',
+          // backgroundRepeat: 'no-repeat',
+          // minHeight: '100vh',
+        }}
+      >
         <div className="max-w-6xl mx-auto ">
           <div className="grid lg:grid-cols-2 gap-12 items-center ">
             {/* Left side - Content */}
-            <div className="backdrop-blur-xl bg-gradient-to-br from-white/90 via-white/60 to-white/70 rounded-2xl md:rounded-3xl p-4 md:p-8 border border-white/40 shadow-2xl ring-1 ring-white/20">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
-                Struggling to understand every
+            <div className="">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
+                Never get left behind in 
                 <span className="block relative overflow-hidden h-14 md:h-20 lg:h-24">
                   <span
                     key={currentWord}
                     className="absolute inset-0 flex items-center"
                     style={{
                       animation: "fadeInUp 3s ease-in-out",
-                      background: "linear-gradient(135deg, #ef4444, #f97316)",
+                      background: "linear-gradient(135deg, #76e387ff, #a9eba8ff)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -70,36 +123,22 @@ function App() {
                   </span>
                 </span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-700 mb-4 md:mb-6 leading-relaxed">
-                Experience continuous live translation powered by the latest AI
-                models. Our live voice translator provides uninterrupted,
-                real-time translation that flows seamlessly throughout entire
-                conversations, interactions, and long speeches.
+              <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed">
+                Understand every word instantly. Converse and collaborate in any language with 
+                AI-powered real-time captions that work even while multitasking.
               </p>
 
               {/* Social Proof */}
-              <div className="mb-6 md:mb-8 backdrop-blur-lg bg-white/25 rounded-xl md:rounded-2xl p-3 md:p-4 border border-white/30 ring-1 ring-white/10">
-                <p className="text-xs md:text-sm text-gray-600 mb-2">
-                  Trusted by thousands of users worldwide for AI voice
-                  translation
-                </p>
-                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 md:space-x-6 text-xs text-gray-700">
-                  <div className="flex items-center">
-                    <span className="font-semibold text-blue-600">37+</span>
-                    <span className="ml-1">Languages</span>
+              <div className="z-1000 mb-6 md:mb-8 backdrop-blur-lg ">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <StarRating rating={4.5} reviews={16} />
                   </div>
-                  <div className="flex items-center">
-                    <span className="font-semibold text-blue-600">
-                      Live Translation
-                    </span>
-                    <span className="ml-1">Technology</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="font-semibold text-blue-600">
-                      AI-powered
-                    </span>
-                    <span className="ml-1">Accuracy</span>
-                  </div>
+                  {/* <div className="flex flex-wrap gap-2 md:gap-3 text-xs text-gray-700">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">37+ Languages</span>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">PiP Mode</span>
+                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">AI-Powered</span>
+                  </div> */}
                 </div>
               </div>
 
@@ -109,16 +148,16 @@ function App() {
               >
                 <img
                   src={appStoreButton}
-                  alt="Download AI Voice Translator - Ekto Captions on the App Store"
+                  alt="Download Live Translator: Captions AI on the App Store"
                   className="w-3/4 sm:w-2/3 md:w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
                 />
               </a>
             </div>
 
             {/* Right side - Mockup Image */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="flex justify-center lg:justify-end scale-105">
               <img
-                src={mockupImage}
+                src={backgroundImage}
                 alt="AI Voice Translator App Interface - Live Voice Translation in Real-Time"
                 className="w-full h-[600px] object-contain"
               />
@@ -132,7 +171,7 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How Our AI Interpreter Works
+              How Our AI Translator Works
             </h2>
             <p className="text-lg text-gray-600">
               Three simple steps to activate your live voice translator
@@ -148,8 +187,8 @@ function App() {
                 Launch Your AI Voice Translator
               </h3>
               <p className="text-gray-700">
-                Open the ekto captions app and select your preferred languages
-                for translation
+                Open Live Translator and select your preferred languages
+                for real-time translation
               </p>
             </div>
 
@@ -228,16 +267,16 @@ function App() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                    d="M4 6h16M4 12h16m-7 6h7M3 18h.01M3 12h.01M3 6h.01"
                   />
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Language Exchange Mode
+                Picture-in-Picture Mode
               </h3>
               <p className="text-gray-700">
-                The Perfect AI interpreter for face to face conversations.
-                Effortless collaboration with native speakers.
+                Multitask while translating. Check emails, notes, or calendars while
+                live captions stay visible in a floating window.
               </p>
             </div>
 
@@ -287,7 +326,7 @@ function App() {
           >
             <img
               src={appStoreButton}
-              alt="Download AI Voice Translator and Live Interpreter - Ekto Captions on the App Store"
+              alt="Download Live Translator: Captions AI on the App Store"
               className="h-16 mx-auto hover:scale-105 transition-transform cursor-pointer"
             />
           </a>
@@ -301,7 +340,7 @@ function App() {
       <footer className="px-6 py-8 bg-gray-800">
         <div className="max-w-6xl mx-auto text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Live Translator: Ekto Captions.
+            &copy; {new Date().getFullYear()} Live Translator: Captions AI.
             All rights reserved.
           </p>
         </div>
