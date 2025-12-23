@@ -331,7 +331,7 @@ function App() {
             />
           </a>
           <p className="text-gray-400 mt-6 text-sm">
-            Available on iOS • Free AI Voice Translator • No signup required
+            Available on iOS • No signup required
           </p>
         </div>
       </section>
