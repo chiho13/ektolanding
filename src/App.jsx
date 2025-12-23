@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/AppIcon.jpg";
 import mockupImage from "./assets/mockuppromax.png";
-import backgroundImage from "./assets/ektolanding3.png";
+import backgroundImage from "./assets/ektolanding3.jpg";
 
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
