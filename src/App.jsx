@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/AppIcon.jpg";
 import mockupImage from "./assets/mockuppromax.png";
-import backgroundImage from "./assets/ektolanding3.jpg";
+import backgroundImage from "./assets/ektolanding4.jpg";
 
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
@@ -91,7 +91,7 @@ function App() {
 
       {/* Hero Section */}
       <section 
-        className="px-6 py-20"
+        className="px-6 py-20 overflow-x-clip"
         style={{
           backgroundColor: '#1362BF',
           // backgroundImage: `url(${backgroundImage})`,
@@ -102,9 +102,9 @@ function App() {
         }}
       >
         <div className="max-w-6xl mx-auto ">
-          <div className="grid lg:grid-cols-2 gap-12 items-center ">
+          <div className="grid lg:grid-cols-2 items-center ">
             {/* Left side - Content */}
-            <div className="">
+            <div className="relative z-10">
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
                 Never get left behind in 
                 <span className="block relative overflow-hidden h-14 md:h-20 lg:h-24">
@@ -123,13 +123,13 @@ function App() {
                   </span>
                 </span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
                 Understand every word instantly. Converse and collaborate in any language with 
                 AI-powered real-time captions that work even while multitasking.
               </p>
 
               {/* Social Proof */}
-              <div className="z-1000 mb-6 md:mb-8 backdrop-blur-lg ">
+              <div className="z-1000 mb-6 md:mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <StarRating rating={4.5} reviews={16} />
@@ -155,11 +155,11 @@ function App() {
             </div>
 
             {/* Right side - Mockup Image */}
-            <div className="flex justify-center lg:justify-end scale-105">
+            <div className="flex justify-center lg:justify-end lg:overflow-visible lg:-mr-32 xl:-mr-48">
               <img
                 src={backgroundImage}
                 alt="AI Voice Translator App Interface - Live Voice Translation in Real-Time"
-                className="w-full h-[600px] object-contain"
+                className="w-full h-[600px] lg:h-[500px] lg:w-auto lg:max-w-none object-contain"
               />
             </div>
           </div>
