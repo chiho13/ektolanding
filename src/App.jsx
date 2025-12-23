@@ -124,8 +124,7 @@ function App() {
                 </span>
               </h1>
               <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                Understand every word instantly. Converse and collaborate in any language with 
-                AI-powered real-time captions that work even while multitasking.
+                Understand every word instantly. See real-time captions that works even when seated far away from the speaker thanks to acoustic intelligence
               </p>
 
               {/* Social Proof */}
