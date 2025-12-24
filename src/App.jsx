@@ -3,16 +3,14 @@ import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/AppIcon.jpg";
 import mockupImage from "./assets/mockuppromax.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
+import { useLanguage } from "./i18n";
 
 function App() {
+  const { language, setLanguage, t, translations } = useLanguage();
   const [currentWord, setCurrentWord] = useState(0);
-  const words = [
-        "lectures",
-     "conferences",
-    "conversations",
-    "meetings",
-    "seminars",
-  ];
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  
+  const words = t.hero.words;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,6 +19,11 @@ function App() {
 
     return () => clearInterval(interval);
   }, [words.length]);
+
+  // Reset word index when language changes to avoid out-of-bounds
+  useEffect(() => {
+    setCurrentWord(0);
+  }, [language]);
 
   // Star rating component with proper half-star support
   const StarRating = ({ rating = 4.5, reviews = 16 }) => {
@@ -59,7 +62,7 @@ function App() {
           ))}
         </div>
         <span className="text-sm font-semibold text-gray-200">{rating}</span>
-        <span className="text-xs text-gray-300">on App Store</span>
+        <span className="text-xs text-gray-300">{t.hero.onAppStore}</span>
       </div>
     );
   };
@@ -75,17 +78,60 @@ function App() {
               alt="Live Translator Captions AI App"
               className="w-10 h-10 rounded-lg shadow-lg"
             />
-            <span className="text-xl font-bold text-gray-800">
+            <span className="text-xl font-bold text-gray-800 hidden sm:inline">
               Live Translator: Captions AI
             </span>
           </div>
-          <a
-            href="https://apps.apple.com/app/id6740196773"
-            className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all duration-300 shadow-lg backdrop-blur-sm"
-            aria-label="Download AI Voice Translator App"
-          >
-            Download
-          </a>
+          <div className="flex items-center gap-3">
+            {/* Language Selector */}
+            {/* <div className="relative">
+              <button
+                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/60 hover:bg-white/80 transition-all duration-200 border border-white/40 shadow-sm"
+                aria-label="Select language"
+              >
+                <span className="text-lg">{translations[language].flag}</span>
+                <span className="text-sm font-medium text-gray-700 hidden sm:inline">{translations[language].name}</span>
+                <svg className={`w-4 h-4 text-gray-500 transition-transform ${isLangMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isLangMenuOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsLangMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 py-2 w-40 bg-white rounded-xl shadow-xl border border-gray-100 z-50">
+                    {Object.values(translations).map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          setLanguage(lang.code);
+                          setIsLangMenuOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-blue-50 transition-colors ${
+                          language === lang.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                        }`}
+                      >
+                        <span className="text-lg">{lang.flag}</span>
+                        <span className="text-sm font-medium">{lang.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div> */}
+
+            <a
+              href="https://apps.apple.com/app/id6740196773"
+              className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all duration-300 shadow-lg backdrop-blur-sm text-sm sm:text-base"
+              aria-label="Download AI Voice Translator App"
+            >
+              {t.hero.download}
+            </a>
+          </div>
         </div>
       </header>
 
@@ -106,7 +152,6 @@ function App() {
             {/* Left side - Content */}
             <div className="relative z-10">
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                Never get left behind in 
                 <span className="block relative overflow-hidden h-14 md:h-20 lg:h-24">
                   <span
                     key={currentWord}
@@ -122,11 +167,12 @@ function App() {
                     {words[currentWord]}
                   </span>
                 </span>
+                <span className="block">{t.hero.tagline}</span>
               </h1>
               <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                Understand every word instantly. 
+                {t.hero.description}
                 <br></br>
-                See real-time captions that works even when seated far away from the speaker thanks to acoustic intelligence
+                {t.hero.descriptionLine2}
               </p>
 
               {/* Social Proof */}
