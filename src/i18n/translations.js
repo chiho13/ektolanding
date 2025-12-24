@@ -95,16 +95,13 @@ export const translations = {
 // Array of rotating words in different languages for the hero animation
 export const rotatingWords = [
   { word: "Lectures", lang: "en" },
+  { word: "讲座", lang: "zh" },
   { word: "Conférences", lang: "fr" },
   { word: "こうぎ", lang: "ja" },
   { word: "Lezioni", lang: "it" },
    { word: "व्याख्यान", lang: "hi" },        // Hindi
   { word: "บรรยาย", lang: "th" }, 
   { word: "강의", lang: "ko" },
-  { word: "Conferencias", lang: "es" },
-  { word: "讲座", lang: "zh" },
-  { word: "Vorlesungen", lang: "de" },    // German
-          // Thai
 ];
 
 export const supportedLanguages = Object.keys(translations);
