@@ -198,7 +198,7 @@ function App() {
             <div className="flex justify-center lg:justify-end lg:overflow-visible lg:-mr-32 xl:-mr-48">
               <img
                 src={backgroundImage}
-                alt="AI Voice Translator App Interface - Live Voice Translation in Real-Time"
+                alt="AI Voice Translator App Interface - Live Translation in Real-Time"
                 className="w-full h-[600px] lg:h-[500px] lg:w-auto lg:max-w-none object-contain"
               />
             </div>
@@ -214,7 +214,7 @@ function App() {
               How Our AI Translator Works
             </h2>
             <p className="text-lg text-gray-600">
-              Three simple steps to activate your live voice translator
+              Three simple steps to activate your live translator
             </p>
           </div>
 
@@ -224,7 +224,7 @@ function App() {
                 1
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Launch Your AI Voice Translator
+                Launch Your Live Translator
               </h3>
               <p className="text-gray-700">
                 Open Live Translator and select your preferred languages
@@ -250,7 +250,7 @@ function App() {
                 3
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Instant Live Voice Translation
+                Read the captions
               </h3>
               <p className="text-gray-700">
                 Receive immediate captions and translations on screen - your
