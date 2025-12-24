@@ -3,27 +3,20 @@ import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/AppIcon.jpg";
 import mockupImage from "./assets/mockuppromax.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
-import { useLanguage } from "./i18n";
+import { useLanguage, rotatingWords } from "./i18n";
 
 function App() {
   const { language, setLanguage, t, translations } = useLanguage();
-  const [currentWord, setCurrentWord] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
-  
-  const words = t.hero.words;
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % words.length);
-    }, 3000); // Change word every 3 seconds
+      setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
+    }, 2500); // Change word every 2.5 seconds
 
     return () => clearInterval(interval);
-  }, [words.length]);
-
-  // Reset word index when language changes to avoid out-of-bounds
-  useEffect(() => {
-    setCurrentWord(0);
-  }, [language]);
+  }, []);
 
   // Star rating component with proper half-star support
   const StarRating = ({ rating = 4.5, reviews = 16 }) => {
@@ -151,20 +144,20 @@ function App() {
           <div className="grid lg:grid-cols-2 items-center ">
             {/* Left side - Content */}
             <div className="relative z-10">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                <span className="block relative overflow-hidden h-14 md:h-20 lg:h-24">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 leading-tight">
+                <span className="block overflow-hidden h-[1.3em] py-16 lg:py-20 text-4xl md:text-5xl lg:text-6xl ">
                   <span
-                    key={currentWord}
-                    className="absolute inset-0 flex items-center"
+                    key={currentWordIndex}
+                    className="inline-block"
                     style={{
-                      animation: "fadeInUp 3s ease-in-out",
+                      animation: "fadeInUp 2.5s ease-in-out",
                       background: "linear-gradient(135deg, #76e387ff, #a9eba8ff)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
                     }}
                   >
-                    {words[currentWord]}
+                    {rotatingWords[currentWordIndex].word}
                   </span>
                 </span>
                 <span className="block">{t.hero.tagline}</span>

@@ -4,9 +4,9 @@ export const translations = {
     name: "English",
     flag: "🇺🇸",
     hero: {
-      words: ["Lectures", "Class", "Conversations", "Meetings", "Seminars"],
+      rotatingWord: "Lectures",
       tagline: "too fast to follow?",
-      description: "Understand every word instantly.",
+      description: "Understand every word in real time.",
       descriptionLine2: "See real-time captions that works even when seated far away from the speaker thanks to acoustic intelligence",
       download: "Download",
       onAppStore: "on App Store",
@@ -17,9 +17,9 @@ export const translations = {
     name: "Français",
     flag: "🇫🇷",
     hero: {
-      words: ["Conférences", "Cours", "Conversations", "Réunions", "Séminaires"],
+      rotatingWord: "Conférences",
       tagline: "trop rapide à suivre ?",
-      description: "Comprenez chaque mot instantanément.",
+      description: "Comprenez chaque mot en temps réel.",
       descriptionLine2: "Voyez des sous-titres en temps réel qui fonctionnent même lorsque vous êtes assis loin de l'orateur grâce à l'intelligence acoustique",
       download: "Télécharger",
       onAppStore: "sur l'App Store",
@@ -30,9 +30,9 @@ export const translations = {
     name: "Italiano",
     flag: "🇮🇹",
     hero: {
-      words: ["Lezioni", "Corsi", "Conversazioni", "Riunioni", "Seminari"],
+      rotatingWord: "Lezioni",
       tagline: "troppo veloce da seguire?",
-      description: "Comprendi ogni parola istantaneamente.",
+      description: "Comprendi ogni parola in tempo reale.",
       descriptionLine2: "Visualizza sottotitoli in tempo reale che funzionano anche quando sei seduto lontano dall'oratore grazie all'intelligenza acustica",
       download: "Scarica",
       onAppStore: "su App Store",
@@ -43,9 +43,9 @@ export const translations = {
     name: "Español",
     flag: "🇪🇸",
     hero: {
-      words: ["Conferencias", "Clases", "Conversaciones", "Reuniones", "Seminarios"],
+      rotatingWord: "Conferencias",
       tagline: "¿demasiado rápido para seguir?",
-      description: "Entiende cada palabra al instante.",
+      description: "Entiende cada palabra en tiempo real.",
       descriptionLine2: "Ve subtítulos en tiempo real que funcionan incluso cuando estás sentado lejos del orador gracias a la inteligencia acústica",
       download: "Descargar",
       onAppStore: "en App Store",
@@ -56,9 +56,9 @@ export const translations = {
     name: "中文",
     flag: "🇨🇳",
     hero: {
-      words: ["讲座", "课程", "对话", "会议", "研讨会"],
+      rotatingWord: "讲座",
       tagline: "语速太快跟不上？",
-      description: "即时理解每一个词。",
+      description: "实时理解每一个词。",
       descriptionLine2: "借助声学智能技术，即使坐在远离演讲者的位置，也能看到实时字幕",
       download: "下载",
       onAppStore: "在 App Store",
@@ -69,9 +69,9 @@ export const translations = {
     name: "日本語",
     flag: "🇯🇵",
     hero: {
-      words: ["講義", "授業", "会話", "会議", "セミナー"],
+      rotatingWord: "こうぎ",
       tagline: "速すぎてついていけない？",
-      description: "すべての言葉を瞬時に理解。",
+      description: "すべての言葉をリアルタイムで理解。",
       descriptionLine2: "音響インテリジェンスにより、話者から離れた席でもリアルタイム字幕が機能します",
       download: "ダウンロード",
       onAppStore: "App Store で",
@@ -82,15 +82,30 @@ export const translations = {
     name: "한국어",
     flag: "🇰🇷",
     hero: {
-      words: ["강의", "수업", "대화", "회의", "세미나"],
+      rotatingWord: "강의",
       tagline: "너무 빨라서 못 따라가겠나요?",
-      description: "모든 단어를 즉시 이해하세요.",
+      description: "모든 단어를 실시간으로 이해하세요.",
       descriptionLine2: "음향 지능 덕분에 발표자로부터 멀리 떨어져 앉아 있어도 실시간 자막이 작동합니다",
       download: "다운로드",
       onAppStore: "App Store에서",
     },
   },
 };
+
+// Array of rotating words in different languages for the hero animation
+export const rotatingWords = [
+  { word: "Lectures", lang: "en" },
+  { word: "Conférences", lang: "fr" },
+  { word: "こうぎ", lang: "ja" },
+  { word: "Lezioni", lang: "it" },
+   { word: "व्याख्यान", lang: "hi" },        // Hindi
+  { word: "บรรยาย", lang: "th" }, 
+  { word: "강의", lang: "ko" },
+  { word: "Conferencias", lang: "es" },
+  { word: "讲座", lang: "zh" },
+  { word: "Vorlesungen", lang: "de" },    // German
+          // Thai
+];
 
 export const supportedLanguages = Object.keys(translations);
 
