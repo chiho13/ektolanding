@@ -7,10 +7,10 @@ import backgroundImage from "./assets/ektolanding4.jpg";
 function App() {
   const [currentWord, setCurrentWord] = useState(0);
   const words = [
+        "lectures",
+     "conferences",
     "conversations",
-    "lectures",
     "meetings",
-    "conferences",
     "seminars",
   ];
 
