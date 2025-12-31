@@ -72,7 +72,7 @@ function App() {
               className="w-10 h-10 rounded-lg shadow-lg"
             />
             <span className="text-xl font-bold text-gray-800 hidden sm:inline">
-              Live Translator: Captions AI
+              Live Translator - ekto
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ function App() {
               >
                 <img
                   src={appStoreButton}
-                  alt="Download Live Translator: Captions AI on the App Store"
+                  alt="Download Live Translator - ekto on the App Store"
                   className="w-3/4 sm:w-2/3 md:w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
                 />
               </a>
@@ -366,7 +366,7 @@ function App() {
           >
             <img
               src={appStoreButton}
-              alt="Download Live Translator: Captions AI on the App Store"
+              alt="Download Live Translator - ekto on the App Store"
               className="h-16 mx-auto hover:scale-105 transition-transform cursor-pointer"
             />
           </a>
@@ -380,7 +380,7 @@ function App() {
       <footer className="px-6 py-8 bg-gray-800">
         <div className="max-w-6xl mx-auto text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Live Translator: Captions AI.
+            &copy; {new Date().getFullYear()} Live Translator - ekto.
             All rights reserved.
           </p>
         </div>
