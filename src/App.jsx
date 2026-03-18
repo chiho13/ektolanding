@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import appStoreButton from "./assets/downloadbtn.svg";
-import appIcon from "./assets/AppIcon.jpg";
+import appIcon from "./assets/ekto.png";
 import mockupImage from "./assets/mockuppromax.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
 import { useLanguage, rotatingWords } from "./i18n";
@@ -24,14 +24,20 @@ function App() {
     const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
-    const starPath = "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z";
+    const starPath =
+      "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z";
 
     return (
       <div className="flex items-center gap-2">
         <div className="flex gap-0.5">
           {/* Full stars */}
           {[...Array(fullStars)].map((_, i) => (
-            <svg key={`full-${i}`} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              key={`full-${i}`}
+              className="w-5 h-5 text-yellow-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path d={starPath} />
             </svg>
           ))}
@@ -49,7 +55,12 @@ function App() {
           )}
           {/* Empty stars */}
           {[...Array(emptyStars)].map((_, i) => (
-            <svg key={`empty-${i}`} className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              key={`empty-${i}`}
+              className="w-5 h-5 text-gray-300"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path d={starPath} />
             </svg>
           ))}
@@ -68,11 +79,11 @@ function App() {
           <div className="flex items-center space-x-3">
             <img
               src={appIcon}
-              alt="Live Translator Captions AI App"
+              alt="ekto: Live AI Captions app icon"
               className="w-10 h-10 rounded-lg shadow-lg"
             />
             <span className="text-xl font-bold text-gray-800 hidden sm:inline">
-              Live Translator - ekto
+              ekto: Live AI Captions
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -129,10 +140,10 @@ function App() {
       </header>
 
       {/* Hero Section */}
-      <section 
+      <section
         className="px-6 py-20 overflow-x-clip"
         style={{
-          backgroundColor: '#1362BF',
+          backgroundColor: "#1362BF",
           // backgroundImage: `url(${backgroundImage})`,
           // backgroundSize: 'cover',
           // backgroundPosition: 'center',
@@ -151,7 +162,8 @@ function App() {
                     className="inline-block"
                     style={{
                       animation: "fadeInUp 2.5s ease-in-out",
-                      background: "linear-gradient(135deg, #76e387ff, #a9eba8ff)",
+                      background:
+                        "linear-gradient(135deg, #76e387ff, #a9eba8ff)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -188,7 +200,7 @@ function App() {
               >
                 <img
                   src={appStoreButton}
-                  alt="Download Live Translator - ekto on the App Store"
+                  alt="Download ekto: Live AI Captions on the App Store"
                   className="w-3/4 sm:w-2/3 md:w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
                 />
               </a>
@@ -227,8 +239,8 @@ function App() {
                 Launch Your Live Translator
               </h3>
               <p className="text-gray-700">
-                Open Live Translator and select your preferred languages
-                for real-time translation
+                Open Live Translator and select your preferred languages for
+                real-time translation
               </p>
             </div>
 
@@ -315,8 +327,8 @@ function App() {
                 Picture-in-Picture Mode
               </h3>
               <p className="text-gray-700">
-                Multitask while translating. Check emails, notes, or calendars while
-                live captions stay visible in a floating window.
+                Multitask while translating. Check emails, notes, or calendars
+                while live captions stay visible in a floating window.
               </p>
             </div>
 
@@ -349,6 +361,27 @@ function App() {
         </div>
       </section>
 
+      <section className="px-6 py-16 bg-white">
+        <div className="max-w-4xl mx-auto rounded-3xl border border-slate-200 bg-slate-50 p-8 md:p-10">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-3">
+            From the Blog
+          </p>
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            Top 5 Best Live Caption Apps for Lectures
+          </h2>
+          <p className="text-lg leading-8 text-slate-700 mb-6">
+            Compare the best tools for lecture captions, with a focus on
+            real-time translation for students studying abroad.
+          </p>
+          <a
+            href="/blog/top-5-best-live-caption-apps-for-lectures/"
+            className="inline-flex items-center text-lg font-semibold text-blue-700 hover:text-blue-800"
+          >
+            Read the full article
+          </a>
+        </div>
+      </section>
+
       {/* Download Section */}
       <section id="download" className="px-6 py-20 bg-gray-900">
         <div className="max-w-4xl mx-auto text-center">
@@ -366,7 +399,7 @@ function App() {
           >
             <img
               src={appStoreButton}
-              alt="Download Live Translator - ekto on the App Store"
+              alt="Download ekto: Live AI Captions on the App Store"
               className="h-16 mx-auto hover:scale-105 transition-transform cursor-pointer"
             />
           </a>
@@ -380,8 +413,8 @@ function App() {
       <footer className="px-6 py-8 bg-gray-800">
         <div className="max-w-6xl mx-auto text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Live Translator - ekto.
-            All rights reserved.
+            &copy; {new Date().getFullYear()} ekto: Live AI Captions. All rights
+            reserved.
           </p>
         </div>
       </footer>
