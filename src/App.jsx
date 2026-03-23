@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/ekto.png";
-import mockupImage from "./assets/mockuppromax.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
-import { useLanguage, rotatingWords } from "./i18n";
+import { rotatingWords } from "./i18n";
 
 function App() {
-  const { language, setLanguage, t, translations } = useLanguage();
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -19,7 +16,7 @@ function App() {
   }, []);
 
   // Star rating component with proper half-star support
-  const StarRating = ({ rating = 4.5, reviews = 16 }) => {
+  const StarRating = ({ rating = 4.5 }) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
@@ -66,7 +63,7 @@ function App() {
           ))}
         </div>
         <span className="text-sm font-semibold text-gray-200">{rating}</span>
-        <span className="text-xs text-gray-300">{t.hero.onAppStore}</span>
+        <span className="text-xs text-gray-300">on App Store</span>
       </div>
     );
   };
@@ -131,9 +128,9 @@ function App() {
             <a
               href="https://apps.apple.com/app/id6740196773"
               className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all duration-300 shadow-lg backdrop-blur-sm text-sm sm:text-base"
-              aria-label="Download AI Voice Translator App"
+              aria-label="Download ekto on the App Store"
             >
-              {t.hero.download}
+              Download
             </a>
           </div>
         </div>
@@ -155,11 +152,13 @@ function App() {
           <div className="grid lg:grid-cols-2 items-center ">
             {/* Left side - Content */}
             <div className="relative z-10">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                <span className="block overflow-hidden h-[1.3em] py-16 lg:py-20 text-4xl md:text-5xl lg:text-6xl ">
+              <p className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-blue-50 shadow-lg backdrop-blur-sm mb-6">
+                <span className="text-blue-100">Understands fast-moving</span>
+                <span className="block overflow-hidden h-[1.4em] text-base font-semibold text-white">
                   <span
                     key={currentWordIndex}
                     className="inline-block"
+                    aria-hidden="true"
                     style={{
                       animation: "fadeInUp 2.5s ease-in-out",
                       background:
@@ -172,31 +171,44 @@ function App() {
                     {rotatingWords[currentWordIndex].word}
                   </span>
                 </span>
-                <span className="block">{t.hero.tagline}</span>
+                <span className="sr-only">
+                  lectures, live TV, and conversations in multiple languages
+                </span>
+              </p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
+                Live captions and translation for real life
               </h1>
               <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                {t.hero.description}
-                <br></br>
-                {t.hero.descriptionLine2}
+                Follow fast speech in lectures, live TV, meetings, and family
+                conversations.
+              </p>
+              <p className="text-base md:text-lg text-blue-100 mb-6 md:mb-8 leading-relaxed md:mr-24 xl:mr-0">
+                37+ languages with picture-in-picture on iPhone.
               </p>
 
               {/* Social Proof */}
               <div className="z-1000 mb-6 md:mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-2">
                     <StarRating rating={4.5} reviews={16} />
                   </div>
-                  {/* <div className="flex flex-wrap gap-2 md:gap-3 text-xs text-gray-700">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">37+ Languages</span>
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">PiP Mode</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">AI-Powered</span>
-                  </div> */}
+                  <div className="flex flex-wrap gap-2 text-xs font-medium text-blue-900">
+                    <span className="rounded-full bg-white px-3 py-1.5">
+                      Live captions anywhere
+                    </span>
+                    <span className="rounded-full bg-blue-100 px-3 py-1.5">
+                      37+ languages
+                    </span>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1.5">
+                      Live TV and family dinners
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <a
                 href="https://apps.apple.com/app/id6740196773"
-                aria-label="Download AI Voice Translator on App Store"
+                aria-label="Download ekto on the App Store"
               >
                 <img
                   src={appStoreButton}
@@ -210,7 +222,7 @@ function App() {
             <div className="flex justify-center lg:justify-end lg:overflow-visible lg:-mr-32 xl:-mr-48">
               <img
                 src={backgroundImage}
-                alt="AI Voice Translator App Interface - Live Translation in Real-Time"
+                alt="ekto showing live captions and real-time translation on iPhone"
                 className="w-full h-[600px] lg:h-[500px] lg:w-auto lg:max-w-none object-contain"
               />
             </div>
@@ -223,10 +235,10 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How Our AI Translator Works
+              How ekto works
             </h2>
             <p className="text-lg text-gray-600">
-              Three simple steps to activate your live translator
+              Three simple steps to follow conversations in real time
             </p>
           </div>
 
@@ -236,11 +248,11 @@ function App() {
                 1
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Launch Your Live Translator
+                Open ekto
               </h3>
               <p className="text-gray-700">
-                Open Live Translator and select your preferred languages for
-                real-time translation
+                Start captions in seconds and choose the language pair you want
+                for speech, live TV, or in-person conversations.
               </p>
             </div>
 
@@ -249,11 +261,11 @@ function App() {
                 2
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                AI-Powered Live Transcription
+                Capture speech live
               </h3>
               <p className="text-gray-700">
-                Our AI interpreter captures and transcribes speech in real-time
-                with incredible accuracy
+                ekto listens and turns spoken audio into readable captions and
+                translations as the moment happens.
               </p>
             </div>
 
@@ -262,11 +274,11 @@ function App() {
                 3
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Read the captions
+                Keep up naturally
               </h3>
               <p className="text-gray-700">
-                Receive immediate captions and translations on screen - your
-                personal AI interpreter
+                Read along on screen while you watch, listen, or talk without
+                asking people to slow down or repeat themselves.
               </p>
             </div>
           </div>
