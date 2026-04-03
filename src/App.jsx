@@ -172,18 +172,20 @@ function App() {
                   </span>
                 </span>
                 <span className="sr-only">
-                  lectures, live TV, and conversations in multiple languages
+                  talks, meetups, lectures, tours, and conversations in
+                  multiple languages
                 </span>
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                Live captions and translation for real life
+                Your impromptu interpreter for real-world conversations
               </h1>
               <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                Follow fast speech in lectures, live TV, meetings, and family
-                conversations.
+                Live captions and translation for in-person events,
+                conversations, and shared spaces.
               </p>
               <p className="text-base md:text-lg text-blue-100 mb-6 md:mb-8 leading-relaxed md:mr-24 xl:mr-0">
-                37+ languages with picture-in-picture on iPhone.
+                For conferences, talks, meetups, classes, tours, churches,
+                clinics, and everyday face-to-face moments.
               </p>
 
               {/* Social Proof */}
@@ -194,13 +196,13 @@ function App() {
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs font-medium text-blue-900">
                     <span className="rounded-full bg-white px-3 py-1.5">
-                      Live captions anywhere
+                      In-person events
                     </span>
                     <span className="rounded-full bg-blue-100 px-3 py-1.5">
                       37+ languages
                     </span>
                     <span className="rounded-full bg-emerald-100 px-3 py-1.5">
-                      Live TV and family dinners
+                      No setup required
                     </span>
                   </div>
                 </div>
@@ -252,7 +254,7 @@ function App() {
               </h3>
               <p className="text-gray-700">
                 Start captions in seconds and choose the language pair you want
-                for speech, live TV, or in-person conversations.
+                for talks, classes, tours, or face-to-face conversations.
               </p>
             </div>
 
@@ -289,7 +291,7 @@ function App() {
       <section className="px-6 py-16 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            Advanced AI Voice Translator Features
+            Built for in-person understanding
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-8 backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-xl hover:bg-white/40 transition-all duration-300 ring-1 ring-white/20">
@@ -313,8 +315,8 @@ function App() {
                 Real-Time AI Captions
               </h3>
               <p className="text-gray-700">
-                Get instant captions powered by advanced AI for any
-                conversation, meeting, or audio content with superior accuracy.
+                Get instant captions powered by advanced AI for in-person
+                conversations and live events with superior accuracy.
               </p>
             </div>
 
@@ -339,8 +341,8 @@ function App() {
                 Picture-in-Picture Mode
               </h3>
               <p className="text-gray-700">
-                Multitask while translating. Check emails, notes, or calendars
-                while live captions stay visible in a floating window.
+                Keep captions visible in a floating window while you move
+                through talks, tours, classes, and other live moments.
               </p>
             </div>
 
@@ -365,8 +367,8 @@ function App() {
                 37+ Language AI Translation
               </h3>
               <p className="text-gray-700">
-                Our AI voice translator supports instant translation between 37+
-                languages. The ultimate multilingual communication solution.
+                ekto supports instant translation between 37+ languages for
+                multilingual conversations in shared, real-world spaces.
               </p>
             </div>
           </div>
@@ -398,12 +400,12 @@ function App() {
       <section id="download" className="px-6 py-20 bg-gray-900">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Start Using the Most Advanced AI Voice Translator
+            Start using your pocket interpreter for real life
           </h2>
           <p className="text-xl text-gray-300 mb-8">
-            Join thousands of users worldwide who trust our AI interpreter for
-            breaking down language barriers every day. Experience live voice
-            translation in seconds.
+            Use live captions and translation when there is no interpreter, no
+            AV team, and no Zoom transcript. Open ekto and follow what is being
+            said in seconds.
           </p>
           <a
             href="https://apps.apple.com/app/id6740196773"

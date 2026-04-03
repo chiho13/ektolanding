@@ -1,0 +1,34 @@
+# ekto
+
+> ekto is an iPhone app for live captions and real-time translation during in-person conversations, events, and shared spaces.
+
+## Summary
+
+- Product type: live caption and translation app
+- Platform: iPhone / iOS
+- Primary use case: understanding spoken language in real time at in-person events and face-to-face conversations
+- Positioning: a pocket interpreter for places that were never designed to be accessible or multilingual
+- Not primarily for: remote team meetings, Zoom calls, meeting notes, or call transcription workflows
+
+## Use cases
+
+- Conferences and talks
+- Meetups and classes
+- Tours and museums
+- Churches and community events
+- Clinics and waiting rooms
+- Everyday face-to-face conversations
+
+## Features
+
+- Live captions
+- Real-time translation
+- 37+ languages
+- Picture-in-picture on iPhone
+- No interpreter, AV team, or Zoom transcript required
+
+## Official URLs
+
+- Website: https://voicetranslate.app/
+- App Store: https://apps.apple.com/app/id6740196773
+- Blog: https://voicetranslate.app/blog/top-5-best-live-caption-apps-for-lectures/
