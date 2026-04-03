@@ -177,15 +177,12 @@ function App() {
                 </span>
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                Your impromptu interpreter for real-world conversations
+                Understand what&apos;s being said, anywhere
               </h1>
               <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                Live captions and translation for in-person events,
-                conversations, and shared spaces.
-              </p>
-              <p className="text-base md:text-lg text-blue-100 mb-6 md:mb-8 leading-relaxed md:mr-24 xl:mr-0">
-                For conferences, talks, meetups, classes, tours, churches,
-                clinics, and everyday face-to-face moments.
+                Live captions and translation for in-person talks, meetups,
+                classes, tours, churches, clinics, and everyday face-to-face
+                moments.
               </p>
 
               {/* Social Proof */}
