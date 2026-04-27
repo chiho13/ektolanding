@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import appIcon from "./assets/ekto.png";
 
-const HISTORY_LIMIT = 50;
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
 
 function normalizeCode(pathname) {
@@ -15,6 +14,44 @@ function getViewerSocketUrl(code) {
     "wss://broadcast.voicetranslate.app";
 
   return `${wsBaseUrl.replace(/\/$/, "")}/rooms/${code}/viewer`;
+}
+
+function getCaptionDisplay(line, index, totalLines) {
+  const text = typeof line === "string" ? line : line.text || "";
+  const isNewestFinal = index === totalLines - 1;
+
+  if (text.startsWith("PT:")) {
+    return {
+      text: text.slice(3),
+      className: "text-[#8aeb9e]/80",
+    };
+  }
+
+  if (text.startsWith("T:")) {
+    return {
+      text: text.slice(2),
+      className: "text-[#8aeb9e]",
+    };
+  }
+
+  if (text.startsWith("C:")) {
+    return {
+      text: text.slice(2),
+      className: "text-white/60",
+    };
+  }
+
+  if (text.startsWith("P:")) {
+    return {
+      text: text.slice(2),
+      className: "text-white/80",
+    };
+  }
+
+  return {
+    text,
+    className: isNewestFinal ? "text-white/90" : "text-white/60",
+  };
 }
 
 function LiveRoomPage() {
@@ -129,7 +166,7 @@ function LiveRoomPage() {
       }
 
       if (message.type === "final") {
-        setFinalLines((lines) => [...lines, message].slice(-HISTORY_LIMIT));
+        setFinalLines((lines) => [...lines, message]);
         setPartialLine("");
         setStatus("live");
         return;
@@ -137,7 +174,7 @@ function LiveRoomPage() {
 
       if (message.type === "ended") {
         if (typeof message.text === "string") {
-          setFinalLines((lines) => [...lines, message].slice(-HISTORY_LIMIT));
+          setFinalLines((lines) => [...lines, message]);
         }
         setPartialLine("");
         setStatus("ended");
@@ -164,77 +201,89 @@ function LiveRoomPage() {
   }[status];
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-white/10 bg-slate-950/90 px-4 py-4 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
+    <main className="min-h-screen bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
+      <section className="mx-auto flex min-h-[calc(100vh-24px)] max-w-6xl flex-col md:min-h-[calc(100vh-48px)]">
+        <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
           <div className="flex min-w-0 items-center gap-3">
             <img
               src={appIcon}
               alt="ekto"
-              className="h-10 w-10 rounded-lg shadow-lg"
+              className="h-9 w-9 rounded-lg shadow-lg"
             />
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-300">
+              <p className="truncate text-sm font-semibold">
                 ekto live captions
               </p>
-              <h1 className="truncate text-lg font-bold text-white">
+              <p className="truncate font-mono text-xs text-white/45">
                 Room {code || "unknown"}
-              </h1>
+              </p>
             </div>
           </div>
-          <div
-            className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold ${
-              status === "live"
-                ? "bg-emerald-400 text-emerald-950"
-                : status === "ended"
-                  ? "bg-slate-200 text-slate-900"
-                  : "bg-amber-300 text-amber-950"
-            }`}
-          >
-            {statusLabel}
-          </div>
-        </div>
-      </header>
-
-      <section className="mx-auto flex min-h-[calc(100vh-73px)] max-w-4xl flex-col px-4 py-6 md:py-10">
-        <div className="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-          {mode && <span className="rounded-full bg-white/10 px-3 py-1">{mode}</span>}
-          {language && (
-            <span className="rounded-full bg-white/10 px-3 py-1">
-              {language}
-            </span>
-          )}
-          {lastUpdatedAt && (
-            <span className="rounded-full bg-white/10 px-3 py-1">
-              Updated {new Date(lastUpdatedAt).toLocaleTimeString()}
-            </span>
-          )}
-        </div>
-
-        <div className="flex flex-1 flex-col justify-end gap-4">
-          {finalLines.length === 0 && !partialLine ? (
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-6 text-slate-300">
-              Captions will appear here when the broadcaster starts speaking.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {finalLines.map((line, index) => (
-                <p
-                  key={`${line.sentAt || "line"}-${index}`}
-                  className="text-2xl font-semibold leading-snug text-white md:text-4xl"
-                >
-                  {line.text}
-                </p>
-              ))}
-            </div>
-          )}
-
-          {partialLine && (
-            <p className="min-h-[3rem] text-2xl font-medium leading-snug text-slate-300 md:text-4xl">
-              {partialLine}
+          <div className="shrink-0 text-right">
+            <p
+              className={`font-mono text-sm font-medium ${
+                status === "live" ? "text-[#8aeb9e]" : "text-white"
+              }`}
+            >
+              {statusLabel}
             </p>
-          )}
+            {lastUpdatedAt && (
+              <p className="font-mono text-xs text-white/45">
+                {new Date(lastUpdatedAt).toLocaleTimeString()}
+              </p>
+            )}
+          </div>
         </div>
+
+        <div className="relative flex flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
+          <div className="absolute left-4 top-4 z-10 flex max-w-[55%] flex-wrap gap-2 text-xs font-medium text-white/60 md:left-6 md:top-6">
+            {mode && <span>{mode}</span>}
+            {language && <span>{language}</span>}
+          </div>
+
+          <div className="absolute right-4 top-4 z-10 font-mono text-xs font-medium text-white/70 md:right-6 md:top-6 md:text-sm">
+            {status === "reconnecting" ? "Reconnecting..." : statusLabel}
+          </div>
+
+          <div className="grid min-h-[70vh] w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-16 text-center md:min-h-[78vh] md:px-10 md:pb-10 md:pt-20">
+            {finalLines.length === 0 && !partialLine ? (
+              <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
+                Captions will appear here when the broadcaster starts speaking.
+              </div>
+            ) : (
+              <div className="relative min-h-0 overflow-hidden">
+                <div className="absolute inset-x-0 bottom-0 space-y-2 md:space-y-3">
+                  {finalLines.map((line, index) => {
+                    const caption = getCaptionDisplay(
+                      line,
+                      index,
+                      finalLines.length,
+                    );
+
+                    return (
+                      <p
+                        key={`${line.sentAt || "line"}-${index}`}
+                        className={`text-2xl font-bold leading-tight [overflow-wrap:anywhere] md:text-5xl ${caption.className}`}
+                      >
+                        {caption.text}
+                      </p>
+                    );
+                  })}
+
+                  {partialLine && (
+                    <p className="mt-2 min-h-[2.5rem] text-2xl font-bold leading-tight text-white [overflow-wrap:anywhere] md:mt-3 md:min-h-[4rem] md:text-5xl">
+                      {partialLine}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <p className="mt-3 truncate text-center font-mono text-xs text-white/35">
+          {new URL(getViewerSocketUrl(code || "ABC123")).host}
+        </p>
       </section>
     </main>
   );
