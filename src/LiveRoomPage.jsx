@@ -16,41 +16,48 @@ function getViewerSocketUrl(code) {
   return `${wsBaseUrl.replace(/\/$/, "")}/rooms/${code}/viewer`;
 }
 
+function formatCaptionText(text) {
+  return text
+    .replace(/([。！？])\s*/g, "$1\n")
+    .replace(/([.!?])\s+(?=[A-Z0-9"“'‘([]|[\u3400-\u9fff])/g, "$1\n")
+    .trim();
+}
+
 function getCaptionDisplay(line, index, totalLines) {
   const text = typeof line === "string" ? line : line.text || "";
-  const isNewestFinal = index === totalLines - 1;
+  const isRecentFinal = index >= totalLines - 2;
 
   if (text.startsWith("PT:")) {
     return {
-      text: text.slice(3),
-      className: "text-[#8aeb9e]/80",
+      text: formatCaptionText(text.slice(3)),
+      className: isRecentFinal ? "text-[#8aeb9e]" : "text-[#8aeb9e]/70",
     };
   }
 
   if (text.startsWith("T:")) {
     return {
-      text: text.slice(2),
+      text: formatCaptionText(text.slice(2)),
       className: "text-[#8aeb9e]",
     };
   }
 
   if (text.startsWith("C:")) {
     return {
-      text: text.slice(2),
-      className: "text-white/60",
+      text: formatCaptionText(text.slice(2)),
+      className: isRecentFinal ? "text-white" : "text-white/70",
     };
   }
 
   if (text.startsWith("P:")) {
     return {
-      text: text.slice(2),
-      className: "text-white/80",
+      text: formatCaptionText(text.slice(2)),
+      className: isRecentFinal ? "text-white" : "text-white/70",
     };
   }
 
   return {
-    text,
-    className: isNewestFinal ? "text-white/90" : "text-white/60",
+    text: formatCaptionText(text),
+    className: isRecentFinal ? "text-white" : "text-white/70",
   };
 }
 
@@ -188,7 +195,7 @@ function LiveRoomPage() {
   return (
     <main className="min-h-screen bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
       <section className="mx-auto flex min-h-[calc(100vh-24px)] max-w-6xl flex-col md:min-h-[calc(100vh-48px)]">
-        <div className="mb-3 flex items-center gap-3 text-white/70">
+        <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
           <div className="flex min-w-0 items-center gap-3">
             <img
               src={appIcon}
@@ -204,10 +211,7 @@ function LiveRoomPage() {
               </p>
             </div>
           </div>
-        </div>
-
-        <div className="relative flex flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
-          <div className="absolute right-4 top-4 z-10 text-right font-mono text-xs font-medium text-white/70 md:right-6 md:top-6 md:text-sm">
+          <div className="shrink-0 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
             {status === "live" ? (
               <p className="inline-flex items-center gap-1.5 text-[#8aeb9e]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
@@ -217,7 +221,9 @@ function LiveRoomPage() {
               <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
             )}
           </div>
+        </div>
 
+        <div className="relative flex flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
           <div className="grid min-h-[70vh] w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-16 text-center md:min-h-[78vh] md:px-10 md:pb-10 md:pt-20">
             {finalLines.length === 0 && !partialLine ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
@@ -236,7 +242,7 @@ function LiveRoomPage() {
                     return (
                       <p
                         key={`${line.sentAt || "line"}-${index}`}
-                        className={`text-2xl font-bold leading-tight [overflow-wrap:anywhere] md:text-5xl ${caption.className}`}
+                        className={`whitespace-pre-line text-2xl font-bold leading-tight [overflow-wrap:anywhere] md:text-5xl ${caption.className}`}
                       >
                         {caption.text}
                       </p>
@@ -244,8 +250,8 @@ function LiveRoomPage() {
                   })}
 
                   {partialLine && (
-                    <p className="mt-2 min-h-[2.5rem] text-2xl font-bold leading-tight text-white [overflow-wrap:anywhere] md:mt-3 md:min-h-[4rem] md:text-5xl">
-                      {partialLine}
+                    <p className="mt-2 min-h-[2.5rem] whitespace-pre-line text-2xl font-bold leading-tight text-white [overflow-wrap:anywhere] md:mt-3 md:min-h-[4rem] md:text-5xl">
+                      {formatCaptionText(partialLine)}
                     </p>
                   )}
                 </div>
