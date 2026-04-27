@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/live/:code",
+      "destination": "/index.html"
+    }
+  ]
+}
