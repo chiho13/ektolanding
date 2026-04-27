@@ -20,6 +20,58 @@ body {
   background-color: #242424;
 }
 
+html,
+#root {
+  min-height: 100%;
+}
+
+.live-room-page {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.live-room-shell {
+  min-height: calc(100vh - 24px - env(safe-area-inset-bottom));
+  min-height: calc(100svh - 24px - env(safe-area-inset-bottom));
+}
+
+.live-room-page {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+
+@supports (height: 100dvh) {
+  body {
+    min-height: 100dvh;
+  }
+
+  .live-room-page {
+    min-height: 100dvh;
+  }
+
+  .live-room-shell {
+    min-height: calc(100dvh - 24px - env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 48rem) {
+  .live-room-page {
+    padding-bottom: 1.5rem;
+  }
+
+  .live-room-shell {
+    min-height: calc(100vh - 48px);
+    min-height: calc(100svh - 48px);
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (min-width: 48rem) {
+    .live-room-shell {
+      min-height: calc(100dvh - 48px);
+    }
+  }
+}
+
 @media (prefers-color-scheme: light) {
   body {
     color: #213547;

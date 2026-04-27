@@ -193,8 +193,8 @@ function LiveRoomPage() {
   }[status];
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
-      <section className="mx-auto flex min-h-[calc(100vh-24px)] max-w-6xl flex-col md:min-h-[calc(100vh-48px)]">
+    <main className="live-room-page bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
+      <section className="live-room-shell mx-auto flex max-w-6xl flex-col">
         <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
           <div className="flex min-w-0 items-center gap-3">
             <img
@@ -223,8 +223,8 @@ function LiveRoomPage() {
           </div>
         </div>
 
-        <div className="relative flex flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
-          <div className="grid min-h-[70vh] w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-16 text-center md:min-h-[78vh] md:px-10 md:pb-10 md:pt-20">
+        <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
+          <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-16 text-center md:px-10 md:pb-10 md:pt-20">
             {finalLines.length === 0 && !partialLine ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 Captions will appear here when the broadcaster starts speaking.
