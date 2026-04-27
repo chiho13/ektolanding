@@ -48,3 +48,5 @@ Download the app here: [ekto: Live AI Captions on the App Store](https://apps.ap
 ## Final Thoughts
 
 The best live caption app for lectures depends on whether you need basic transcription or full real-time understanding. For many students, especially those studying abroad, real-time translated captions are the feature that matters most. If your goal is to follow lectures with less stress and better comprehension, ekto: Live AI Captions is one of the most relevant options to try.
+
+If you are studying abroad and want a broader strategy, read our guide on [how to understand lectures in a foreign language](/blog/how-to-understand-lectures-in-a-foreign-language/).

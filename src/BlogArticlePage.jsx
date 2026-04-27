@@ -1,5 +1,5 @@
 import appStoreButton from "./assets/downloadbtn.svg";
-import appIcon from "./assets/AppIcon.jpg";
+import appIcon from "./assets/ekto.png";
 
 const lectureCaptionApps = [
   {
@@ -164,7 +164,7 @@ function BlogArticlePage() {
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-5">
               Final Thoughts
             </h2>
-            <p className="text-lg leading-8 text-slate-700">
+            <p className="text-lg leading-8 text-slate-700 mb-5">
               The best live caption app for lectures depends on whether you
               need basic transcription or full real-time understanding. For
               many students, especially those studying abroad, real-time
@@ -172,6 +172,17 @@ function BlogArticlePage() {
               goal is to follow lectures with less stress and better
               comprehension, ekto: Live AI Captions is one of the most relevant
               options to try.
+            </p>
+            <p className="text-lg leading-8 text-slate-700">
+              If you are studying abroad and want a broader strategy, read our
+              guide on{" "}
+              <a
+                href="/blog/how-to-understand-lectures-in-a-foreign-language/"
+                className="font-semibold text-blue-700 underline underline-offset-4"
+              >
+                how to understand lectures in a foreign language
+              </a>
+              .
             </p>
           </section>
 

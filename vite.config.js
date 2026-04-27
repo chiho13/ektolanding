@@ -17,6 +17,10 @@ export default defineConfig({
           rootDir,
           "blog/top-5-best-live-caption-apps-for-lectures/index.html"
         ),
+        foreignLanguageLecturesArticle: resolve(
+          rootDir,
+          "blog/how-to-understand-lectures-in-a-foreign-language/index.html"
+        ),
       },
     },
   },
