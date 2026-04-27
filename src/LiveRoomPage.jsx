@@ -59,9 +59,6 @@ function LiveRoomPage() {
   const [status, setStatus] = useState("connecting");
   const [finalLines, setFinalLines] = useState([]);
   const [partialLine, setPartialLine] = useState("");
-  const [language, setLanguage] = useState("");
-  const [mode, setMode] = useState("");
-  const [lastUpdatedAt, setLastUpdatedAt] = useState("");
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef(null);
   const shouldReconnectRef = useRef(true);
@@ -128,18 +125,6 @@ function LiveRoomPage() {
     function handleBroadcastMessage(message) {
       if (!message || typeof message !== "object") {
         return;
-      }
-
-      if (typeof message.language === "string") {
-        setLanguage(message.language);
-      }
-
-      if (typeof message.mode === "string") {
-        setMode(message.mode);
-      }
-
-      if (typeof message.sentAt === "string") {
-        setLastUpdatedAt(message.sentAt);
       }
 
       if (message.type === "snapshot") {
@@ -222,17 +207,14 @@ function LiveRoomPage() {
         </div>
 
         <div className="relative flex flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
-          <div className="absolute left-4 top-4 z-10 flex max-w-[55%] flex-wrap gap-2 text-xs font-medium text-white/60 md:left-6 md:top-6">
-            {mode && <span>{mode}</span>}
-            {language && <span>{language}</span>}
-          </div>
-
           <div className="absolute right-4 top-4 z-10 text-right font-mono text-xs font-medium text-white/70 md:right-6 md:top-6 md:text-sm">
-            <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
-            {lastUpdatedAt && (
-              <p className="mt-1 text-[10px] text-white/45 md:text-xs">
-                {new Date(lastUpdatedAt).toLocaleTimeString()}
+            {status === "live" ? (
+              <p className="inline-flex items-center gap-1.5 text-[#8aeb9e]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
+                LIVE
               </p>
+            ) : (
+              <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
             )}
           </div>
 
