@@ -203,7 +203,7 @@ function LiveRoomPage() {
   return (
     <main className="min-h-screen bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
       <section className="mx-auto flex min-h-[calc(100vh-24px)] max-w-6xl flex-col md:min-h-[calc(100vh-48px)]">
-        <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
+        <div className="mb-3 flex items-center gap-3 text-white/70">
           <div className="flex min-w-0 items-center gap-3">
             <img
               src={appIcon}
@@ -219,20 +219,6 @@ function LiveRoomPage() {
               </p>
             </div>
           </div>
-          <div className="shrink-0 text-right">
-            <p
-              className={`font-mono text-sm font-medium ${
-                status === "live" ? "text-[#8aeb9e]" : "text-white"
-              }`}
-            >
-              {statusLabel}
-            </p>
-            {lastUpdatedAt && (
-              <p className="font-mono text-xs text-white/45">
-                {new Date(lastUpdatedAt).toLocaleTimeString()}
-              </p>
-            )}
-          </div>
         </div>
 
         <div className="relative flex flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
@@ -241,8 +227,13 @@ function LiveRoomPage() {
             {language && <span>{language}</span>}
           </div>
 
-          <div className="absolute right-4 top-4 z-10 font-mono text-xs font-medium text-white/70 md:right-6 md:top-6 md:text-sm">
-            {status === "reconnecting" ? "Reconnecting..." : statusLabel}
+          <div className="absolute right-4 top-4 z-10 text-right font-mono text-xs font-medium text-white/70 md:right-6 md:top-6 md:text-sm">
+            <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
+            {lastUpdatedAt && (
+              <p className="mt-1 text-[10px] text-white/45 md:text-xs">
+                {new Date(lastUpdatedAt).toLocaleTimeString()}
+              </p>
+            )}
           </div>
 
           <div className="grid min-h-[70vh] w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-16 text-center md:min-h-[78vh] md:px-10 md:pb-10 md:pt-20">
@@ -280,10 +271,6 @@ function LiveRoomPage() {
             )}
           </div>
         </div>
-
-        <p className="mt-3 truncate text-center font-mono text-xs text-white/35">
-          {new URL(getViewerSocketUrl(code || "ABC123")).host}
-        </p>
       </section>
     </main>
   );
