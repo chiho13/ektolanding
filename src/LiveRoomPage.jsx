@@ -610,10 +610,10 @@ function LiveRoomPage() {
           </div>
           <div
             ref={fontControlRef}
-            className="absolute right-3 top-3 z-20 flex flex-col items-end gap-2 md:right-4 md:top-4"
+            className="absolute right-3 top-3 z-20 h-9 w-10 md:right-4 md:top-4"
           >
             {isFontControlOpen ? (
-              <div className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
+              <div className="absolute right-0 top-11 flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
                 <button
                   type="button"
                   aria-label="Decrease caption font size"
