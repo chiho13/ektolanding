@@ -25,47 +25,129 @@ function formatCaptionText(text) {
 }
 
 function parseCaptionPart(text, sourceKey) {
-  if (text.startsWith("PT:")) {
+  const captionText = text.trim();
+
+  if (captionText.startsWith("PT:")) {
     return {
       key: sourceKey,
-      text: formatCaptionText(text.slice(3)),
+      text: formatCaptionText(captionText.slice(3)),
       className: "text-[#8aeb9e]/80",
     };
   }
 
-  if (text.startsWith("C:")) {
+  if (captionText.startsWith("C:")) {
     return {
       key: sourceKey,
-      text: formatCaptionText(text.slice(2)),
+      text: formatCaptionText(captionText.slice(2)),
       className: "text-white/60",
     };
   }
 
-  if (text.startsWith("P:")) {
+  if (captionText.startsWith("P:")) {
     return {
       key: sourceKey,
-      text: formatCaptionText(text.slice(2)),
+      text: formatCaptionText(captionText.slice(2)),
       className: "text-white/80",
     };
   }
 
-  if (text.startsWith("T:")) {
+  if (captionText.startsWith("T:")) {
     return {
       key: sourceKey,
-      text: formatCaptionText(text.slice(2)),
+      text: formatCaptionText(captionText.slice(2)),
       className: "text-[#8aeb9e]",
     };
   }
 
   return {
     key: sourceKey,
-    text: formatCaptionText(text),
+    text: formatCaptionText(captionText),
     className: "text-white",
   };
 }
 
+function getLineText(line) {
+  return typeof line === "string" ? line : line?.text || "";
+}
+
+function getMessageCaptionText(message) {
+  return typeof message?.captionText === "string" ? message.captionText.trim() : "";
+}
+
+function hasCaptionPrefix(text, prefix) {
+  return text
+    .split("\n")
+    .map((part) => part.trim())
+    .some((part) => part.startsWith(prefix));
+}
+
+function getActiveCaptionText(text) {
+  return text
+    .split("\n")
+    .map((part) => part.trim())
+    .filter((part) => {
+      if (!part) {
+        return false;
+      }
+
+      return !(
+        part.startsWith("T:") ||
+        part.startsWith("PT:") ||
+        part.startsWith("P:") ||
+        part.startsWith("C:")
+      );
+    })
+    .join("\n");
+}
+
+function prefixFinalizedCaption(text) {
+  return text
+    .trim()
+    .split("\n")
+    .map((part) => {
+      const trimmedPart = part.trim();
+
+      if (!trimmedPart) {
+        return "";
+      }
+
+      return `C:${trimmedPart}`;
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getFinalLinesToAppend(message, lastActiveCaptionText) {
+  const finalText = getLineText(message);
+  const captionText = getMessageCaptionText(message) || lastActiveCaptionText;
+  const shouldFinalizeCurrentOriginal =
+    hasCaptionPrefix(finalText, "PT:") &&
+    captionText.trim() &&
+    !hasCaptionPrefix(finalText, "P:") &&
+    !hasCaptionPrefix(finalText, "C:");
+
+  if (!shouldFinalizeCurrentOriginal) {
+    return [message];
+  }
+
+  const finalizedOriginal = prefixFinalizedCaption(captionText);
+
+  if (!finalizedOriginal) {
+    return [message];
+  }
+
+  return [
+    {
+      ...message,
+      text: finalizedOriginal,
+      sentAt: `${message.sentAt || Date.now()}-original`,
+    },
+    message,
+  ];
+}
+
 function getCaptionPartsFromLine(line, lineIndex, source = "final") {
-  const rawText = typeof line === "string" ? line : line?.text || "";
+  const rawText = getLineText(line);
   const sourceId =
     typeof line === "object" && line !== null && line.sentAt
       ? line.sentAt
@@ -85,6 +167,8 @@ function LiveRoomPage() {
   const [status, setStatus] = useState("connecting");
   const [finalLines, setFinalLines] = useState([]);
   const [partialLine, setPartialLine] = useState("");
+  const partialLineRef = useRef("");
+  const lastActiveCaptionTextRef = useRef("");
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef(null);
   const shouldReconnectRef = useRef(true);
@@ -159,7 +243,12 @@ function LiveRoomPage() {
             ? message.history.filter((item) => typeof item.text === "string")
             : [],
         );
-        setPartialLine(message.latestPartial?.text || "");
+        partialLineRef.current = message.latestPartial?.text || "";
+        lastActiveCaptionTextRef.current =
+          getMessageCaptionText(message.latestPartial) ||
+          getActiveCaptionText(partialLineRef.current) ||
+          lastActiveCaptionTextRef.current;
+        setPartialLine(partialLineRef.current);
         setStatus(message.status || "waiting");
         endedRef.current = message.status === "ended";
         return;
@@ -171,23 +260,40 @@ function LiveRoomPage() {
       }
 
       if (message.type === "partial") {
-        setPartialLine(message.text || "");
+        partialLineRef.current = message.text || "";
+        lastActiveCaptionTextRef.current =
+          getMessageCaptionText(message) ||
+          getActiveCaptionText(partialLineRef.current) ||
+          lastActiveCaptionTextRef.current;
+        setPartialLine(partialLineRef.current);
         setStatus("live");
         return;
       }
 
       if (message.type === "final") {
-        setFinalLines((lines) => [...lines, message]);
-        setPartialLine("");
+        const linesToAppend = getFinalLinesToAppend(
+          message,
+          lastActiveCaptionTextRef.current,
+        );
+        setFinalLines((lines) => [...lines, ...linesToAppend]);
+        partialLineRef.current = "";
+        lastActiveCaptionTextRef.current = "";
+        setPartialLine(partialLineRef.current);
         setStatus("live");
         return;
       }
 
       if (message.type === "ended") {
         if (typeof message.text === "string") {
-          setFinalLines((lines) => [...lines, message]);
+          const linesToAppend = getFinalLinesToAppend(
+            message,
+            lastActiveCaptionTextRef.current,
+          );
+          setFinalLines((lines) => [...lines, ...linesToAppend]);
         }
-        setPartialLine("");
+        partialLineRef.current = "";
+        lastActiveCaptionTextRef.current = "";
+        setPartialLine(partialLineRef.current);
         setStatus("ended");
         endedRef.current = true;
       }
