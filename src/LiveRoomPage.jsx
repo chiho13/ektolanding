@@ -70,6 +70,10 @@ function getLineText(line) {
   return typeof line === "string" ? line : line?.text || "";
 }
 
+function isTranslateMessage(message) {
+  return message?.mode === "translate";
+}
+
 function getMessageCaptionText(message) {
   return typeof message?.captionText === "string" ? message.captionText.trim() : "";
 }
@@ -130,7 +134,35 @@ function getMessageTranslationText(message) {
     : "";
 }
 
+function getTranslateCaptionParts(message, sourceKey, isFinal = false) {
+  const translationLines = getLineText(message)
+    .split("\n")
+    .map((part) => part.trim())
+    .filter(
+      (part) => part.startsWith("T:") || part.startsWith("PT:"),
+    );
+
+  if (translationLines.length > 0) {
+    return getCaptionPartsFromText(translationLines.join("\n"), sourceKey);
+  }
+
+  const translationText = getMessageTranslationText(message);
+
+  if (translationText) {
+    return getCaptionPartsFromText(
+      `${isFinal ? "PT" : "T"}:${translationText}`,
+      sourceKey,
+    );
+  }
+
+  return [];
+}
+
 function getPartialCaptionParts(message, sourceKey) {
+  if (isTranslateMessage(message)) {
+    return getTranslateCaptionParts(message, sourceKey);
+  }
+
   const captionText = getMessageCaptionText(message);
   const translationText = getMessageTranslationText(message);
 
@@ -154,6 +186,10 @@ function getPartialCaptionParts(message, sourceKey) {
 }
 
 function getFinalCaptionParts(message, fallbackCaptionText, sourceKey) {
+  if (isTranslateMessage(message)) {
+    return getTranslateCaptionParts(message, sourceKey, true);
+  }
+
   const captionText = getMessageCaptionText(message) || fallbackCaptionText.trim();
   const translationText = getMessageTranslationText(message);
 
@@ -291,14 +327,20 @@ function LiveRoomPage() {
       if (message.type === "partial") {
         const partialText = message.text || "";
         lastActiveCaptionTextRef.current =
-          getMessageCaptionText(message) ||
-          getActiveCaptionText(partialText) ||
-          lastActiveCaptionTextRef.current;
+          isTranslateMessage(message)
+            ? lastActiveCaptionTextRef.current
+            : getMessageCaptionText(message) ||
+              getActiveCaptionText(partialText) ||
+              lastActiveCaptionTextRef.current;
         messageSequenceRef.current += 1;
         const prefixedLines = splitPrefixedCaptionLines(partialText);
 
-        if (prefixedLines.final.length > 0) {
-          const newFinalLines = prefixedLines.final.filter((line) => {
+        const finalizedLines = isTranslateMessage(message)
+          ? prefixedLines.final.filter((line) => line.startsWith("PT:"))
+          : prefixedLines.final;
+
+        if (finalizedLines.length > 0) {
+          const newFinalLines = finalizedLines.filter((line) => {
             if (appendedPrefixedFinalLinesRef.current.has(line)) {
               return false;
             }
@@ -316,8 +358,20 @@ function LiveRoomPage() {
           }
         }
 
-        setActiveCaptionParts(
-          prefixedLines.final.length > 0
+        const activeTranslationLines = prefixedLines.active.filter((line) =>
+          line.startsWith("T:"),
+        );
+        const nextActiveCaptionParts = isTranslateMessage(message)
+          ? activeTranslationLines.length > 0
+            ? getCaptionPartsFromText(
+                activeTranslationLines.join("\n"),
+                `partial-${messageSequenceRef.current}`,
+              )
+            : getTranslateCaptionParts(
+                message,
+                `partial-${messageSequenceRef.current}`,
+              )
+          : prefixedLines.final.length > 0
             ? getCaptionPartsFromText(
                 [...prefixedLines.active, ...prefixedLines.unprefixed].join("\n"),
                 `partial-${messageSequenceRef.current}`,
@@ -325,8 +379,9 @@ function LiveRoomPage() {
             : getPartialCaptionParts(
                 message,
                 `partial-${messageSequenceRef.current}`,
-              ),
-        );
+              );
+
+        setActiveCaptionParts(nextActiveCaptionParts);
         setStatus("live");
         return;
       }
