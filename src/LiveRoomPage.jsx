@@ -290,6 +290,7 @@ function LiveRoomPage() {
   const [roomMode, setRoomMode] = useState("captions");
   const [hideOriginals, setHideOriginals] = useState(false);
   const [fontScale, setFontScale] = useState(readStoredFontScale);
+  const [isFontControlOpen, setIsFontControlOpen] = useState(false);
   const lastActiveCaptionTextRef = useRef("");
   const appendedPrefixedFinalLinesRef = useRef(new Set());
   const messageSequenceRef = useRef(0);
@@ -555,63 +556,15 @@ function LiveRoomPage() {
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <div className="flex h-8 items-center gap-2 rounded-md bg-white/5 px-2 ring-1 ring-white/10">
-              <button
-                type="button"
-                aria-label="Decrease caption font size"
-                title="Decrease caption font size"
-                disabled={fontScale <= MIN_FONT_SCALE}
-                onClick={() =>
-                  setFontScale((currentScale) =>
-                    clampFontScale(currentScale - FONT_SCALE_STEP),
-                  )
-                }
-                className="h-6 w-7 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
-              >
-                A-
-              </button>
-              <input
-                aria-label="Caption font size"
-                type="range"
-                min={MIN_FONT_SCALE}
-                max={MAX_FONT_SCALE}
-                step={FONT_SCALE_STEP}
-                value={fontScale}
-                onChange={(event) =>
-                  setFontScale(clampFontScale(event.target.value))
-                }
-                className="h-6 w-20 accent-[#8aeb9e] md:w-28"
-              />
-              <button
-                type="button"
-                aria-label="Increase caption font size"
-                title="Increase caption font size"
-                disabled={fontScale >= MAX_FONT_SCALE}
-                onClick={() =>
-                  setFontScale((currentScale) =>
-                    clampFontScale(currentScale + FONT_SCALE_STEP),
-                  )
-                }
-                className="h-6 w-7 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
-              >
-                A+
-              </button>
-              <span className="hidden w-9 text-right font-mono text-[0.65rem] font-semibold text-white/45 md:block">
-                {captionFontPercent}%
-              </span>
-            </div>
-
-            <div className="text-right font-mono text-xs font-medium text-white/70 md:text-sm">
-              {status === "live" ? (
-                <p className="inline-flex items-center gap-1.5 text-[#8aeb9e]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
-                  LIVE
-                </p>
-              ) : (
-                <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
-              )}
-            </div>
+          <div className="shrink-0 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
+            {status === "live" ? (
+              <p className="inline-flex items-center gap-1.5 text-[#8aeb9e]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
+                LIVE
+              </p>
+            ) : (
+              <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
+            )}
           </div>
         </div>
 
@@ -635,6 +588,65 @@ function LiveRoomPage() {
                 </div>
               </div>
             )}
+          </div>
+          <div className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-2 md:bottom-4 md:right-4">
+            {isFontControlOpen ? (
+              <div className="flex h-10 items-center gap-2 rounded-lg bg-neutral-950/90 px-2 shadow-xl ring-1 ring-white/15 backdrop-blur">
+                <button
+                  type="button"
+                  aria-label="Decrease caption font size"
+                  title="Decrease caption font size"
+                  disabled={fontScale <= MIN_FONT_SCALE}
+                  onClick={() =>
+                    setFontScale((currentScale) =>
+                      clampFontScale(currentScale - FONT_SCALE_STEP),
+                    )
+                  }
+                  className="h-7 w-8 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                >
+                  A-
+                </button>
+                <input
+                  aria-label="Caption font size"
+                  type="range"
+                  min={MIN_FONT_SCALE}
+                  max={MAX_FONT_SCALE}
+                  step={FONT_SCALE_STEP}
+                  value={fontScale}
+                  onChange={(event) =>
+                    setFontScale(clampFontScale(event.target.value))
+                  }
+                  className="h-7 w-24 accent-[#8aeb9e] md:w-32"
+                />
+                <button
+                  type="button"
+                  aria-label="Increase caption font size"
+                  title="Increase caption font size"
+                  disabled={fontScale >= MAX_FONT_SCALE}
+                  onClick={() =>
+                    setFontScale((currentScale) =>
+                      clampFontScale(currentScale + FONT_SCALE_STEP),
+                    )
+                  }
+                  className="h-7 w-8 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                >
+                  A+
+                </button>
+                <span className="w-9 text-right font-mono text-[0.65rem] font-semibold text-white/50">
+                  {captionFontPercent}%
+                </span>
+              </div>
+            ) : null}
+            <button
+              type="button"
+              aria-label="Caption font size settings"
+              aria-expanded={isFontControlOpen}
+              title="Caption font size"
+              onClick={() => setIsFontControlOpen((isOpen) => !isOpen)}
+              className="h-9 w-9 rounded-full bg-neutral-950/80 text-sm font-bold text-white/80 shadow-lg ring-1 ring-white/15 backdrop-blur transition hover:bg-neutral-900 hover:text-white"
+            >
+              Aa
+            </button>
           </div>
         </div>
       </section>
