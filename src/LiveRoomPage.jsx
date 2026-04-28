@@ -100,7 +100,7 @@ function getActiveCaptionText(text) {
     .join("\n");
 }
 
-function prefixFinalizedCaption(text) {
+function prefixPreviousCaption(text) {
   return text
     .trim()
     .split("\n")
@@ -111,7 +111,7 @@ function prefixFinalizedCaption(text) {
         return "";
       }
 
-      return `C:${trimmedPart}`;
+      return `P:${trimmedPart}`;
     })
     .filter(Boolean)
     .join("\n");
@@ -130,7 +130,7 @@ function getFinalLinesToAppend(message, lastActiveCaptionText) {
     return [message];
   }
 
-  const finalizedOriginal = prefixFinalizedCaption(captionText);
+  const finalizedOriginal = prefixPreviousCaption(captionText);
 
   if (!finalizedOriginal) {
     return [message];
