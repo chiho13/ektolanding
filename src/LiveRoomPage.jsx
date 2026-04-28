@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import appIcon from "./assets/ekto.png";
 
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
+const MAX_RENDERED_CAPTION_LINES = 10;
 
 function normalizeCode(pathname) {
   const match = pathname.match(/^\/live\/([^/]+)\/?$/);
@@ -23,42 +24,60 @@ function formatCaptionText(text) {
     .trim();
 }
 
-function getCaptionDisplay(line, index, totalLines) {
-  const text = typeof line === "string" ? line : line.text || "";
-  const isRecentFinal = index >= totalLines - 2;
-
+function parseCaptionPart(text, sourceKey) {
   if (text.startsWith("PT:")) {
     return {
+      key: sourceKey,
       text: formatCaptionText(text.slice(3)),
-      className: isRecentFinal ? "text-[#8aeb9e]" : "text-[#8aeb9e]/70",
-    };
-  }
-
-  if (text.startsWith("T:")) {
-    return {
-      text: formatCaptionText(text.slice(2)),
-      className: "text-[#8aeb9e]",
+      className: "text-[#8aeb9e]/80",
     };
   }
 
   if (text.startsWith("C:")) {
     return {
+      key: sourceKey,
       text: formatCaptionText(text.slice(2)),
-      className: isRecentFinal ? "text-white" : "text-white/70",
+      className: "text-white/60",
     };
   }
 
   if (text.startsWith("P:")) {
     return {
+      key: sourceKey,
       text: formatCaptionText(text.slice(2)),
-      className: isRecentFinal ? "text-white" : "text-white/70",
+      className: "text-white/80",
+    };
+  }
+
+  if (text.startsWith("T:")) {
+    return {
+      key: sourceKey,
+      text: formatCaptionText(text.slice(2)),
+      className: "text-[#8aeb9e]",
     };
   }
 
   return {
+    key: sourceKey,
     text: formatCaptionText(text),
-    className: isRecentFinal ? "text-white" : "text-white/70",
+    className: "text-white",
   };
+}
+
+function getCaptionPartsFromLine(line, lineIndex, source = "final") {
+  const rawText = typeof line === "string" ? line : line?.text || "";
+  const sourceId =
+    typeof line === "object" && line !== null && line.sentAt
+      ? line.sentAt
+      : `${source}-${lineIndex}`;
+
+  return rawText
+    .split("\n")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part, partIndex) =>
+      parseCaptionPart(part, `${sourceId}-${partIndex}`),
+    );
 }
 
 function LiveRoomPage() {
@@ -192,6 +211,17 @@ function LiveRoomPage() {
     missing: "Invalid room",
   }[status];
 
+  const visibleCaptionParts = useMemo(() => {
+    const finalParts = finalLines.flatMap((line, index) =>
+      getCaptionPartsFromLine(line, index),
+    );
+    const partialParts = partialLine
+      ? getCaptionPartsFromLine({ text: partialLine }, 0, "partial")
+      : [];
+
+    return [...finalParts, ...partialParts].slice(-MAX_RENDERED_CAPTION_LINES);
+  }, [finalLines, partialLine]);
+
   return (
     <main className="live-room-page bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
       <section className="live-room-shell mx-auto flex max-w-6xl flex-col">
@@ -225,35 +255,21 @@ function LiveRoomPage() {
 
         <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
           <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-16 text-center md:px-10 md:pb-10 md:pt-20">
-            {finalLines.length === 0 && !partialLine ? (
+            {visibleCaptionParts.length === 0 ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 Captions will appear here when the broadcaster starts speaking.
               </div>
             ) : (
               <div className="relative min-h-0 overflow-hidden">
                 <div className="absolute inset-x-0 bottom-0 space-y-2 md:space-y-3">
-                  {finalLines.map((line, index) => {
-                    const caption = getCaptionDisplay(
-                      line,
-                      index,
-                      finalLines.length,
-                    );
-
-                    return (
-                      <p
-                        key={`${line.sentAt || "line"}-${index}`}
-                        className={`whitespace-pre-line text-2xl font-bold leading-tight [overflow-wrap:anywhere] md:text-5xl ${caption.className}`}
-                      >
-                        {caption.text}
-                      </p>
-                    );
-                  })}
-
-                  {partialLine && (
-                    <p className="mt-2 min-h-[2.5rem] whitespace-pre-line text-2xl font-bold leading-tight text-white [overflow-wrap:anywhere] md:mt-3 md:min-h-[4rem] md:text-5xl">
-                      {formatCaptionText(partialLine)}
+                  {visibleCaptionParts.map((caption) => (
+                    <p
+                      key={caption.key}
+                      className={`whitespace-pre-line text-2xl font-bold leading-tight [overflow-wrap:anywhere] md:text-5xl ${caption.className}`}
+                    >
+                      {caption.text}
                     </p>
-                  )}
+                  ))}
                 </div>
               </div>
             )}
