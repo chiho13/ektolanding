@@ -39,6 +39,10 @@ html,
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
 }
 
+.live-caption-text {
+  font-size: calc(1.5rem * var(--caption-font-scale, 1));
+}
+
 @supports (height: 100dvh) {
   body {
     min-height: 100dvh;
@@ -56,6 +60,10 @@ html,
 @media (min-width: 48rem) {
   .live-room-page {
     padding-bottom: 1.5rem;
+  }
+
+  .live-caption-text {
+    font-size: calc(3rem * var(--caption-font-scale, 1));
   }
 
   .live-room-shell {

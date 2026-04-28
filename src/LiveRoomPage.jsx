@@ -3,6 +3,36 @@ import appIcon from "./assets/ekto.png";
 
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
 const MAX_RENDERED_CAPTION_LINES = 10;
+const FONT_SCALE_STORAGE_KEY = "ekto.live.fontScale";
+const DEFAULT_FONT_SCALE = 1;
+const MIN_FONT_SCALE = 0.75;
+const MAX_FONT_SCALE = 1.6;
+const FONT_SCALE_STEP = 0.05;
+
+function clampFontScale(value) {
+  if (value === null || value === undefined || value === "") {
+    return DEFAULT_FONT_SCALE;
+  }
+
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return DEFAULT_FONT_SCALE;
+  }
+
+  const roundedValue =
+    Math.round(numericValue / FONT_SCALE_STEP) * FONT_SCALE_STEP;
+
+  return Math.min(MAX_FONT_SCALE, Math.max(MIN_FONT_SCALE, roundedValue));
+}
+
+function readStoredFontScale() {
+  try {
+    return clampFontScale(window.localStorage.getItem(FONT_SCALE_STORAGE_KEY));
+  } catch {
+    return DEFAULT_FONT_SCALE;
+  }
+}
 
 function normalizeCode(pathname) {
   const match = pathname.match(/^\/live\/([^/]+)\/?$/);
@@ -259,6 +289,7 @@ function LiveRoomPage() {
   const [activeCaptionParts, setActiveCaptionParts] = useState([]);
   const [roomMode, setRoomMode] = useState("captions");
   const [hideOriginals, setHideOriginals] = useState(false);
+  const [fontScale, setFontScale] = useState(readStoredFontScale);
   const lastActiveCaptionTextRef = useRef("");
   const appendedPrefixedFinalLinesRef = useRef(new Set());
   const messageSequenceRef = useRef(0);
@@ -266,6 +297,14 @@ function LiveRoomPage() {
   const reconnectTimerRef = useRef(null);
   const shouldReconnectRef = useRef(true);
   const endedRef = useRef(false);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(FONT_SCALE_STORAGE_KEY, String(fontScale));
+    } catch {
+      // Ignore storage failures; the control should still work for this page.
+    }
+  }, [fontScale]);
 
   useEffect(() => {
     if (!code) {
@@ -492,9 +531,13 @@ function LiveRoomPage() {
     },
     [activeCaptionParts, finalizedCaptionParts, hideOriginals, roomMode],
   );
+  const captionFontPercent = Math.round(fontScale * 100);
 
   return (
-    <main className="live-room-page bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
+    <main
+      className="live-room-page bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6"
+      style={{ "--caption-font-scale": fontScale }}
+    >
       <section className="live-room-shell mx-auto flex max-w-6xl flex-col">
         <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
           <div className="flex min-w-0 items-center gap-3">
@@ -512,15 +555,63 @@ function LiveRoomPage() {
               </p>
             </div>
           </div>
-          <div className="shrink-0 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
-            {status === "live" ? (
-              <p className="inline-flex items-center gap-1.5 text-[#8aeb9e]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
-                LIVE
-              </p>
-            ) : (
-              <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
-            )}
+          <div className="flex shrink-0 items-center gap-3">
+            <div className="flex h-8 items-center gap-2 rounded-md bg-white/5 px-2 ring-1 ring-white/10">
+              <button
+                type="button"
+                aria-label="Decrease caption font size"
+                title="Decrease caption font size"
+                disabled={fontScale <= MIN_FONT_SCALE}
+                onClick={() =>
+                  setFontScale((currentScale) =>
+                    clampFontScale(currentScale - FONT_SCALE_STEP),
+                  )
+                }
+                className="h-6 w-7 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                A-
+              </button>
+              <input
+                aria-label="Caption font size"
+                type="range"
+                min={MIN_FONT_SCALE}
+                max={MAX_FONT_SCALE}
+                step={FONT_SCALE_STEP}
+                value={fontScale}
+                onChange={(event) =>
+                  setFontScale(clampFontScale(event.target.value))
+                }
+                className="h-6 w-20 accent-[#8aeb9e] md:w-28"
+              />
+              <button
+                type="button"
+                aria-label="Increase caption font size"
+                title="Increase caption font size"
+                disabled={fontScale >= MAX_FONT_SCALE}
+                onClick={() =>
+                  setFontScale((currentScale) =>
+                    clampFontScale(currentScale + FONT_SCALE_STEP),
+                  )
+                }
+                className="h-6 w-7 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                A+
+              </button>
+              <span className="hidden w-9 text-right font-mono text-[0.65rem] font-semibold text-white/45 md:block">
+                {captionFontPercent}%
+              </span>
+            </div>
+
+            <div className="text-right font-mono text-xs font-medium text-white/70 md:text-sm">
+              {status === "live" ? (
+                <p className="inline-flex items-center gap-1.5 text-[#8aeb9e]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
+                  LIVE
+                </p>
+              ) : (
+                <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -536,7 +627,7 @@ function LiveRoomPage() {
                   {visibleCaptionParts.map((caption) => (
                     <p
                       key={caption.key}
-                      className={`whitespace-pre-line text-2xl font-bold leading-tight [overflow-wrap:anywhere] md:text-5xl ${caption.className}`}
+                      className={`live-caption-text whitespace-pre-line font-bold leading-tight [overflow-wrap:anywhere] ${caption.className}`}
                     >
                       {caption.text}
                     </p>
