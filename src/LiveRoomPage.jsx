@@ -32,6 +32,7 @@ function parseCaptionPart(text, sourceKey) {
       key: sourceKey,
       text: formatCaptionText(captionText.slice(3)),
       className: "text-[#8aeb9e]/80",
+      role: "translation-history",
     };
   }
 
@@ -40,6 +41,7 @@ function parseCaptionPart(text, sourceKey) {
       key: sourceKey,
       text: formatCaptionText(captionText.slice(2)),
       className: "text-white/60",
+      role: "caption-history",
     };
   }
 
@@ -48,6 +50,7 @@ function parseCaptionPart(text, sourceKey) {
       key: sourceKey,
       text: formatCaptionText(captionText.slice(2)),
       className: "text-white/80",
+      role: "caption-history",
     };
   }
 
@@ -56,6 +59,7 @@ function parseCaptionPart(text, sourceKey) {
       key: sourceKey,
       text: formatCaptionText(captionText.slice(2)),
       className: "text-[#8aeb9e]",
+      role: "translation-active",
     };
   }
 
@@ -63,6 +67,7 @@ function parseCaptionPart(text, sourceKey) {
     key: sourceKey,
     text: formatCaptionText(captionText),
     className: "text-white",
+    role: "caption-active",
   };
 }
 
@@ -72,6 +77,20 @@ function getLineText(line) {
 
 function isTranslateMessage(message) {
   return message?.mode === "translate";
+}
+
+function getMessageMode(message) {
+  return typeof message?.mode === "string" ? message.mode : null;
+}
+
+function getMessageHideOriginals(message) {
+  return typeof message?.hideOriginals === "boolean"
+    ? message.hideOriginals
+    : null;
+}
+
+function isOriginalCaptionPart(part) {
+  return part.role === "caption-active" || part.role === "caption-history";
 }
 
 function getMessageCaptionText(message) {
@@ -135,27 +154,28 @@ function getMessageTranslationText(message) {
 }
 
 function getTranslateCaptionParts(message, sourceKey, isFinal = false) {
-  const translationLines = getLineText(message)
+  const renderLines = getLineText(message)
     .split("\n")
     .map((part) => part.trim())
-    .filter(
-      (part) => part.startsWith("T:") || part.startsWith("PT:"),
-    );
+    .filter(Boolean);
 
-  if (translationLines.length > 0) {
-    return getCaptionPartsFromText(translationLines.join("\n"), sourceKey);
+  if (renderLines.length > 0) {
+    return getCaptionPartsFromText(renderLines.join("\n"), sourceKey);
   }
 
+  const captionText = getMessageCaptionText(message);
   const translationText = getMessageTranslationText(message);
+  const fallbackLines = [];
+
+  if (captionText) {
+    fallbackLines.push(isFinal ? `P:${captionText}` : captionText);
+  }
 
   if (translationText) {
-    return getCaptionPartsFromText(
-      `${isFinal ? "PT" : "T"}:${translationText}`,
-      sourceKey,
-    );
+    fallbackLines.push(`${isFinal ? "PT" : "T"}:${translationText}`);
   }
 
-  return [];
+  return getCaptionPartsFromText(fallbackLines.join("\n"), sourceKey);
 }
 
 function getPartialCaptionParts(message, sourceKey) {
@@ -217,11 +237,28 @@ function getFinalCaptionParts(message, fallbackCaptionText, sourceKey) {
   return getCaptionPartsFromText(getLineText(message), sourceKey);
 }
 
+function getSnapshotDisplayState(message) {
+  return [
+    ...(Array.isArray(message.history) ? message.history : []),
+    message.latestPartial,
+  ]
+    .filter(Boolean)
+    .reduce(
+      (state, item) => ({
+        mode: getMessageMode(item) || state.mode,
+        hideOriginals: getMessageHideOriginals(item) ?? state.hideOriginals,
+      }),
+      { mode: "captions", hideOriginals: false },
+    );
+}
+
 function LiveRoomPage() {
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const [status, setStatus] = useState("connecting");
   const [finalizedCaptionParts, setFinalizedCaptionParts] = useState([]);
   const [activeCaptionParts, setActiveCaptionParts] = useState([]);
+  const [roomMode, setRoomMode] = useState("captions");
+  const [hideOriginals, setHideOriginals] = useState(false);
   const lastActiveCaptionTextRef = useRef("");
   const appendedPrefixedFinalLinesRef = useRef(new Set());
   const messageSequenceRef = useRef(0);
@@ -293,7 +330,20 @@ function LiveRoomPage() {
         return;
       }
 
+      const nextMode = getMessageMode(message);
+      if (nextMode) {
+        setRoomMode(nextMode);
+      }
+
+      const nextHideOriginals = getMessageHideOriginals(message);
+      if (nextHideOriginals !== null) {
+        setHideOriginals(nextHideOriginals);
+      }
+
       if (message.type === "snapshot") {
+        const snapshotState = getSnapshotDisplayState(message);
+        setRoomMode(snapshotState.mode);
+        setHideOriginals(snapshotState.hideOriginals);
         appendedPrefixedFinalLinesRef.current = new Set();
         setFinalizedCaptionParts(
           Array.isArray(message.history)
@@ -335,9 +385,7 @@ function LiveRoomPage() {
         messageSequenceRef.current += 1;
         const prefixedLines = splitPrefixedCaptionLines(partialText);
 
-        const finalizedLines = isTranslateMessage(message)
-          ? prefixedLines.final.filter((line) => line.startsWith("PT:"))
-          : prefixedLines.final;
+        const finalizedLines = prefixedLines.final;
 
         if (finalizedLines.length > 0) {
           const newFinalLines = finalizedLines.filter((line) => {
@@ -358,13 +406,16 @@ function LiveRoomPage() {
           }
         }
 
-        const activeTranslationLines = prefixedLines.active.filter((line) =>
-          line.startsWith("T:"),
-        );
+        const activeTranslateLines = partialText
+          .split("\n")
+          .map((part) => part.trim())
+          .filter(
+            (part) => part && !part.startsWith("P:") && !part.startsWith("PT:"),
+          );
         const nextActiveCaptionParts = isTranslateMessage(message)
-          ? activeTranslationLines.length > 0
+          ? activeTranslateLines.length > 0
             ? getCaptionPartsFromText(
-                activeTranslationLines.join("\n"),
+                activeTranslateLines.join("\n"),
                 `partial-${messageSequenceRef.current}`,
               )
             : getTranslateCaptionParts(
@@ -436,11 +487,16 @@ function LiveRoomPage() {
   }[status];
 
   const visibleCaptionParts = useMemo(
-    () =>
-      [...finalizedCaptionParts, ...activeCaptionParts].slice(
-        -MAX_RENDERED_CAPTION_LINES,
-      ),
-    [activeCaptionParts, finalizedCaptionParts],
+    () => {
+      const shouldHideOriginals = roomMode === "translate" && hideOriginals;
+      const parts = [...finalizedCaptionParts, ...activeCaptionParts];
+
+      return (shouldHideOriginals
+        ? parts.filter((part) => !isOriginalCaptionPart(part))
+        : parts
+      ).slice(-MAX_RENDERED_CAPTION_LINES);
+    },
+    [activeCaptionParts, finalizedCaptionParts, hideOriginals, roomMode],
   );
 
   return (
