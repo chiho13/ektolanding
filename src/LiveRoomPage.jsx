@@ -566,9 +566,9 @@ function LiveRoomPage() {
     waiting: "Waiting for captions",
     live: "Live",
     reconnecting: "Reconnecting",
-    ended: "Live room ended",
-    missing: "Room not found or expired",
-    expired: "Room not found or expired",
+    ended: "Live broadcast ended",
+    missing: "Live link not found or expired",
+    expired: "Live link not found or expired",
   }[status];
 
   const visibleCaptionParts = useMemo(
@@ -588,9 +588,9 @@ function LiveRoomPage() {
   );
   const captionFontPercent = Math.round(fontScale * 100);
   const emptyCaptionMessage = isUnavailableRoomStatus(status)
-    ? "This live room does not exist or has expired."
+    ? "This live link does not exist or has expired."
     : status === "ended"
-      ? "This live room has ended."
+      ? "This live broadcast has ended."
       : "Captions will appear here when speaking starts.";
 
   return (
@@ -607,22 +607,25 @@ function LiveRoomPage() {
               className="h-9 w-9 rounded-lg shadow-lg"
             />
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">
+              <p className="truncate text-sm font-semibold text-white/85">
                 ekto live captions
               </p>
-              <p className="truncate font-mono text-xs text-white/45">
-                Room {code || "unknown"}
+              <p className="mt-0.5 inline-flex max-w-full items-center gap-1.5 truncate rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[0.68rem] uppercase tracking-[0.08em] text-white/50">
+                <span className="h-1 w-1 shrink-0 rounded-full bg-white/35" />
+                Broadcast {code || "unknown"}
               </p>
             </div>
           </div>
           <div className="shrink-0 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
             {status === "live" ? (
-              <p className="inline-flex items-center gap-1.5 text-[#8aeb9e]">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-[#8aeb9e]/25 bg-[#8aeb9e]/10 px-2.5 py-1 text-[#8aeb9e]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
                 LIVE
               </p>
             ) : (
-              <p>{status === "reconnecting" ? "Reconnecting..." : statusLabel}</p>
+              <p className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1">
+                {status === "reconnecting" ? "Reconnecting..." : statusLabel}
+              </p>
             )}
           </div>
         </div>
