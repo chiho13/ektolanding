@@ -628,7 +628,7 @@ function LiveRoomPage() {
         </div>
 
         <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
-          <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-8 text-center md:px-10 md:pb-10 md:pt-12">
+          <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-0 text-center md:px-10 md:pb-10 md:pt-0">
             {visibleCaptionParts.length === 0 ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 {emptyCaptionMessage}
