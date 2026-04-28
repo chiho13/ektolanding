@@ -385,7 +385,7 @@ function LiveRoomPage() {
         messageSequenceRef.current += 1;
         const prefixedLines = splitPrefixedCaptionLines(partialText);
 
-        const finalizedLines = prefixedLines.final;
+        const finalizedLines = isTranslateMessage(message) ? [] : prefixedLines.final;
 
         if (finalizedLines.length > 0) {
           const newFinalLines = finalizedLines.filter((line) => {
@@ -406,22 +406,11 @@ function LiveRoomPage() {
           }
         }
 
-        const activeTranslateLines = partialText
-          .split("\n")
-          .map((part) => part.trim())
-          .filter(
-            (part) => part && !part.startsWith("P:") && !part.startsWith("PT:"),
-          );
         const nextActiveCaptionParts = isTranslateMessage(message)
-          ? activeTranslateLines.length > 0
-            ? getCaptionPartsFromText(
-                activeTranslateLines.join("\n"),
-                `partial-${messageSequenceRef.current}`,
-              )
-            : getTranslateCaptionParts(
-                message,
-                `partial-${messageSequenceRef.current}`,
-              )
+          ? getTranslateCaptionParts(
+              message,
+              `partial-${messageSequenceRef.current}`,
+            )
           : prefixedLines.final.length > 0
             ? getCaptionPartsFromText(
                 [...prefixedLines.active, ...prefixedLines.unprefixed].join("\n"),
@@ -445,8 +434,10 @@ function LiveRoomPage() {
           `final-${messageSequenceRef.current}`,
         );
         setFinalizedCaptionParts((parts) => [...parts, ...partsToAppend]);
-        lastActiveCaptionTextRef.current = "";
-        setActiveCaptionParts([]);
+        if (!isTranslateMessage(message)) {
+          lastActiveCaptionTextRef.current = "";
+          setActiveCaptionParts([]);
+        }
         setStatus("live");
         return;
       }
@@ -489,7 +480,10 @@ function LiveRoomPage() {
   const visibleCaptionParts = useMemo(
     () => {
       const shouldHideOriginals = roomMode === "translate" && hideOriginals;
-      const parts = [...finalizedCaptionParts, ...activeCaptionParts];
+      const parts =
+        roomMode === "translate" && activeCaptionParts.length > 0
+          ? activeCaptionParts
+          : [...finalizedCaptionParts, ...activeCaptionParts];
 
       return (shouldHideOriginals
         ? parts.filter((part) => !isOriginalCaptionPart(part))
