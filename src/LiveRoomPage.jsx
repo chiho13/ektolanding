@@ -8,6 +8,8 @@ const DEFAULT_FONT_SCALE = 1;
 const MIN_FONT_SCALE = 0.75;
 const MAX_FONT_SCALE = 1.6;
 const FONT_SCALE_STEP = 0.05;
+const ROOM_CODE_PATTERN = /^[A-Z0-9]{6}$/;
+const UNAVAILABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
 
 function clampFontScale(value) {
   if (value === null || value === undefined || value === "") {
@@ -45,6 +47,18 @@ function getViewerSocketUrl(code) {
     "wss://broadcast.voicetranslate.app";
 
   return `${wsBaseUrl.replace(/\/$/, "")}/rooms/${code}/viewer`;
+}
+
+function isValidRoomCode(code) {
+  return ROOM_CODE_PATTERN.test(code);
+}
+
+function isUnavailableRoomStatus(status) {
+  return UNAVAILABLE_ROOM_STATUSES.has(status);
+}
+
+function getTerminalRoomStatus(status) {
+  return status === "expired" ? "expired" : "ended";
 }
 
 function formatCaptionText(text) {
@@ -327,7 +341,7 @@ function LiveRoomPage() {
   }, [isFontControlOpen]);
 
   useEffect(() => {
-    if (!code) {
+    if (!code || !isValidRoomCode(code)) {
       setStatus("missing");
       return undefined;
     }
@@ -363,8 +377,19 @@ function LiveRoomPage() {
           return;
         }
 
+        if (
+          event.code === 4004 ||
+          isUnavailableRoomStatus(event.reason)
+        ) {
+          shouldReconnectRef.current = false;
+          setStatus(isUnavailableRoomStatus(event.reason) ? event.reason : "missing");
+          return;
+        }
+
         if (event.reason === "ended" || endedRef.current) {
-          setStatus("ended");
+          setStatus((currentStatus) =>
+            isUnavailableRoomStatus(currentStatus) ? currentStatus : "ended",
+          );
           return;
         }
 
@@ -378,7 +403,9 @@ function LiveRoomPage() {
       });
 
       socket.addEventListener("error", () => {
-        setStatus("reconnecting");
+        if (shouldReconnectRef.current) {
+          setStatus("reconnecting");
+        }
       });
 
       return socket;
@@ -401,6 +428,7 @@ function LiveRoomPage() {
 
       if (message.type === "snapshot") {
         const snapshotState = getSnapshotDisplayState(message);
+        const nextStatus = message.status || "waiting";
         setRoomMode(snapshotState.mode);
         setHideOriginals(snapshotState.hideOriginals);
         appendedPrefixedFinalLinesRef.current = new Set();
@@ -423,13 +451,19 @@ function LiveRoomPage() {
             ? getPartialCaptionParts(message.latestPartial, "partial")
             : [],
         );
-        setStatus(message.status || "waiting");
-        endedRef.current = message.status === "ended";
+        setStatus(nextStatus);
+        endedRef.current =
+          nextStatus === "ended" || isUnavailableRoomStatus(nextStatus);
         return;
       }
 
       if (message.type === "status") {
-        setStatus(message.status || "live");
+        const nextStatus = message.status || "live";
+        if (isUnavailableRoomStatus(nextStatus)) {
+          shouldReconnectRef.current = false;
+          endedRef.current = true;
+        }
+        setStatus(nextStatus);
         return;
       }
 
@@ -513,7 +547,7 @@ function LiveRoomPage() {
         }
         lastActiveCaptionTextRef.current = "";
         setActiveCaptionParts([]);
-        setStatus("ended");
+        setStatus(getTerminalRoomStatus(message.status));
         endedRef.current = true;
       }
     }
@@ -533,7 +567,8 @@ function LiveRoomPage() {
     live: "Live",
     reconnecting: "Reconnecting",
     ended: "Broadcast ended",
-    missing: "Invalid room",
+    missing: "Room not found or expired",
+    expired: "Room not found or expired",
   }[status];
 
   const visibleCaptionParts = useMemo(
@@ -552,6 +587,11 @@ function LiveRoomPage() {
     [activeCaptionParts, finalizedCaptionParts, hideOriginals, roomMode],
   );
   const captionFontPercent = Math.round(fontScale * 100);
+  const emptyCaptionMessage = isUnavailableRoomStatus(status)
+    ? "This live room does not exist or has expired."
+    : status === "ended"
+      ? "This broadcast has ended."
+      : "Captions will appear here when the broadcaster starts speaking.";
 
   return (
     <main
@@ -591,7 +631,7 @@ function LiveRoomPage() {
           <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-8 text-center md:px-10 md:pb-10 md:pt-12">
             {visibleCaptionParts.length === 0 ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
-                Captions will appear here when the broadcaster starts speaking.
+                {emptyCaptionMessage}
               </div>
             ) : (
               <div className="relative min-h-0 overflow-hidden">
