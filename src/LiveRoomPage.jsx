@@ -103,6 +103,27 @@ function getCaptionPartsFromText(text, sourceKey) {
     );
 }
 
+function splitPrefixedCaptionLines(text) {
+  return text
+    .split("\n")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .reduce(
+      (lines, part) => {
+        if (part.startsWith("P:") || part.startsWith("PT:")) {
+          lines.final.push(part);
+        } else if (part.startsWith("C:") || part.startsWith("T:")) {
+          lines.active.push(part);
+        } else {
+          lines.unprefixed.push(part);
+        }
+
+        return lines;
+      },
+      { final: [], active: [], unprefixed: [] },
+    );
+}
+
 function getMessageTranslationText(message) {
   return typeof message?.translationText === "string"
     ? message.translationText.trim()
@@ -166,6 +187,7 @@ function LiveRoomPage() {
   const [finalizedCaptionParts, setFinalizedCaptionParts] = useState([]);
   const [activeCaptionParts, setActiveCaptionParts] = useState([]);
   const lastActiveCaptionTextRef = useRef("");
+  const appendedPrefixedFinalLinesRef = useRef(new Set());
   const messageSequenceRef = useRef(0);
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef(null);
@@ -236,6 +258,7 @@ function LiveRoomPage() {
       }
 
       if (message.type === "snapshot") {
+        appendedPrefixedFinalLinesRef.current = new Set();
         setFinalizedCaptionParts(
           Array.isArray(message.history)
             ? message.history.flatMap((item, index) =>
@@ -272,11 +295,37 @@ function LiveRoomPage() {
           getActiveCaptionText(partialText) ||
           lastActiveCaptionTextRef.current;
         messageSequenceRef.current += 1;
+        const prefixedLines = splitPrefixedCaptionLines(partialText);
+
+        if (prefixedLines.final.length > 0) {
+          const newFinalLines = prefixedLines.final.filter((line) => {
+            if (appendedPrefixedFinalLinesRef.current.has(line)) {
+              return false;
+            }
+
+            appendedPrefixedFinalLinesRef.current.add(line);
+            return true;
+          });
+          const finalParts = getCaptionPartsFromText(
+            newFinalLines.join("\n"),
+            `partial-final-${messageSequenceRef.current}`,
+          );
+
+          if (finalParts.length > 0) {
+            setFinalizedCaptionParts((parts) => [...parts, ...finalParts]);
+          }
+        }
+
         setActiveCaptionParts(
-          getPartialCaptionParts(
-            message,
-            `partial-${messageSequenceRef.current}`,
-          ),
+          prefixedLines.final.length > 0
+            ? getCaptionPartsFromText(
+                [...prefixedLines.active, ...prefixedLines.unprefixed].join("\n"),
+                `partial-${messageSequenceRef.current}`,
+              )
+            : getPartialCaptionParts(
+                message,
+                `partial-${messageSequenceRef.current}`,
+              ),
         );
         setStatus("live");
         return;
@@ -371,7 +420,7 @@ function LiveRoomPage() {
         </div>
 
         <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
-          <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-16 text-center md:px-10 md:pb-10 md:pt-20">
+          <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-8 text-center md:px-10 md:pb-10 md:pt-12">
             {visibleCaptionParts.length === 0 ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 Captions will appear here when the broadcaster starts speaking.
