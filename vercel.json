@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/live/:code",
-      "destination": "/index.html"
+      "destination": "/live/index.html"
     }
   ]
 }

@@ -13,6 +13,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(rootDir, "index.html"),
+        liveRoom: resolve(rootDir, "live/index.html"),
         lectureCaptionsArticle: resolve(
           rootDir,
           "blog/top-5-best-live-caption-apps-for-lectures/index.html"
