@@ -298,6 +298,7 @@ function LiveRoomPage() {
   const reconnectTimerRef = useRef(null);
   const shouldReconnectRef = useRef(true);
   const endedRef = useRef(false);
+  const fontControlRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -306,6 +307,24 @@ function LiveRoomPage() {
       // Ignore storage failures; the control should still work for this page.
     }
   }, [fontScale]);
+
+  useEffect(() => {
+    if (!isFontControlOpen) {
+      return undefined;
+    }
+
+    function handlePointerDown(event) {
+      if (!fontControlRef.current?.contains(event.target)) {
+        setIsFontControlOpen(false);
+      }
+    }
+
+    window.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isFontControlOpen]);
 
   useEffect(() => {
     if (!code) {
@@ -589,9 +608,12 @@ function LiveRoomPage() {
               </div>
             )}
           </div>
-          <div className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-2 md:bottom-4 md:right-4">
+          <div
+            ref={fontControlRef}
+            className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-2 md:bottom-4 md:right-4"
+          >
             {isFontControlOpen ? (
-              <div className="flex h-10 items-center gap-2 rounded-lg bg-neutral-950/90 px-2 shadow-xl ring-1 ring-white/15 backdrop-blur">
+              <div className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
                 <button
                   type="button"
                   aria-label="Decrease caption font size"
@@ -602,7 +624,7 @@ function LiveRoomPage() {
                       clampFontScale(currentScale - FONT_SCALE_STEP),
                     )
                   }
-                  className="h-7 w-8 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                  className="h-7 w-8 cursor-pointer rounded-sm border border-white/10 text-xs font-bold text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
                 >
                   A-
                 </button>
@@ -616,7 +638,7 @@ function LiveRoomPage() {
                   onChange={(event) =>
                     setFontScale(clampFontScale(event.target.value))
                   }
-                  className="h-7 w-24 accent-[#8aeb9e] md:w-32"
+                  className="h-7 w-24 cursor-pointer accent-[#8aeb9e] md:w-32"
                 />
                 <button
                   type="button"
@@ -628,7 +650,7 @@ function LiveRoomPage() {
                       clampFontScale(currentScale + FONT_SCALE_STEP),
                     )
                   }
-                  className="h-7 w-8 rounded text-xs font-bold text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                  className="h-7 w-8 cursor-pointer rounded-sm border border-white/10 text-xs font-bold text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
                 >
                   A+
                 </button>
@@ -643,7 +665,7 @@ function LiveRoomPage() {
               aria-expanded={isFontControlOpen}
               title="Caption font size"
               onClick={() => setIsFontControlOpen((isOpen) => !isOpen)}
-              className="h-9 w-9 rounded-full bg-neutral-950/80 text-sm font-bold text-white/80 shadow-lg ring-1 ring-white/15 backdrop-blur transition hover:bg-neutral-900 hover:text-white"
+              className="h-9 w-10 cursor-pointer rounded-md border border-white/15 bg-neutral-950/80 text-sm font-bold text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white"
             >
               Aa
             </button>
