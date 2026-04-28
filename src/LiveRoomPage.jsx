@@ -610,7 +610,7 @@ function LiveRoomPage() {
           </div>
           <div
             ref={fontControlRef}
-            className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-2 md:bottom-4 md:right-4"
+            className="absolute right-3 top-3 z-20 flex flex-col items-end gap-2 md:right-4 md:top-4"
           >
             {isFontControlOpen ? (
               <div className="flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
