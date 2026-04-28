@@ -566,7 +566,7 @@ function LiveRoomPage() {
     waiting: "Waiting for captions",
     live: "Live",
     reconnecting: "Reconnecting",
-    ended: "Broadcast ended",
+    ended: "Live room ended",
     missing: "Room not found or expired",
     expired: "Room not found or expired",
   }[status];
@@ -590,8 +590,8 @@ function LiveRoomPage() {
   const emptyCaptionMessage = isUnavailableRoomStatus(status)
     ? "This live room does not exist or has expired."
     : status === "ended"
-      ? "This broadcast has ended."
-      : "Captions will appear here when the broadcaster starts speaking.";
+      ? "This live room has ended."
+      : "Captions will appear here when speaking starts.";
 
   return (
     <main
