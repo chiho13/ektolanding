@@ -74,13 +74,6 @@ function getMessageCaptionText(message) {
   return typeof message?.captionText === "string" ? message.captionText.trim() : "";
 }
 
-function hasCaptionPrefix(text, prefix) {
-  return text
-    .split("\n")
-    .map((part) => part.trim())
-    .some((part) => part.startsWith(prefix));
-}
-
 function getActiveCaptionText(text) {
   return text
     .split("\n")
@@ -100,75 +93,80 @@ function getActiveCaptionText(text) {
     .join("\n");
 }
 
-function prefixPreviousCaption(text) {
+function getCaptionPartsFromText(text, sourceKey) {
   return text
-    .trim()
-    .split("\n")
-    .map((part) => {
-      const trimmedPart = part.trim();
-
-      if (!trimmedPart) {
-        return "";
-      }
-
-      return `P:${trimmedPart}`;
-    })
-    .filter(Boolean)
-    .join("\n");
-}
-
-function getFinalLinesToAppend(message, lastActiveCaptionText) {
-  const finalText = getLineText(message);
-  const captionText = getMessageCaptionText(message) || lastActiveCaptionText;
-  const shouldFinalizeCurrentOriginal =
-    hasCaptionPrefix(finalText, "PT:") &&
-    captionText.trim() &&
-    !hasCaptionPrefix(finalText, "P:") &&
-    !hasCaptionPrefix(finalText, "C:");
-
-  if (!shouldFinalizeCurrentOriginal) {
-    return [message];
-  }
-
-  const finalizedOriginal = prefixPreviousCaption(captionText);
-
-  if (!finalizedOriginal) {
-    return [message];
-  }
-
-  return [
-    {
-      ...message,
-      text: finalizedOriginal,
-      sentAt: `${message.sentAt || Date.now()}-original`,
-    },
-    message,
-  ];
-}
-
-function getCaptionPartsFromLine(line, lineIndex, source = "final") {
-  const rawText = getLineText(line);
-  const sourceId =
-    typeof line === "object" && line !== null && line.sentAt
-      ? line.sentAt
-      : `${source}-${lineIndex}`;
-
-  return rawText
     .split("\n")
     .map((part) => part.trim())
     .filter(Boolean)
     .map((part, partIndex) =>
-      parseCaptionPart(part, `${sourceId}-${partIndex}`),
+      parseCaptionPart(part, `${sourceKey}-${partIndex}`),
     );
+}
+
+function getMessageTranslationText(message) {
+  return typeof message?.translationText === "string"
+    ? message.translationText.trim()
+    : "";
+}
+
+function getPartialCaptionParts(message, sourceKey) {
+  const captionText = getMessageCaptionText(message);
+  const translationText = getMessageTranslationText(message);
+
+  if (captionText || translationText) {
+    const parts = [];
+
+    if (captionText) {
+      parts.push(...getCaptionPartsFromText(captionText, `${sourceKey}-caption`));
+    }
+
+    if (translationText) {
+      parts.push(
+        ...getCaptionPartsFromText(`T:${translationText}`, `${sourceKey}-translation`),
+      );
+    }
+
+    return parts;
+  }
+
+  return getCaptionPartsFromText(getLineText(message), sourceKey);
+}
+
+function getFinalCaptionParts(message, fallbackCaptionText, sourceKey) {
+  const captionText = getMessageCaptionText(message) || fallbackCaptionText.trim();
+  const translationText = getMessageTranslationText(message);
+
+  if (captionText || translationText) {
+    const parts = [];
+
+    if (captionText) {
+      parts.push(
+        ...getCaptionPartsFromText(`P:${captionText}`, `${sourceKey}-caption`),
+      );
+    }
+
+    if (translationText) {
+      parts.push(
+        ...getCaptionPartsFromText(
+          `PT:${translationText}`,
+          `${sourceKey}-translation`,
+        ),
+      );
+    }
+
+    return parts;
+  }
+
+  return getCaptionPartsFromText(getLineText(message), sourceKey);
 }
 
 function LiveRoomPage() {
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const [status, setStatus] = useState("connecting");
-  const [finalLines, setFinalLines] = useState([]);
-  const [partialLine, setPartialLine] = useState("");
-  const partialLineRef = useRef("");
+  const [finalizedCaptionParts, setFinalizedCaptionParts] = useState([]);
+  const [activeCaptionParts, setActiveCaptionParts] = useState([]);
   const lastActiveCaptionTextRef = useRef("");
+  const messageSequenceRef = useRef(0);
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef(null);
   const shouldReconnectRef = useRef(true);
@@ -238,17 +236,25 @@ function LiveRoomPage() {
       }
 
       if (message.type === "snapshot") {
-        setFinalLines(
+        setFinalizedCaptionParts(
           Array.isArray(message.history)
-            ? message.history.filter((item) => typeof item.text === "string")
+            ? message.history.flatMap((item, index) =>
+                typeof item.text === "string"
+                  ? getFinalCaptionParts(item, "", `snapshot-${index}`)
+                  : [],
+              )
             : [],
         );
-        partialLineRef.current = message.latestPartial?.text || "";
+        const partialText = message.latestPartial?.text || "";
         lastActiveCaptionTextRef.current =
           getMessageCaptionText(message.latestPartial) ||
-          getActiveCaptionText(partialLineRef.current) ||
+          getActiveCaptionText(partialText) ||
           lastActiveCaptionTextRef.current;
-        setPartialLine(partialLineRef.current);
+        setActiveCaptionParts(
+          message.latestPartial
+            ? getPartialCaptionParts(message.latestPartial, "partial")
+            : [],
+        );
         setStatus(message.status || "waiting");
         endedRef.current = message.status === "ended";
         return;
@@ -260,40 +266,48 @@ function LiveRoomPage() {
       }
 
       if (message.type === "partial") {
-        partialLineRef.current = message.text || "";
+        const partialText = message.text || "";
         lastActiveCaptionTextRef.current =
           getMessageCaptionText(message) ||
-          getActiveCaptionText(partialLineRef.current) ||
+          getActiveCaptionText(partialText) ||
           lastActiveCaptionTextRef.current;
-        setPartialLine(partialLineRef.current);
+        messageSequenceRef.current += 1;
+        setActiveCaptionParts(
+          getPartialCaptionParts(
+            message,
+            `partial-${messageSequenceRef.current}`,
+          ),
+        );
         setStatus("live");
         return;
       }
 
       if (message.type === "final") {
-        const linesToAppend = getFinalLinesToAppend(
+        messageSequenceRef.current += 1;
+        const partsToAppend = getFinalCaptionParts(
           message,
           lastActiveCaptionTextRef.current,
+          `final-${messageSequenceRef.current}`,
         );
-        setFinalLines((lines) => [...lines, ...linesToAppend]);
-        partialLineRef.current = "";
+        setFinalizedCaptionParts((parts) => [...parts, ...partsToAppend]);
         lastActiveCaptionTextRef.current = "";
-        setPartialLine(partialLineRef.current);
+        setActiveCaptionParts([]);
         setStatus("live");
         return;
       }
 
       if (message.type === "ended") {
         if (typeof message.text === "string") {
-          const linesToAppend = getFinalLinesToAppend(
+          messageSequenceRef.current += 1;
+          const partsToAppend = getFinalCaptionParts(
             message,
             lastActiveCaptionTextRef.current,
+            `ended-${messageSequenceRef.current}`,
           );
-          setFinalLines((lines) => [...lines, ...linesToAppend]);
+          setFinalizedCaptionParts((parts) => [...parts, ...partsToAppend]);
         }
-        partialLineRef.current = "";
         lastActiveCaptionTextRef.current = "";
-        setPartialLine(partialLineRef.current);
+        setActiveCaptionParts([]);
         setStatus("ended");
         endedRef.current = true;
       }
@@ -317,16 +331,13 @@ function LiveRoomPage() {
     missing: "Invalid room",
   }[status];
 
-  const visibleCaptionParts = useMemo(() => {
-    const finalParts = finalLines.flatMap((line, index) =>
-      getCaptionPartsFromLine(line, index),
-    );
-    const partialParts = partialLine
-      ? getCaptionPartsFromLine({ text: partialLine }, 0, "partial")
-      : [];
-
-    return [...finalParts, ...partialParts].slice(-MAX_RENDERED_CAPTION_LINES);
-  }, [finalLines, partialLine]);
+  const visibleCaptionParts = useMemo(
+    () =>
+      [...finalizedCaptionParts, ...activeCaptionParts].slice(
+        -MAX_RENDERED_CAPTION_LINES,
+      ),
+    [activeCaptionParts, finalizedCaptionParts],
+  );
 
   return (
     <main className="live-room-page bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6">
