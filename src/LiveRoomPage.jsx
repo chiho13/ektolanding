@@ -147,7 +147,7 @@ function getCaptionWeightClassName(part, roomMode) {
   }
 
   if (part.role === "translation-history") {
-    return "font-medium";
+    return "font-semibold";
   }
 
   if (part.role === "caption-active") {
@@ -155,7 +155,7 @@ function getCaptionWeightClassName(part, roomMode) {
   }
 
   if (part.role === "caption-history") {
-    return roomMode === "translate" ? "font-normal" : "font-medium";
+    return roomMode === "captions" ? "font-semibold" : "font-medium";
   }
 
   return "font-medium";
