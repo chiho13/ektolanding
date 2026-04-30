@@ -194,6 +194,24 @@ function keepLatestTranslateSentenceActive(parts) {
   );
 }
 
+function keepLatestCaptionSentenceActive(parts) {
+  if (parts.some((part) => part.role === "caption-active")) {
+    return parts;
+  }
+
+  const lastCaptionIndex = parts.findLastIndex(
+    (part) => part.role === "caption-history",
+  );
+
+  if (lastCaptionIndex === -1) {
+    return parts;
+  }
+
+  return parts.map((part, index) =>
+    index === lastCaptionIndex ? promoteCaptionPartToActive(part) : part,
+  );
+}
+
 function getMessageCaptionText(message) {
   return typeof message?.captionText === "string" ? message.captionText.trim() : "";
 }
@@ -638,7 +656,7 @@ function LiveRoomPage() {
       const parts =
         roomMode === "translate"
           ? keepLatestTranslateSentenceActive(rawParts)
-          : rawParts;
+          : keepLatestCaptionSentenceActive(rawParts);
 
       return (shouldHideOriginals
         ? parts.filter((part) => !isOriginalCaptionPart(part))
