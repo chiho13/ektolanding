@@ -137,6 +137,63 @@ function isOriginalCaptionPart(part) {
   return part.role === "caption-active" || part.role === "caption-history";
 }
 
+function isActiveCaptionPart(part) {
+  return part.role === "caption-active" || part.role === "translation-active";
+}
+
+function promoteCaptionPartToActive(part) {
+  if (part.role === "caption-history") {
+    return {
+      ...part,
+      key: `${part.key}-active`,
+      className: "text-white",
+      role: "caption-active",
+    };
+  }
+
+  if (part.role === "translation-history") {
+    return {
+      ...part,
+      key: `${part.key}-active`,
+      className: "text-[#8aeb9e]",
+      role: "translation-active",
+    };
+  }
+
+  return part;
+}
+
+function keepLatestTranslateSentenceActive(parts) {
+  if (parts.some(isActiveCaptionPart)) {
+    return parts;
+  }
+
+  const lastOriginalIndex = parts.findLastIndex(
+    (part) => part.role === "caption-history",
+  );
+  const lastTranslationIndex = parts.findLastIndex(
+    (part) => part.role === "translation-history",
+  );
+
+  if (lastOriginalIndex === -1 && lastTranslationIndex === -1) {
+    return parts;
+  }
+
+  const indexesToPromote = new Set();
+
+  if (lastOriginalIndex !== -1) {
+    indexesToPromote.add(lastOriginalIndex);
+  }
+
+  if (lastTranslationIndex !== -1) {
+    indexesToPromote.add(lastTranslationIndex);
+  }
+
+  return parts.map((part, index) =>
+    indexesToPromote.has(index) ? promoteCaptionPartToActive(part) : part,
+  );
+}
+
 function getMessageCaptionText(message) {
   return typeof message?.captionText === "string" ? message.captionText.trim() : "";
 }
@@ -574,10 +631,14 @@ function LiveRoomPage() {
   const visibleCaptionParts = useMemo(
     () => {
       const shouldHideOriginals = roomMode === "translate" && hideOriginals;
-      const parts =
+      const rawParts =
         roomMode === "translate" && activeCaptionParts.length > 0
           ? activeCaptionParts
           : [...finalizedCaptionParts, ...activeCaptionParts];
+      const parts =
+        roomMode === "translate"
+          ? keepLatestTranslateSentenceActive(rawParts)
+          : rawParts;
 
       return (shouldHideOriginals
         ? parts.filter((part) => !isOriginalCaptionPart(part))
