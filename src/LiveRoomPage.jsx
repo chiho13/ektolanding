@@ -141,6 +141,26 @@ function isActiveCaptionPart(part) {
   return part.role === "caption-active" || part.role === "translation-active";
 }
 
+function getCaptionWeightClassName(part, roomMode) {
+  if (part.role === "translation-active") {
+    return "font-semibold";
+  }
+
+  if (part.role === "translation-history") {
+    return "font-medium";
+  }
+
+  if (part.role === "caption-active") {
+    return roomMode === "translate" ? "font-medium" : "font-semibold";
+  }
+
+  if (part.role === "caption-history") {
+    return roomMode === "translate" ? "font-normal" : "font-medium";
+  }
+
+  return "font-medium";
+}
+
 function promoteCaptionPartToActive(part) {
   if (part.role === "caption-history") {
     return {
@@ -721,7 +741,7 @@ function LiveRoomPage() {
                   {visibleCaptionParts.map((caption) => (
                     <p
                       key={caption.key}
-                      className={`live-caption-text whitespace-pre-line font-bold leading-tight [overflow-wrap:anywhere] ${caption.className}`}
+                      className={`live-caption-text whitespace-pre-line leading-tight [overflow-wrap:anywhere] ${getCaptionWeightClassName(caption, roomMode)} ${caption.className}`}
                     >
                       {caption.text}
                     </p>
