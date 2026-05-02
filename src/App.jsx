@@ -4,6 +4,25 @@ import appIcon from "./assets/ekto.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
 import { rotatingWords } from "./i18n";
 
+const pricingPlans = [
+  {
+    name: "Weekly",
+    price: "$12.99",
+    cadence: "per week",
+  },
+  {
+    name: "Monthly",
+    price: "$24.99",
+    cadence: "per month",
+  },
+  {
+    name: "Yearly",
+    price: "$134.99",
+    cadence: "per year",
+    badge: "Best value",
+  },
+];
+
 function App() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
@@ -368,6 +387,69 @@ function App() {
                 multilingual conversations in shared, real-world spaces.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="px-6 py-16 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-10 max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-3">
+              Pricing
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Unlimited captions and translation
+            </h2>
+            <p className="text-lg leading-8 text-gray-700">
+              Use ekto as much as you need, with each live session supporting up
+              to 2 hours. US App Store pricing is shown below; prices may vary
+              by country or region.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {pricingPlans.map((plan) => (
+              <div
+                key={plan.name}
+                className={`relative rounded-2xl border p-6 shadow-lg ${
+                  plan.badge
+                    ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100"
+                    : "border-slate-200 bg-slate-50"
+                }`}
+              >
+                {plan.badge && (
+                  <span className="absolute right-4 top-4 rounded-full bg-blue-700 px-3 py-1 text-xs font-semibold text-white">
+                    {plan.badge}
+                  </span>
+                )}
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  {plan.name}
+                </h3>
+                <p className="mb-2">
+                  <span className="text-4xl font-bold text-gray-900">
+                    {plan.price}
+                  </span>
+                  <span className="ml-2 text-gray-600">{plan.cadence}</span>
+                </p>
+                <p className="text-sm font-medium text-gray-600">
+                  Unlimited usage • 2-hour sessions
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 md:flex-row md:items-center md:justify-between">
+            <p className="text-base leading-7 text-gray-700">
+              Final subscription options and local pricing are confirmed in the
+              App Store before purchase.
+            </p>
+            <a
+              href="https://apps.apple.com/app/id6740196773"
+              className="inline-flex shrink-0 items-center justify-center rounded-lg bg-blue-700 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-800"
+            >
+              View on App Store
+            </a>
           </div>
         </div>
       </section>

@@ -12,6 +12,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:lang(ja) {
+  font-family: "Noto Sans JP", "Poppins", system-ui, sans-serif;
+}
+
 body {
   margin: 0;
   min-width: 320px;

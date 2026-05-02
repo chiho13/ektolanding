@@ -11,7 +11,17 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://voicetranslate.app/ja/blog/top-5-best-live-caption-apps-for-lectures/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://voicetranslate.app/blog/how-to-understand-lectures-in-a-foreign-language/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://voicetranslate.app/ja/blog/how-to-understand-lectures-in-a-foreign-language/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

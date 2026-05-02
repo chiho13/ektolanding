@@ -22,6 +22,14 @@ export default defineConfig({
           rootDir,
           "blog/how-to-understand-lectures-in-a-foreign-language/index.html"
         ),
+        lectureCaptionsArticleJa: resolve(
+          rootDir,
+          "ja/blog/top-5-best-live-caption-apps-for-lectures/index.html"
+        ),
+        foreignLanguageLecturesArticleJa: resolve(
+          rootDir,
+          "ja/blog/how-to-understand-lectures-in-a-foreign-language/index.html"
+        ),
       },
     },
   },
