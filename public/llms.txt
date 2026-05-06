@@ -16,7 +16,7 @@
 - Meetups and classes
 - Tours and museums
 - Churches and community events
-- Clinics and waiting rooms
+- Doctor's appointments and waiting rooms
 - Everyday face-to-face conversations
 
 ## Features

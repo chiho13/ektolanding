@@ -7,12 +7,12 @@ import { rotatingWords } from "./i18n";
 const pricingPlans = [
   {
     name: "Weekly",
-    price: "$12.99",
+    price: "$14.99",
     cadence: "per week",
   },
   {
     name: "Monthly",
-    price: "$24.99",
+    price: "$29.99",
     cadence: "per month",
   },
   {
@@ -102,7 +102,7 @@ function App() {
               ekto: Live AI Captions
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             <a
               href="/blog/"
               className="hidden sm:inline-flex text-sm font-semibold text-gray-700 hover:text-blue-700"
@@ -177,12 +177,12 @@ function App() {
           <div className="grid lg:grid-cols-2 items-center ">
             {/* Left side - Content */}
             <div className="relative z-10">
-              <p className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-blue-50 shadow-lg backdrop-blur-sm mb-6">
-                <span className="text-blue-100">Understands fast-moving</span>
-                <span className="block overflow-hidden h-[1.4em] text-base font-semibold text-white">
+              <p className="inline-flex min-h-10 max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium leading-none text-blue-50 shadow-lg backdrop-blur-sm mb-6">
+                <span className="shrink-0 text-blue-100">Keeps up with</span>
+                <span className="inline-flex h-5 min-w-0 items-center overflow-hidden text-sm font-semibold">
                   <span
                     key={currentWordIndex}
-                    className="inline-block"
+                    className="inline-block truncate whitespace-nowrap"
                     aria-hidden="true"
                     style={{
                       animation: "fadeInUp 2.5s ease-in-out",
@@ -197,17 +197,17 @@ function App() {
                   </span>
                 </span>
                 <span className="sr-only">
-                  talks, meetups, lectures, tours, and conversations in
-                  multiple languages
+                  lectures, meetings, conferences, and sermons in English and
+                  Japanese
                 </span>
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
                 Understand what&apos;s being said, anywhere
               </h1>
               <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                Live captions and translation for in-person talks, meetups,
-                classes, tours, churches, clinics, and everyday face-to-face
-                moments.
+                Live captions and live translation for study abroad lectures,
+                international conferences, meetings, and face-to-face
+                conversations.
               </p>
 
               {/* Social Proof */}

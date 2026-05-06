@@ -94,14 +94,14 @@ export const translations = {
 
 // Array of rotating words in different languages for the hero animation
 export const rotatingWords = [
-  { word: "Lectures", lang: "en" },
-  { word: "讲座", lang: "zh" },
-  { word: "Conférences", lang: "fr" },
-  { word: "こうぎ", lang: "ja" },
-  { word: "Lezioni", lang: "it" },
-   { word: "व्याख्यान", lang: "hi" },        // Hindi
-  { word: "บรรยาย", lang: "th" }, 
-  { word: "강의", lang: "ko" },
+  { word: "lectures", lang: "en" },
+  { word: "講義", lang: "ja" },
+  { word: "meetings", lang: "en" },
+  { word: "会議", lang: "ja" },
+  { word: "conferences", lang: "en" },
+  { word: "カンファレンス", lang: "ja" },
+  { word: "sermons", lang: "en" },
+  { word: "説教", lang: "ja" },
 ];
 
 export const supportedLanguages = Object.keys(translations);
