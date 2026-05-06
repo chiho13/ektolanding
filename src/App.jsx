@@ -103,6 +103,12 @@ function App() {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <a
+              href="/blog/"
+              className="hidden sm:inline-flex text-sm font-semibold text-gray-700 hover:text-blue-700"
+            >
+              Blog
+            </a>
             {/* Language Selector */}
             {/* <div className="relative">
               <button
@@ -455,23 +461,101 @@ function App() {
       </section>
 
       <section className="px-6 py-16 bg-white">
-        <div className="max-w-4xl mx-auto rounded-3xl border border-slate-200 bg-slate-50 p-8 md:p-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-3">
-            From the Blog
-          </p>
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">
-            Top 5 Best Live Caption Apps for Lectures
-          </h2>
-          <p className="text-lg leading-8 text-slate-700 mb-6">
-            Compare the best tools for lecture captions, with a focus on
-            real-time translation for students studying abroad.
-          </p>
-          <a
-            href="/blog/top-5-best-live-caption-apps-for-lectures/"
-            className="inline-flex items-center text-lg font-semibold text-blue-700 hover:text-blue-800"
-          >
-            Read the full article
-          </a>
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-3">
+                From the Blog
+              </p>
+              <h2 className="text-3xl font-bold text-slate-900">
+                Live translation and caption guides
+              </h2>
+            </div>
+            <a
+              href="/blog/"
+              className="inline-flex text-lg font-semibold text-blue-700 hover:text-blue-800"
+            >
+              View all articles
+            </a>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <article className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700 mb-3">
+                Accessibility
+              </p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Live Captions for Deaf and Hard-of-Hearing People
+              </h3>
+              <p className="text-base leading-7 text-slate-700 mb-5">
+                Follow speech and respond clearly in dinners, appointments,
+                travel, lectures, and events.
+              </p>
+              <a
+                href="/blog/live-captions-for-deaf-hard-of-hearing-events/"
+                className="inline-flex font-semibold text-blue-700 hover:text-blue-800"
+              >
+                Read article
+              </a>
+            </article>
+
+            <article className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700 mb-3">
+                Conferences
+              </p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Live Translation for Business Conferences
+              </h3>
+              <p className="text-base leading-7 text-slate-700 mb-5">
+                Understand talks, panels, and sessions when speakers use
+                another language.
+              </p>
+              <a
+                href="/blog/live-translation-for-business-conferences/"
+                className="inline-flex font-semibold text-blue-700 hover:text-blue-800"
+              >
+                Read article
+              </a>
+            </article>
+
+            <article className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700 mb-3">
+                Lectures
+              </p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                How to Understand Lectures in a Foreign Language
+              </h3>
+              <p className="text-base leading-7 text-slate-700 mb-5">
+                Practical tips for following lectures with live translation and
+                saved transcripts.
+              </p>
+              <a
+                href="/blog/how-to-understand-lectures-in-a-foreign-language/"
+                className="inline-flex font-semibold text-blue-700 hover:text-blue-800"
+              >
+                Read article
+              </a>
+            </article>
+
+            <article className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700 mb-3">
+                App guides
+              </p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Top 5 Best Live Caption Apps for Lectures
+              </h3>
+              <p className="text-base leading-7 text-slate-700 mb-5">
+                Compare live caption tools for students who need real-time
+                translation.
+              </p>
+              <a
+                href="/blog/top-5-best-live-caption-apps-for-lectures/"
+                className="inline-flex font-semibold text-blue-700 hover:text-blue-800"
+              >
+                Read article
+              </a>
+            </article>
+          </div>
         </div>
       </section>
 

@@ -14,6 +14,7 @@ export default defineConfig({
       input: {
         main: resolve(rootDir, "index.html"),
         liveRoom: resolve(rootDir, "live/index.html"),
+        blogIndex: resolve(rootDir, "blog/index.html"),
         lectureCaptionsArticle: resolve(
           rootDir,
           "blog/top-5-best-live-caption-apps-for-lectures/index.html"
@@ -22,6 +23,15 @@ export default defineConfig({
           rootDir,
           "blog/how-to-understand-lectures-in-a-foreign-language/index.html"
         ),
+        businessConferenceTranslationArticle: resolve(
+          rootDir,
+          "blog/live-translation-for-business-conferences/index.html"
+        ),
+        deafHardOfHearingCaptionsArticle: resolve(
+          rootDir,
+          "blog/live-captions-for-deaf-hard-of-hearing-events/index.html"
+        ),
+        blogIndexJa: resolve(rootDir, "ja/blog/index.html"),
         lectureCaptionsArticleJa: resolve(
           rootDir,
           "ja/blog/top-5-best-live-caption-apps-for-lectures/index.html"
@@ -29,6 +39,14 @@ export default defineConfig({
         foreignLanguageLecturesArticleJa: resolve(
           rootDir,
           "ja/blog/how-to-understand-lectures-in-a-foreign-language/index.html"
+        ),
+        businessConferenceTranslationArticleJa: resolve(
+          rootDir,
+          "ja/blog/live-translation-for-business-conferences/index.html"
+        ),
+        deafHardOfHearingCaptionsArticleJa: resolve(
+          rootDir,
+          "ja/blog/live-captions-for-deaf-hard-of-hearing-events/index.html"
         ),
       },
     },

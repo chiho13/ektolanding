@@ -31,4 +31,7 @@
 
 - Website: https://voicetranslate.app/
 - App Store: https://apps.apple.com/app/id6740196773
-- Blog: https://voicetranslate.app/blog/top-5-best-live-caption-apps-for-lectures/
+- Blog: https://voicetranslate.app/blog/
+- Live captions for Deaf and hard-of-hearing people: https://voicetranslate.app/blog/live-captions-for-deaf-hard-of-hearing-events/
+- Live translation for business conferences: https://voicetranslate.app/blog/live-translation-for-business-conferences/
+- Best live caption apps for lectures: https://voicetranslate.app/blog/top-5-best-live-caption-apps-for-lectures/
