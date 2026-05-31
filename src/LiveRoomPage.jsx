@@ -9,7 +9,7 @@ const MIN_FONT_SCALE = 0.75;
 const MAX_FONT_SCALE = 1.6;
 const FONT_SCALE_STEP = 0.05;
 const ROOM_CODE_PATTERN = /^[A-Z0-9]{6,24}$/;
-const UNAVAILABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
+const RETRYABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
 
 function clampFontScale(value) {
   if (value === null || value === undefined || value === "") {
@@ -53,8 +53,8 @@ function isValidRoomCode(code) {
   return ROOM_CODE_PATTERN.test(code);
 }
 
-function isUnavailableRoomStatus(status) {
-  return UNAVAILABLE_ROOM_STATUSES.has(status);
+function isRetryableRoomStatus(status) {
+  return RETRYABLE_ROOM_STATUSES.has(status);
 }
 
 function getTerminalRoomStatus(status) {
@@ -437,7 +437,7 @@ function LiveRoomPage() {
 
   useEffect(() => {
     if (!code || !isValidRoomCode(code)) {
-      setStatus("missing");
+      setStatus("invalid");
       return undefined;
     }
 
@@ -472,18 +472,9 @@ function LiveRoomPage() {
           return;
         }
 
-        if (
-          event.code === 4004 ||
-          isUnavailableRoomStatus(event.reason)
-        ) {
-          shouldReconnectRef.current = false;
-          setStatus(isUnavailableRoomStatus(event.reason) ? event.reason : "missing");
-          return;
-        }
-
         if (event.reason === "ended" || endedRef.current) {
           setStatus((currentStatus) =>
-            isUnavailableRoomStatus(currentStatus) ? currentStatus : "ended",
+            currentStatus === "invalid" ? currentStatus : "ended",
           );
           return;
         }
@@ -493,7 +484,11 @@ function LiveRoomPage() {
             Math.min(reconnectAttemptRef.current, RECONNECT_DELAYS_MS.length - 1)
           ];
         reconnectAttemptRef.current += 1;
-        setStatus("reconnecting");
+        setStatus(
+          event.code === 4004 || isRetryableRoomStatus(event.reason)
+            ? "waiting"
+            : "reconnecting",
+        );
         reconnectTimerRef.current = window.setTimeout(connect, delay);
       });
 
@@ -546,17 +541,16 @@ function LiveRoomPage() {
             ? getPartialCaptionParts(message.latestPartial, "partial")
             : [],
         );
-        setStatus(nextStatus);
-        endedRef.current =
-          nextStatus === "ended" || isUnavailableRoomStatus(nextStatus);
+        setStatus(isRetryableRoomStatus(nextStatus) ? "waiting" : nextStatus);
+        endedRef.current = nextStatus === "ended";
         return;
       }
 
       if (message.type === "status") {
         const nextStatus = message.status || "live";
-        if (isUnavailableRoomStatus(nextStatus)) {
-          shouldReconnectRef.current = false;
-          endedRef.current = true;
+        if (isRetryableRoomStatus(nextStatus)) {
+          setStatus("waiting");
+          return;
         }
         setStatus(nextStatus);
         return;
@@ -642,6 +636,13 @@ function LiveRoomPage() {
         }
         lastActiveCaptionTextRef.current = "";
         setActiveCaptionParts([]);
+
+        if (isRetryableRoomStatus(message.status)) {
+          setStatus("waiting");
+          endedRef.current = false;
+          return;
+        }
+
         setStatus(getTerminalRoomStatus(message.status));
         endedRef.current = true;
       }
@@ -658,12 +659,13 @@ function LiveRoomPage() {
 
   const statusLabel = {
     connecting: "Connecting",
-    waiting: "Waiting for captions",
+    waiting: "Waiting for presenter",
     live: "Live",
     reconnecting: "Reconnecting",
     ended: "Live broadcast ended",
-    missing: "Live link not found or expired",
-    expired: "Live link not found or expired",
+    missing: "Waiting for presenter",
+    expired: "Waiting for presenter",
+    invalid: "Invalid live link",
   }[status];
 
   const visibleCaptionParts = useMemo(
@@ -686,10 +688,12 @@ function LiveRoomPage() {
     [activeCaptionParts, finalizedCaptionParts, hideOriginals, roomMode],
   );
   const captionFontPercent = Math.round(fontScale * 100);
-  const emptyCaptionMessage = isUnavailableRoomStatus(status)
-    ? "This live link does not exist or has expired."
+  const emptyCaptionMessage = status === "invalid"
+    ? "This live link is invalid."
     : status === "ended"
       ? "This live broadcast has ended."
+      : status === "waiting" || status === "reconnecting" || status === "connecting"
+        ? "Waiting for the presenter to start this live broadcast."
       : "Captions will appear here when speaking starts.";
 
   return (
