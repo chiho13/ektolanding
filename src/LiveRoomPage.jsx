@@ -8,7 +8,7 @@ const DEFAULT_FONT_SCALE = 1;
 const MIN_FONT_SCALE = 0.75;
 const MAX_FONT_SCALE = 1.6;
 const FONT_SCALE_STEP = 0.05;
-const ROOM_CODE_PATTERN = /^[A-Z0-9]{6}$/;
+const ROOM_CODE_PATTERN = /^[A-Z0-9]{6,24}$/;
 const UNAVAILABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
 
 function clampFontScale(value) {
