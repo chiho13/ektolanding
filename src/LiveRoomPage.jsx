@@ -551,9 +551,14 @@ function LiveRoomPage() {
   const messageSequenceRef = useRef(0);
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef(null);
+  const socketRef = useRef(null);
   const shouldReconnectRef = useRef(true);
   const endedRef = useRef(false);
   const latestStatusRef = useRef("connecting");
+  const viewerSocketAttachedRef = useRef(false);
+  const liveReconnectRequestedRef = useRef(false);
+  const reconnectImmediatelyRef = useRef(false);
+  const reconnectNowRef = useRef(() => {});
   const fontControlRef = useRef(null);
   const shareFeedbackTimerRef = useRef(null);
 
@@ -671,7 +676,21 @@ function LiveRoomPage() {
           return;
         }
 
-        if (nextStatus === "live" || latestStatusRef.current !== "live") {
+        if (nextStatus === "live") {
+          applyRoomStatus(nextStatus);
+          if (
+            !viewerSocketAttachedRef.current &&
+            !liveReconnectRequestedRef.current
+          ) {
+            liveReconnectRequestedRef.current = true;
+            reconnectNowRef.current();
+          }
+          return;
+        }
+
+        liveReconnectRequestedRef.current = false;
+
+        if (latestStatusRef.current !== "live") {
           applyRoomStatus(nextStatus);
         }
       } catch {
@@ -697,7 +716,14 @@ function LiveRoomPage() {
 
     shouldReconnectRef.current = true;
 
+    function scheduleReconnect(delay) {
+      window.clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = window.setTimeout(connect, delay);
+    }
+
     function connect() {
+      window.clearTimeout(reconnectTimerRef.current);
+      viewerSocketAttachedRef.current = false;
       setStatus((currentStatus) =>
         currentStatus === "ended" ? "ended" : "connecting",
       );
@@ -705,6 +731,7 @@ function LiveRoomPage() {
         latestStatusRef.current === "ended" ? "ended" : "connecting";
 
       const socket = new WebSocket(getViewerSocketUrl(code));
+      socketRef.current = socket;
 
       socket.addEventListener("open", () => {
         reconnectAttemptRef.current = 0;
@@ -724,7 +751,18 @@ function LiveRoomPage() {
       });
 
       socket.addEventListener("close", (event) => {
+        if (socketRef.current === socket) {
+          socketRef.current = null;
+        }
+        viewerSocketAttachedRef.current = false;
+
         if (!shouldReconnectRef.current) {
+          return;
+        }
+
+        if (reconnectImmediatelyRef.current) {
+          reconnectImmediatelyRef.current = false;
+          scheduleReconnect(0);
           return;
         }
 
@@ -751,10 +789,12 @@ function LiveRoomPage() {
             ? "waiting"
             : "reconnecting",
         );
-        reconnectTimerRef.current = window.setTimeout(connect, delay);
+        liveReconnectRequestedRef.current = false;
+        scheduleReconnect(delay);
       });
 
       socket.addEventListener("error", () => {
+        viewerSocketAttachedRef.current = false;
         if (shouldReconnectRef.current) {
           applyRoomStatus("reconnecting");
         }
@@ -803,6 +843,8 @@ function LiveRoomPage() {
             ? getPartialCaptionParts(message.latestPartial, "partial")
             : [],
         );
+        viewerSocketAttachedRef.current = true;
+        liveReconnectRequestedRef.current = false;
         applyRoomStatus(nextStatus);
         endedRef.current = nextStatus === "ended";
         return;
@@ -915,12 +957,37 @@ function LiveRoomPage() {
       }
     }
 
+    reconnectNowRef.current = () => {
+      if (!shouldReconnectRef.current) {
+        return;
+      }
+
+      reconnectAttemptRef.current = 0;
+      window.clearTimeout(reconnectTimerRef.current);
+
+      const socket = socketRef.current;
+      if (
+        socket &&
+        (socket.readyState === WebSocket.CONNECTING ||
+          socket.readyState === WebSocket.OPEN)
+      ) {
+        reconnectImmediatelyRef.current = true;
+        socket.close(1000, "refreshing");
+        return;
+      }
+
+      scheduleReconnect(0);
+    };
+
     const socket = connect();
 
     return () => {
       shouldReconnectRef.current = false;
       window.clearTimeout(reconnectTimerRef.current);
-      socket?.close();
+      reconnectNowRef.current = () => {};
+      const activeSocket = socketRef.current || socket;
+      socketRef.current = null;
+      activeSocket?.close();
     };
   }, [applyRoomStatus, code]);
 
