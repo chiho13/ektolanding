@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import appIcon from "./assets/ekto.png";
 
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
@@ -58,6 +58,14 @@ function getViewerSocketUrl(code) {
   return `${wsBaseUrl.replace(/\/$/, "")}/rooms/${code}/viewer`;
 }
 
+function getRoomStatusUrl(code) {
+  const httpBaseUrl =
+    import.meta.env.VITE_BROADCAST_HTTP_BASE_URL ||
+    "https://broadcast.voicetranslate.app";
+
+  return `${httpBaseUrl.replace(/\/$/, "")}/rooms/${code}/status`;
+}
+
 function getLiveRoomUrl() {
   return window.location.href;
 }
@@ -68,6 +76,10 @@ function isValidRoomCode(code) {
 
 function isRetryableRoomStatus(status) {
   return RETRYABLE_ROOM_STATUSES.has(status);
+}
+
+function normalizedRoomStatus(status) {
+  return isRetryableRoomStatus(status) ? "waiting" : status;
 }
 
 function getTerminalRoomStatus(status) {
@@ -541,8 +553,18 @@ function LiveRoomPage() {
   const reconnectTimerRef = useRef(null);
   const shouldReconnectRef = useRef(true);
   const endedRef = useRef(false);
+  const latestStatusRef = useRef("connecting");
   const fontControlRef = useRef(null);
   const shareFeedbackTimerRef = useRef(null);
+
+  const applyRoomStatus = useCallback((nextStatus) => {
+    const normalizedStatus = normalizedRoomStatus(nextStatus || "waiting");
+    latestStatusRef.current = normalizedStatus;
+    if (normalizedStatus === "live") {
+      endedRef.current = false;
+    }
+    setStatus(normalizedStatus);
+  }, []);
 
   function showShareFeedback(message) {
     window.clearTimeout(shareFeedbackTimerRef.current);
@@ -632,7 +654,44 @@ function LiveRoomPage() {
 
   useEffect(() => {
     if (!code || !isValidRoomCode(code)) {
+      return undefined;
+    }
+
+    let isCancelled = false;
+
+    async function refreshRoomStatus() {
+      try {
+        const response = await fetch(getRoomStatusUrl(code), {
+          cache: "no-store",
+        });
+        const payload = await response.json().catch(() => null);
+        const nextStatus = payload?.status;
+
+        if (isCancelled || !nextStatus) {
+          return;
+        }
+
+        if (nextStatus === "live" || latestStatusRef.current !== "live") {
+          applyRoomStatus(nextStatus);
+        }
+      } catch {
+        // WebSocket remains the primary live path.
+      }
+    }
+
+    refreshRoomStatus();
+    const interval = window.setInterval(refreshRoomStatus, 2_000);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [applyRoomStatus, code]);
+
+  useEffect(() => {
+    if (!code || !isValidRoomCode(code)) {
       setStatus("invalid");
+      latestStatusRef.current = "invalid";
       return undefined;
     }
 
@@ -642,12 +701,14 @@ function LiveRoomPage() {
       setStatus((currentStatus) =>
         currentStatus === "ended" ? "ended" : "connecting",
       );
+      latestStatusRef.current =
+        latestStatusRef.current === "ended" ? "ended" : "connecting";
 
       const socket = new WebSocket(getViewerSocketUrl(code));
 
       socket.addEventListener("open", () => {
         reconnectAttemptRef.current = 0;
-        setStatus("waiting");
+        applyRoomStatus("waiting");
       });
 
       socket.addEventListener("message", (event) => {
@@ -668,7 +729,7 @@ function LiveRoomPage() {
         }
 
         if (event.code === ROOM_FULL_CLOSE_CODE || event.reason === "full") {
-          setStatus("full");
+          applyRoomStatus("full");
           return;
         }
 
@@ -676,6 +737,7 @@ function LiveRoomPage() {
           setStatus((currentStatus) =>
             currentStatus === "invalid" ? currentStatus : "ended",
           );
+          latestStatusRef.current = "ended";
           return;
         }
 
@@ -684,7 +746,7 @@ function LiveRoomPage() {
             Math.min(reconnectAttemptRef.current, RECONNECT_DELAYS_MS.length - 1)
           ];
         reconnectAttemptRef.current += 1;
-        setStatus(
+        applyRoomStatus(
           event.code === 4004 || isRetryableRoomStatus(event.reason)
             ? "waiting"
             : "reconnecting",
@@ -694,7 +756,7 @@ function LiveRoomPage() {
 
       socket.addEventListener("error", () => {
         if (shouldReconnectRef.current) {
-          setStatus("reconnecting");
+          applyRoomStatus("reconnecting");
         }
       });
 
@@ -741,7 +803,7 @@ function LiveRoomPage() {
             ? getPartialCaptionParts(message.latestPartial, "partial")
             : [],
         );
-        setStatus(isRetryableRoomStatus(nextStatus) ? "waiting" : nextStatus);
+        applyRoomStatus(nextStatus);
         endedRef.current = nextStatus === "ended";
         return;
       }
@@ -749,15 +811,15 @@ function LiveRoomPage() {
       if (message.type === "status") {
         const nextStatus = message.status || "live";
         if (isRetryableRoomStatus(nextStatus)) {
-          setStatus("waiting");
+          applyRoomStatus("waiting");
           return;
         }
         if (nextStatus === "full") {
-          setStatus("full");
+          applyRoomStatus("full");
           endedRef.current = true;
           return;
         }
-        setStatus(nextStatus);
+        applyRoomStatus(nextStatus);
         return;
       }
 
@@ -809,7 +871,7 @@ function LiveRoomPage() {
               );
 
         setActiveCaptionParts(nextActiveCaptionParts);
-        setStatus("live");
+        applyRoomStatus("live");
         return;
       }
 
@@ -825,7 +887,7 @@ function LiveRoomPage() {
           lastActiveCaptionTextRef.current = "";
           setActiveCaptionParts([]);
         }
-        setStatus("live");
+        applyRoomStatus("live");
         return;
       }
 
@@ -843,12 +905,12 @@ function LiveRoomPage() {
         setActiveCaptionParts([]);
 
         if (isRetryableRoomStatus(message.status)) {
-          setStatus("waiting");
+          applyRoomStatus("waiting");
           endedRef.current = false;
           return;
         }
 
-        setStatus(getTerminalRoomStatus(message.status));
+        applyRoomStatus(getTerminalRoomStatus(message.status));
         endedRef.current = true;
       }
     }
@@ -860,7 +922,7 @@ function LiveRoomPage() {
       window.clearTimeout(reconnectTimerRef.current);
       socket?.close();
     };
-  }, [code]);
+  }, [applyRoomStatus, code]);
 
   const statusLabel = {
     connecting: "Connecting",
