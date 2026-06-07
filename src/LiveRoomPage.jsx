@@ -11,6 +11,14 @@ const FONT_SCALE_STEP = 0.05;
 const ROOM_CODE_PATTERN = /^[A-Z0-9]{6,24}$/;
 const RETRYABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
 const ROOM_FULL_CLOSE_CODE = 4409;
+const QR_CODE_OPTIONS = {
+  color: {
+    dark: "#111827",
+    light: "#ffffff",
+  },
+  margin: 1,
+  width: 320,
+};
 
 function clampFontScale(value) {
   if (value === null || value === undefined || value === "") {
@@ -48,6 +56,10 @@ function getViewerSocketUrl(code) {
     "wss://broadcast.voicetranslate.app";
 
   return `${wsBaseUrl.replace(/\/$/, "")}/rooms/${code}/viewer`;
+}
+
+function getLiveRoomUrl() {
+  return window.location.href;
 }
 
 function isValidRoomCode(code) {
@@ -396,8 +408,122 @@ function getSnapshotDisplayState(message) {
     );
 }
 
+function ShareActionButton({ children, onClick, variant = "secondary" }) {
+  const variantClassName =
+    variant === "primary"
+      ? "border-[#8aeb9e]/40 bg-[#8aeb9e] text-neutral-950 hover:bg-[#9df3ae]"
+      : "border-white/10 bg-white/[0.06] text-white/80 hover:border-white/20 hover:bg-white/[0.10] hover:text-white";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`h-11 flex-1 cursor-pointer rounded-md border px-3 text-sm font-semibold transition ${variantClassName}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function LiveRoomQrCode({ qrCodeDataUrl, liveRoomUrl, className = "" }) {
+  return (
+    <div
+      className={`grid place-items-center rounded-md bg-white p-2 shadow-lg ${className}`}
+    >
+      {qrCodeDataUrl ? (
+        <img
+          src={qrCodeDataUrl}
+          alt={`QR code for ${liveRoomUrl}`}
+          className="h-full w-full"
+        />
+      ) : (
+        <div className="grid h-full w-full place-items-center rounded-sm bg-neutral-100 text-xs font-semibold text-neutral-500">
+          QR
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DesktopQrCard({ code, liveRoomUrl, qrCodeDataUrl }) {
+  return (
+    <aside className="absolute bottom-4 left-4 z-20 hidden w-36 rounded-lg border border-white/10 bg-neutral-950/86 p-3 text-left shadow-2xl backdrop-blur md:block">
+      <LiveRoomQrCode
+        qrCodeDataUrl={qrCodeDataUrl}
+        liveRoomUrl={liveRoomUrl}
+        className="mx-auto h-24 w-24"
+      />
+      <p className="mt-2 text-xs font-semibold text-white/88">Scan to join</p>
+      <p className="mt-0.5 truncate font-mono text-[0.68rem] uppercase text-white/45">
+        {code}
+      </p>
+    </aside>
+  );
+}
+
+function MobileShareSheet({
+  code,
+  liveRoomUrl,
+  qrCodeDataUrl,
+  shareFeedback,
+  onClose,
+  onCopy,
+  onShare,
+}) {
+  return (
+    <div className="fixed inset-0 z-50 md:hidden">
+      <button
+        type="button"
+        aria-label="Close share sheet"
+        onClick={onClose}
+        className="absolute inset-0 cursor-pointer bg-black/62 backdrop-blur-sm"
+      />
+      <section className="absolute inset-x-0 bottom-0 rounded-t-2xl border border-white/10 bg-neutral-950 px-5 pb-5 pt-3 shadow-2xl">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/24" />
+        <div className="mt-5 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-lg font-semibold text-white">Share live room</p>
+            <p className="mt-1 truncate font-mono text-xs uppercase text-white/45">
+              Broadcast {code || "unknown"}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full border border-white/10 bg-white/[0.06] text-lg leading-none text-white/70 transition hover:bg-white/[0.10] hover:text-white"
+          >
+            x
+          </button>
+        </div>
+
+        <LiveRoomQrCode
+          qrCodeDataUrl={qrCodeDataUrl}
+          liveRoomUrl={liveRoomUrl}
+          className="mx-auto mt-5 h-52 w-52"
+        />
+
+        <p className="mx-auto mt-4 max-w-xs truncate text-center font-mono text-xs text-white/45">
+          {liveRoomUrl}
+        </p>
+
+        <div className="mt-5 flex gap-3">
+          <ShareActionButton onClick={onCopy}>
+            {shareFeedback || "Copy link"}
+          </ShareActionButton>
+          <ShareActionButton onClick={onShare} variant="primary">
+            Share
+          </ShareActionButton>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function LiveRoomPage() {
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
+  const canShareLiveRoom = Boolean(code && isValidRoomCode(code));
+  const liveRoomUrl = useMemo(getLiveRoomUrl, []);
   const [status, setStatus] = useState("connecting");
   const [finalizedCaptionParts, setFinalizedCaptionParts] = useState([]);
   const [activeCaptionParts, setActiveCaptionParts] = useState([]);
@@ -405,6 +531,9 @@ function LiveRoomPage() {
   const [hideOriginals, setHideOriginals] = useState(false);
   const [fontScale, setFontScale] = useState(readStoredFontScale);
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
+  const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
+  const [shareFeedback, setShareFeedback] = useState("");
   const lastActiveCaptionTextRef = useRef("");
   const appendedPrefixedFinalLinesRef = useRef(new Set());
   const messageSequenceRef = useRef(0);
@@ -413,6 +542,43 @@ function LiveRoomPage() {
   const shouldReconnectRef = useRef(true);
   const endedRef = useRef(false);
   const fontControlRef = useRef(null);
+  const shareFeedbackTimerRef = useRef(null);
+
+  function showShareFeedback(message) {
+    window.clearTimeout(shareFeedbackTimerRef.current);
+    setShareFeedback(message);
+    shareFeedbackTimerRef.current = window.setTimeout(() => {
+      setShareFeedback("");
+    }, 1600);
+  }
+
+  async function copyLiveRoomLink() {
+    try {
+      await navigator.clipboard.writeText(liveRoomUrl);
+      showShareFeedback("Copied");
+    } catch {
+      showShareFeedback("Copy failed");
+    }
+  }
+
+  async function shareLiveRoomLink() {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "ekto live captions",
+          text: "Join this ekto live room.",
+          url: liveRoomUrl,
+        });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    await copyLiveRoomLink();
+  }
 
   useEffect(() => {
     try {
@@ -421,6 +587,30 @@ function LiveRoomPage() {
       // Ignore storage failures; the control should still work for this page.
     }
   }, [fontScale]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    import("qrcode")
+      .then(({ default: QRCode }) =>
+        QRCode.toDataURL(liveRoomUrl, QR_CODE_OPTIONS),
+      )
+      .then((dataUrl) => {
+        if (!isCancelled) {
+          setQrCodeDataUrl(dataUrl);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setQrCodeDataUrl("");
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+      window.clearTimeout(shareFeedbackTimerRef.current);
+    };
+  }, [liveRoomUrl]);
 
   useEffect(() => {
     if (!isFontControlOpen) {
@@ -737,7 +927,17 @@ function LiveRoomPage() {
               </p>
             </div>
           </div>
-          <div className="shrink-0 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
+          <div className="flex shrink-0 items-center gap-2 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
+            {canShareLiveRoom ? (
+              <button
+                type="button"
+                aria-label="Open room QR code"
+                onClick={() => setIsShareSheetOpen(true)}
+                className="h-9 cursor-pointer rounded-md border border-white/12 bg-white/[0.06] px-3 text-xs font-bold text-white/80 shadow-lg backdrop-blur transition hover:border-white/24 hover:bg-white/[0.10] hover:text-white md:hidden"
+              >
+                QR
+              </button>
+            ) : null}
             {status === "live" ? (
               <p className="inline-flex items-center gap-1.5 rounded-full border border-[#8aeb9e]/25 bg-[#8aeb9e]/10 px-2.5 py-1 text-[#8aeb9e]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
@@ -759,7 +959,7 @@ function LiveRoomPage() {
               </div>
             ) : (
               <div className="relative min-h-0 overflow-hidden">
-                <div className="absolute inset-x-0 bottom-0 space-y-2 md:space-y-3">
+                <div className="absolute inset-x-0 bottom-0 space-y-2 md:space-y-3 md:px-44">
                   {visibleCaptionParts.map((caption) => (
                     <p
                       key={caption.key}
@@ -834,8 +1034,26 @@ function LiveRoomPage() {
               Aa
             </button>
           </div>
+          {canShareLiveRoom ? (
+            <DesktopQrCard
+              code={code}
+              liveRoomUrl={liveRoomUrl}
+              qrCodeDataUrl={qrCodeDataUrl}
+            />
+          ) : null}
         </div>
       </section>
+      {isShareSheetOpen && canShareLiveRoom ? (
+        <MobileShareSheet
+          code={code}
+          liveRoomUrl={liveRoomUrl}
+          qrCodeDataUrl={qrCodeDataUrl}
+          shareFeedback={shareFeedback}
+          onClose={() => setIsShareSheetOpen(false)}
+          onCopy={copyLiveRoomLink}
+          onShare={shareLiveRoomLink}
+        />
+      ) : null}
     </main>
   );
 }
