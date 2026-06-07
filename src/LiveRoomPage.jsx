@@ -10,6 +10,7 @@ const MAX_FONT_SCALE = 1.6;
 const FONT_SCALE_STEP = 0.05;
 const ROOM_CODE_PATTERN = /^[A-Z0-9]{6,24}$/;
 const RETRYABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
+const ROOM_FULL_CLOSE_CODE = 4409;
 
 function clampFontScale(value) {
   if (value === null || value === undefined || value === "") {
@@ -58,6 +59,10 @@ function isRetryableRoomStatus(status) {
 }
 
 function getTerminalRoomStatus(status) {
+  if (status === "full") {
+    return "full";
+  }
+
   return status === "expired" ? "expired" : "ended";
 }
 
@@ -472,6 +477,11 @@ function LiveRoomPage() {
           return;
         }
 
+        if (event.code === ROOM_FULL_CLOSE_CODE || event.reason === "full") {
+          setStatus("full");
+          return;
+        }
+
         if (event.reason === "ended" || endedRef.current) {
           setStatus((currentStatus) =>
             currentStatus === "invalid" ? currentStatus : "ended",
@@ -550,6 +560,11 @@ function LiveRoomPage() {
         const nextStatus = message.status || "live";
         if (isRetryableRoomStatus(nextStatus)) {
           setStatus("waiting");
+          return;
+        }
+        if (nextStatus === "full") {
+          setStatus("full");
+          endedRef.current = true;
           return;
         }
         setStatus(nextStatus);
@@ -665,6 +680,7 @@ function LiveRoomPage() {
     ended: "Live broadcast ended",
     missing: "Waiting for presenter",
     expired: "Waiting for presenter",
+    full: "Room is full",
     invalid: "Invalid live link",
   }[status];
 
@@ -690,6 +706,8 @@ function LiveRoomPage() {
   const captionFontPercent = Math.round(fontScale * 100);
   const emptyCaptionMessage = status === "invalid"
     ? "This live link is invalid."
+    : status === "full"
+      ? "This live broadcast is full."
     : status === "ended"
       ? "This live broadcast has ended."
       : status === "waiting" || status === "reconnecting" || status === "connecting"
