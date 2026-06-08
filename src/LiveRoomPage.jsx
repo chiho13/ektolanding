@@ -464,7 +464,7 @@ function LiveRoomQrCode({ qrCodeDataUrl, liveRoomUrl, className = "" }) {
 
 function DesktopQrCard({ liveRoomUrl, qrCodeDataUrl, onShareClick }) {
   return (
-    <aside className="absolute bottom-4 left-4 z-20 hidden w-36 rounded-lg border border-white/10 bg-neutral-950/86 p-3 text-center shadow-2xl backdrop-blur md:block">
+    <aside className="absolute bottom-4 left-4 z-20 hidden w-36 rounded-lg border border-white/10 bg-neutral-950/86 p-3 text-center shadow-2xl backdrop-blur lg:block">
       <LiveRoomQrCode
         qrCodeDataUrl={qrCodeDataUrl}
         liveRoomUrl={liveRoomUrl}
@@ -1189,7 +1189,7 @@ function LiveRoomPage() {
                 aria-label="Open room QR code"
                 title="Open room QR code"
                 onClick={() => setIsShareSheetOpen(true)}
-                className="grid h-10 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white md:hidden"
+                className="grid h-10 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white lg:hidden"
               >
                 <Share2 size={16} strokeWidth={2.3} />
               </button>
