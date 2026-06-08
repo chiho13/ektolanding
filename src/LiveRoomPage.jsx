@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Share2, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import appIcon from "./assets/ekto.png";
 
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
@@ -19,6 +21,9 @@ const QR_CODE_OPTIONS = {
   margin: 1,
   width: 320,
 };
+const MotionDiv = motion.div;
+const MotionButton = motion.button;
+const MotionSection = motion.section;
 
 function clampFontScale(value) {
   if (value === null || value === undefined || value === "") {
@@ -482,15 +487,49 @@ function MobileShareSheet({
   onCopy,
   onShare,
 }) {
+  function handleDragEnd(_event, info) {
+    if (info.offset.y > 80 || info.velocity.y > 650) {
+      onClose();
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
-      <button
+    <MotionDiv
+      className="fixed inset-0 z-50"
+      initial="closed"
+      animate="open"
+      exit="closed"
+    >
+      <MotionButton
         type="button"
         aria-label="Close share sheet"
         onClick={onClose}
         className="absolute inset-0 cursor-pointer bg-black/62 backdrop-blur-sm"
+        variants={{
+          closed: { opacity: 0 },
+          open: { opacity: 1 },
+        }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
       />
-      <section className="absolute inset-x-0 bottom-0 rounded-t-2xl border border-white/10 bg-neutral-950 px-5 pb-5 pt-3 shadow-2xl">
+      <MotionSection
+        className="absolute inset-x-0 bottom-0 mx-auto max-w-xl rounded-t-[1.7rem] border border-white/10 bg-neutral-950 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl"
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.34 }}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        style={{ touchAction: "none" }}
+        variants={{
+          closed: { y: "105%", scale: 0.98 },
+          open: { y: 0, scale: 1 },
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 430,
+          damping: 38,
+          mass: 0.9,
+        }}
+      >
         <div className="mx-auto h-1 w-10 rounded-full bg-white/24" />
         <div className="mt-5 flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -505,7 +544,7 @@ function MobileShareSheet({
             onClick={onClose}
             className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full border border-white/10 bg-white/[0.06] text-lg leading-none text-white/70 transition hover:bg-white/[0.10] hover:text-white"
           >
-            x
+            <X size={18} strokeWidth={2.3} />
           </button>
         </div>
 
@@ -524,11 +563,14 @@ function MobileShareSheet({
             {shareFeedback || "Copy link"}
           </ShareActionButton>
           <ShareActionButton onClick={onShare} variant="primary">
-            Share
+            <span className="inline-flex items-center justify-center gap-2">
+              <Share2 size={16} strokeWidth={2.2} />
+              Share
+            </span>
           </ShareActionButton>
         </div>
-      </section>
-    </div>
+      </MotionSection>
+    </MotionDiv>
   );
 }
 
@@ -991,18 +1033,6 @@ function LiveRoomPage() {
     };
   }, [applyRoomStatus, code]);
 
-  const statusLabel = {
-    connecting: "Connecting",
-    waiting: "Waiting for presenter",
-    live: "Live",
-    reconnecting: "Reconnecting",
-    ended: "Live broadcast ended",
-    missing: "Waiting for presenter",
-    expired: "Waiting for presenter",
-    full: "Room is full",
-    invalid: "Invalid live link",
-  }[status];
-
   const visibleCaptionParts = useMemo(
     () => {
       const shouldHideOriginals = roomMode === "translate" && hideOriginals;
@@ -1023,6 +1053,7 @@ function LiveRoomPage() {
     [activeCaptionParts, finalizedCaptionParts, hideOriginals, roomMode],
   );
   const captionFontPercent = Math.round(fontScale * 100);
+  const shouldShowStatusChip = status === "live" || status === "ended";
   const emptyCaptionMessage = status === "invalid"
     ? "This live link is invalid."
     : status === "full"
@@ -1056,28 +1087,20 @@ function LiveRoomPage() {
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
-            {canShareLiveRoom ? (
-              <button
-                type="button"
-                aria-label="Open room QR code"
-                onClick={() => setIsShareSheetOpen(true)}
-                className="h-9 cursor-pointer rounded-md border border-white/12 bg-white/[0.06] px-3 text-xs font-bold text-white/80 shadow-lg backdrop-blur transition hover:border-white/24 hover:bg-white/[0.10] hover:text-white md:hidden"
-              >
-                QR
-              </button>
-            ) : null}
-            {status === "live" ? (
-              <p className="inline-flex items-center gap-1.5 rounded-full border border-[#8aeb9e]/25 bg-[#8aeb9e]/10 px-2.5 py-1 text-[#8aeb9e]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
-                LIVE
-              </p>
-            ) : (
-              <p className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1">
-                {status === "reconnecting" ? "Reconnecting..." : statusLabel}
-              </p>
-            )}
-          </div>
+          {shouldShowStatusChip ? (
+            <div className="flex shrink-0 items-center gap-2 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
+              {status === "live" ? (
+                <p className="inline-flex items-center gap-1.5 rounded-full border border-[#8aeb9e]/25 bg-[#8aeb9e]/10 px-2.5 py-1 text-[#8aeb9e]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
+                  LIVE
+                </p>
+              ) : (
+                <p className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-white/60">
+                  Broadcast ended
+                </p>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
@@ -1103,7 +1126,7 @@ function LiveRoomPage() {
           </div>
           <div
             ref={fontControlRef}
-            className="absolute right-3 top-3 z-20 h-9 w-10 md:right-4 md:top-4"
+            className="absolute right-3 top-3 z-20 flex items-start gap-2 md:right-4 md:top-4"
           >
             {isFontControlOpen ? (
               <div className="absolute right-0 top-11 flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
@@ -1152,6 +1175,17 @@ function LiveRoomPage() {
                 </span>
               </div>
             ) : null}
+            {canShareLiveRoom ? (
+              <button
+                type="button"
+                aria-label="Open room QR code"
+                title="Open room QR code"
+                onClick={() => setIsShareSheetOpen(true)}
+                className="grid h-9 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white md:hidden"
+              >
+                <Share2 size={16} strokeWidth={2.3} />
+              </button>
+            ) : null}
             <button
               type="button"
               aria-label="Caption font size settings"
@@ -1172,17 +1206,19 @@ function LiveRoomPage() {
           ) : null}
         </div>
       </section>
-      {isShareSheetOpen && canShareLiveRoom ? (
-        <MobileShareSheet
-          code={code}
-          liveRoomUrl={liveRoomUrl}
-          qrCodeDataUrl={qrCodeDataUrl}
-          shareFeedback={shareFeedback}
-          onClose={() => setIsShareSheetOpen(false)}
-          onCopy={copyLiveRoomLink}
-          onShare={shareLiveRoomLink}
-        />
-      ) : null}
+      <AnimatePresence>
+        {isShareSheetOpen && canShareLiveRoom ? (
+          <MobileShareSheet
+            code={code}
+            liveRoomUrl={liveRoomUrl}
+            qrCodeDataUrl={qrCodeDataUrl}
+            shareFeedback={shareFeedback}
+            onClose={() => setIsShareSheetOpen(false)}
+            onCopy={copyLiveRoomLink}
+            onShare={shareLiveRoomLink}
+          />
+        ) : null}
+      </AnimatePresence>
     </main>
   );
 }
