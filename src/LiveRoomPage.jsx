@@ -462,7 +462,7 @@ function LiveRoomQrCode({ qrCodeDataUrl, liveRoomUrl, className = "" }) {
   );
 }
 
-function DesktopQrCard({ code, liveRoomUrl, qrCodeDataUrl }) {
+function DesktopQrCard({ liveRoomUrl, qrCodeDataUrl, onShareClick }) {
   return (
     <aside className="absolute bottom-4 left-4 z-20 hidden w-36 rounded-lg border border-white/10 bg-neutral-950/86 p-3 text-left shadow-2xl backdrop-blur md:block">
       <LiveRoomQrCode
@@ -470,15 +470,21 @@ function DesktopQrCard({ code, liveRoomUrl, qrCodeDataUrl }) {
         liveRoomUrl={liveRoomUrl}
         className="mx-auto h-24 w-24"
       />
-      <p className="mt-2 text-xs font-semibold text-white/88">Scan to join</p>
-      <p className="mt-0.5 truncate font-mono text-[0.68rem] uppercase text-white/45">
-        {code}
-      </p>
+      <p className="mt-2 text-xs font-semibold text-white/88">Scan to Join</p>
+      <button
+        type="button"
+        aria-label="Share live room"
+        onClick={onShareClick}
+        className="mt-1.5 inline-flex cursor-pointer items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[0.68rem] font-semibold text-white/52 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-white/78"
+      >
+        <Share2 size={11} strokeWidth={2.2} />
+        Share
+      </button>
     </aside>
   );
 }
 
-function MobileShareSheet({
+function LiveRoomShareDialog({
   code,
   liveRoomUrl,
   qrCodeDataUrl,
@@ -495,7 +501,7 @@ function MobileShareSheet({
 
   return (
     <MotionDiv
-      className="fixed inset-0 z-50"
+      className="fixed inset-0 z-50 grid place-items-end md:place-items-center"
       initial="closed"
       animate="open"
       exit="closed"
@@ -512,7 +518,7 @@ function MobileShareSheet({
         transition={{ duration: 0.18, ease: "easeOut" }}
       />
       <MotionSection
-        className="absolute inset-x-0 bottom-0 mx-auto max-w-xl rounded-t-[1.7rem] border border-white/10 bg-neutral-950 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl"
+        className="relative z-10 w-full max-w-xl rounded-t-[1.7rem] border border-white/10 bg-neutral-950 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl md:w-[min(92vw,420px)] md:rounded-3xl md:pb-6"
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={{ top: 0, bottom: 0.34 }}
@@ -1199,16 +1205,16 @@ function LiveRoomPage() {
           </div>
           {canShareLiveRoom ? (
             <DesktopQrCard
-              code={code}
               liveRoomUrl={liveRoomUrl}
               qrCodeDataUrl={qrCodeDataUrl}
+              onShareClick={() => setIsShareSheetOpen(true)}
             />
           ) : null}
         </div>
       </section>
       <AnimatePresence>
         {isShareSheetOpen && canShareLiveRoom ? (
-          <MobileShareSheet
+          <LiveRoomShareDialog
             code={code}
             liveRoomUrl={liveRoomUrl}
             qrCodeDataUrl={qrCodeDataUrl}
