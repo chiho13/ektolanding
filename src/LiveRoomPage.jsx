@@ -1189,7 +1189,7 @@ function LiveRoomPage() {
                 aria-label="Open room QR code"
                 title="Open room QR code"
                 onClick={() => setIsShareSheetOpen(true)}
-                className="grid h-9 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white md:hidden"
+                className="grid h-10 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white md:hidden"
               >
                 <Share2 size={16} strokeWidth={2.3} />
               </button>
@@ -1200,7 +1200,7 @@ function LiveRoomPage() {
               aria-expanded={isFontControlOpen}
               title="Caption font size"
               onClick={() => setIsFontControlOpen((isOpen) => !isOpen)}
-              className="h-9 w-10 cursor-pointer rounded-md border border-white/15 bg-neutral-950/80 text-sm font-bold text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white"
+              className="h-10 w-10 cursor-pointer rounded-md border border-white/15 bg-neutral-950/80 text-sm font-bold text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white"
             >
               Aa
             </button>
