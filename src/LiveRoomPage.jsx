@@ -464,18 +464,20 @@ function LiveRoomQrCode({ qrCodeDataUrl, liveRoomUrl, className = "" }) {
 
 function DesktopQrCard({ liveRoomUrl, qrCodeDataUrl, onShareClick }) {
   return (
-    <aside className="absolute bottom-4 left-4 z-20 hidden w-36 rounded-lg border border-white/10 bg-neutral-950/86 p-3 text-left shadow-2xl backdrop-blur md:block">
+    <aside className="absolute bottom-4 left-4 z-20 hidden w-36 rounded-lg border border-white/10 bg-neutral-950/86 p-3 text-center shadow-2xl backdrop-blur md:block">
       <LiveRoomQrCode
         qrCodeDataUrl={qrCodeDataUrl}
         liveRoomUrl={liveRoomUrl}
         className="mx-auto h-24 w-24"
       />
-      <p className="mt-2 text-xs font-semibold text-white/88">Scan to Join</p>
+      <p className="mt-2 text-center text-xs font-semibold text-white/88">
+        Scan to Join
+      </p>
       <button
         type="button"
         aria-label="Share live room"
         onClick={onShareClick}
-        className="mt-1.5 inline-flex cursor-pointer items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[0.68rem] font-semibold text-white/52 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-white/78"
+        className="mx-auto mt-1.5 inline-flex cursor-pointer items-center justify-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[0.68rem] font-semibold text-white/52 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-white/78"
       >
         <Share2 size={11} strokeWidth={2.2} />
         Share
