@@ -21,6 +21,7 @@ const MINI_CAPTION_WINDOW_SIZE = {
   height: 140,
 };
 const MINI_CAPTION_WINDOW_TITLE = "Live captions";
+const FADED_CAPTION_OPACITY = 0.56;
 const QR_CODE_OPTIONS = {
   color: {
     dark: "#111827",
@@ -101,11 +102,7 @@ const MINI_CAPTION_WINDOW_STYLES = `
   }
 
   .mini-caption-line.caption-history {
-    color: rgba(255, 255, 255, 0.62);
-  }
-
-  .mini-caption-line.translation-history {
-    opacity: 0.82;
+    color: #fff;
   }
 
   .mini-caption-empty {
@@ -212,6 +209,112 @@ function getTerminalRoomStatus(status) {
   return status === "expired" ? "expired" : "ended";
 }
 
+function getNextNonSpaceCharacter(text, index) {
+  return text.slice(index + 1).match(/\S/)?.[0] || "";
+}
+
+function getTokenBeforeIndex(text, index) {
+  return text
+    .slice(0, index + 1)
+    .split(/\s/)
+    .pop()
+    .replace(/^[("'“‘[]+/, "");
+}
+
+function isProtectedPeriod(text, index) {
+  const previousCharacter = text[index - 1] || "";
+  const nextCharacter = text[index + 1] || "";
+
+  if (/\d/.test(previousCharacter) && /\d/.test(nextCharacter)) {
+    return true;
+  }
+
+  const token = getTokenBeforeIndex(text, index);
+  const normalizedToken = token.toLowerCase();
+  const protectedAbbreviations = new Set([
+    "mr.",
+    "mrs.",
+    "ms.",
+    "dr.",
+    "prof.",
+    "sr.",
+    "jr.",
+    "st.",
+    "vs.",
+    "etc.",
+    "e.g.",
+    "i.e.",
+  ]);
+
+  if (protectedAbbreviations.has(normalizedToken)) {
+    return true;
+  }
+
+  if (/^[A-Z]\.$/.test(token)) {
+    return true;
+  }
+
+  if (/^(?:[A-Za-z]\.){2,}$/.test(token)) {
+    const nextNonSpaceCharacter = getNextNonSpaceCharacter(text, index);
+    return !nextNonSpaceCharacter || /[a-z]/.test(nextNonSpaceCharacter);
+  }
+
+  return false;
+}
+
+function splitCaptionTextIntoSentences(text) {
+  const trimmedText = text.trim();
+
+  if (!trimmedText) {
+    return [];
+  }
+
+  const sentences = [];
+  let sentenceStartIndex = 0;
+
+  for (let index = 0; index < trimmedText.length; index += 1) {
+    const character = trimmedText[index];
+
+    if (!/[.!?。！？]/.test(character)) {
+      continue;
+    }
+
+    if (character === "." && isProtectedPeriod(trimmedText, index)) {
+      continue;
+    }
+
+    let sentenceEndIndex = index + 1;
+    while (
+      sentenceEndIndex < trimmedText.length &&
+      /["'”’)\]]/.test(trimmedText[sentenceEndIndex])
+    ) {
+      sentenceEndIndex += 1;
+    }
+
+    const sentence = trimmedText.slice(sentenceStartIndex, sentenceEndIndex).trim();
+    if (sentence) {
+      sentences.push(sentence);
+    }
+
+    while (
+      sentenceEndIndex < trimmedText.length &&
+      /\s/.test(trimmedText[sentenceEndIndex])
+    ) {
+      sentenceEndIndex += 1;
+    }
+
+    sentenceStartIndex = sentenceEndIndex;
+    index = sentenceEndIndex - 1;
+  }
+
+  const trailingSentence = trimmedText.slice(sentenceStartIndex).trim();
+  if (trailingSentence) {
+    sentences.push(trailingSentence);
+  }
+
+  return sentences;
+}
+
 function formatCaptionText(text) {
   return text
     .replace(/([。！？])\s*/g, "$1\n")
@@ -219,51 +322,88 @@ function formatCaptionText(text) {
     .trim();
 }
 
-function parseCaptionPart(text, sourceKey) {
+function createCaptionPartsFromText(
+  text,
+  sourceKey,
+  className,
+  role,
+  { splitSentences = false } = {},
+) {
+  if (splitSentences) {
+    return splitCaptionTextIntoSentences(text).map((sentence, index) => ({
+      key: `${sourceKey}-sentence-${index}`,
+      text: sentence,
+      className,
+      role,
+    }));
+  }
+
+  const formattedText = formatCaptionText(text);
+
+  if (!formattedText) {
+    return [];
+  }
+
+  return [
+    {
+      key: sourceKey,
+      text: formattedText,
+      className,
+      role,
+    },
+  ];
+}
+
+function parseCaptionPart(text, sourceKey, options = {}) {
   const captionText = text.trim();
 
   if (captionText.startsWith("PT:")) {
-    return {
-      key: sourceKey,
-      text: formatCaptionText(captionText.slice(3)),
-      className: "text-[#8aeb9e]/80",
-      role: "translation-history",
-    };
+    return createCaptionPartsFromText(
+      captionText.slice(3),
+      sourceKey,
+      "text-[#8aeb9e]/80",
+      "translation-history",
+      options,
+    );
   }
 
   if (captionText.startsWith("C:")) {
-    return {
-      key: sourceKey,
-      text: formatCaptionText(captionText.slice(2)),
-      className: "text-white/60",
-      role: "caption-history",
-    };
+    return createCaptionPartsFromText(
+      captionText.slice(2),
+      sourceKey,
+      options.splitSentences ? "text-white" : "text-white/60",
+      "caption-history",
+      options,
+    );
   }
 
   if (captionText.startsWith("P:")) {
-    return {
-      key: sourceKey,
-      text: formatCaptionText(captionText.slice(2)),
-      className: "text-white/80",
-      role: "caption-history",
-    };
+    return createCaptionPartsFromText(
+      captionText.slice(2),
+      sourceKey,
+      options.splitSentences ? "text-white" : "text-white/80",
+      "caption-history",
+      options,
+    );
   }
 
   if (captionText.startsWith("T:")) {
-    return {
-      key: sourceKey,
-      text: formatCaptionText(captionText.slice(2)),
-      className: "text-[#8aeb9e]",
-      role: "translation-active",
-    };
+    return createCaptionPartsFromText(
+      captionText.slice(2),
+      sourceKey,
+      "text-[#8aeb9e]",
+      "translation-active",
+      options,
+    );
   }
 
-  return {
-    key: sourceKey,
-    text: formatCaptionText(captionText),
-    className: "text-white",
-    role: "caption-active",
-  };
+  return createCaptionPartsFromText(
+    captionText,
+    sourceKey,
+    "text-white",
+    "caption-active",
+    options,
+  );
 }
 
 function getLineText(line) {
@@ -310,6 +450,34 @@ function getCaptionWeightClassName(part, roomMode) {
   }
 
   return "font-medium";
+}
+
+function getBrightCaptionStartIndex(parts) {
+  const lastIndex = parts.length - 1;
+
+  if (lastIndex < 0) {
+    return 0;
+  }
+
+  const lastPart = parts[lastIndex];
+  const previousPart = parts[lastIndex - 1];
+
+  if (
+    lastPart?.role === "translation-active" &&
+    previousPart?.role === "caption-active"
+  ) {
+    return lastIndex - 1;
+  }
+
+  return lastIndex;
+}
+
+function getCaptionOpacity(parts, index, roomMode) {
+  if (roomMode !== "captions") {
+    return 1;
+  }
+
+  return index < getBrightCaptionStartIndex(parts) ? FADED_CAPTION_OPACITY : 1;
 }
 
 function promoteCaptionPartToActive(part) {
@@ -406,13 +574,13 @@ function getActiveCaptionText(text) {
     .join("\n");
 }
 
-function getCaptionPartsFromText(text, sourceKey) {
+function getCaptionPartsFromText(text, sourceKey, options = {}) {
   return text
     .split("\n")
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((part, partIndex) =>
-      parseCaptionPart(part, `${sourceKey}-${partIndex}`),
+    .flatMap((part, partIndex) =>
+      parseCaptionPart(part, `${sourceKey}-${partIndex}`, options),
     );
 }
 
@@ -480,7 +648,11 @@ function getPartialCaptionParts(message, sourceKey) {
     const parts = [];
 
     if (captionText) {
-      parts.push(...getCaptionPartsFromText(captionText, `${sourceKey}-caption`));
+      parts.push(
+        ...getCaptionPartsFromText(captionText, `${sourceKey}-caption`, {
+          splitSentences: true,
+        }),
+      );
     }
 
     if (translationText) {
@@ -492,7 +664,9 @@ function getPartialCaptionParts(message, sourceKey) {
     return parts;
   }
 
-  return getCaptionPartsFromText(getLineText(message), sourceKey);
+  return getCaptionPartsFromText(getLineText(message), sourceKey, {
+    splitSentences: true,
+  });
 }
 
 function getFinalCaptionParts(message, fallbackCaptionText, sourceKey) {
@@ -508,7 +682,9 @@ function getFinalCaptionParts(message, fallbackCaptionText, sourceKey) {
 
     if (captionText) {
       parts.push(
-        ...getCaptionPartsFromText(`P:${captionText}`, `${sourceKey}-caption`),
+        ...getCaptionPartsFromText(`P:${captionText}`, `${sourceKey}-caption`, {
+          splitSentences: true,
+        }),
       );
     }
 
@@ -524,7 +700,9 @@ function getFinalCaptionParts(message, fallbackCaptionText, sourceKey) {
     return parts;
   }
 
-  return getCaptionPartsFromText(getLineText(message), sourceKey);
+  return getCaptionPartsFromText(getLineText(message), sourceKey, {
+    splitSentences: true,
+  });
 }
 
 function getSnapshotDisplayState(message) {
@@ -707,6 +885,7 @@ function MiniCaptionWindowContent({
   visibleCaptionParts,
   emptyCaptionMessage,
   fontScale,
+  roomMode,
 }) {
   const miniCaptionParts = visibleCaptionParts.slice(-MAX_MINI_CAPTION_LINES);
 
@@ -720,10 +899,13 @@ function MiniCaptionWindowContent({
           <p className="mini-caption-empty">{emptyCaptionMessage}</p>
         ) : (
           <div className="mini-caption-stack">
-            {miniCaptionParts.map((caption) => (
+            {miniCaptionParts.map((caption, index) => (
               <p
                 key={caption.key}
                 className={getMiniCaptionClassName(caption)}
+                style={{
+                  opacity: getCaptionOpacity(miniCaptionParts, index, roomMode),
+                }}
               >
                 {caption.text}
               </p>
@@ -1177,6 +1359,7 @@ function LiveRoomPage() {
           const finalParts = getCaptionPartsFromText(
             newFinalLines.join("\n"),
             `partial-final-${messageSequenceRef.current}`,
+            { splitSentences: true },
           );
 
           if (finalParts.length > 0) {
@@ -1193,6 +1376,7 @@ function LiveRoomPage() {
             ? getCaptionPartsFromText(
                 [...prefixedLines.active, ...prefixedLines.unprefixed].join("\n"),
                 `partial-${messageSequenceRef.current}`,
+                { splitSentences: true },
               )
             : getPartialCaptionParts(
                 message,
@@ -1357,10 +1541,17 @@ function LiveRoomPage() {
             ) : (
               <div className="relative min-h-0 overflow-hidden">
                 <div className="absolute inset-x-0 bottom-0 space-y-2 md:space-y-3 md:px-44">
-                  {visibleCaptionParts.map((caption) => (
+                  {visibleCaptionParts.map((caption, index) => (
                     <p
                       key={caption.key}
                       className={`live-caption-text whitespace-pre-line leading-tight [overflow-wrap:anywhere] ${getCaptionWeightClassName(caption, roomMode)} ${caption.className}`}
+                      style={{
+                        opacity: getCaptionOpacity(
+                          visibleCaptionParts,
+                          index,
+                          roomMode,
+                        ),
+                      }}
                     >
                       {caption.text}
                     </p>
@@ -1489,6 +1680,7 @@ function LiveRoomPage() {
               visibleCaptionParts={visibleCaptionParts}
               emptyCaptionMessage={emptyCaptionMessage}
               fontScale={fontScale}
+              roomMode={roomMode}
             />,
             miniCaptionRoot,
           )
