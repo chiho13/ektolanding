@@ -197,6 +197,10 @@ function isRetryableRoomStatus(status) {
   return RETRYABLE_ROOM_STATUSES.has(status);
 }
 
+function normalizeRoomMode(mode) {
+  return mode === "translate" || mode === "captions" ? mode : null;
+}
+
 function normalizedRoomStatus(status) {
   return isRetryableRoomStatus(status) ? "waiting" : status;
 }
@@ -411,11 +415,11 @@ function getLineText(line) {
 }
 
 function isTranslateMessage(message) {
-  return message?.mode === "translate";
+  return normalizeRoomMode(message?.mode) === "translate";
 }
 
 function getMessageMode(message) {
-  return typeof message?.mode === "string" ? message.mode : null;
+  return normalizeRoomMode(message?.mode);
 }
 
 function getMessageHideOriginals(message) {
@@ -716,8 +720,20 @@ function getSnapshotDisplayState(message) {
         mode: getMessageMode(item) || state.mode,
         hideOriginals: getMessageHideOriginals(item) ?? state.hideOriginals,
       }),
-      { mode: "captions", hideOriginals: false },
+      { mode: null, hideOriginals: false },
     );
+}
+
+function getLiveRoomTitle(roomMode) {
+  if (roomMode === "translate") {
+    return "ekto live translation";
+  }
+
+  if (roomMode === "captions") {
+    return "ekto live captions";
+  }
+
+  return "ekto live room";
 }
 
 function ShareActionButton({ children, onClick, variant = "secondary" }) {
@@ -924,7 +940,7 @@ function LiveRoomPage() {
   const [status, setStatus] = useState("connecting");
   const [finalizedCaptionParts, setFinalizedCaptionParts] = useState([]);
   const [activeCaptionParts, setActiveCaptionParts] = useState([]);
-  const [roomMode, setRoomMode] = useState("captions");
+  const [roomMode, setRoomMode] = useState(null);
   const [hideOriginals, setHideOriginals] = useState(false);
   const [fontScale, setFontScale] = useState(readStoredFontScale);
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
@@ -935,6 +951,8 @@ function LiveRoomPage() {
   const [miniCaptionRoot, setMiniCaptionRoot] = useState(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [shareFeedback, setShareFeedback] = useState("");
+  const effectiveRoomMode = roomMode || "captions";
+  const liveRoomTitle = getLiveRoomTitle(roomMode);
   const lastActiveCaptionTextRef = useRef("");
   const appendedPrefixedFinalLinesRef = useRef(new Set());
   const messageSequenceRef = useRef(0);
@@ -1032,7 +1050,7 @@ function LiveRoomPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "ekto live captions",
+          title: liveRoomTitle,
           text: "Join this ekto live room.",
           url: liveRoomUrl,
         });
@@ -1140,6 +1158,11 @@ function LiveRoomPage() {
         });
         const payload = await response.json().catch(() => null);
         const nextStatus = payload?.status;
+        const nextMode = getMessageMode(payload);
+
+        if (!isCancelled && nextMode) {
+          setRoomMode(nextMode);
+        }
 
         if (isCancelled || !nextStatus) {
           return;
@@ -1464,13 +1487,14 @@ function LiveRoomPage() {
 
   const visibleCaptionParts = useMemo(
     () => {
-      const shouldHideOriginals = roomMode === "translate" && hideOriginals;
+      const shouldHideOriginals =
+        effectiveRoomMode === "translate" && hideOriginals;
       const rawParts =
-        roomMode === "translate" && activeCaptionParts.length > 0
+        effectiveRoomMode === "translate" && activeCaptionParts.length > 0
           ? activeCaptionParts
           : [...finalizedCaptionParts, ...activeCaptionParts];
       const parts =
-        roomMode === "translate"
+        effectiveRoomMode === "translate"
           ? keepLatestTranslateSentenceActive(rawParts)
           : keepLatestCaptionSentenceActive(rawParts);
 
@@ -1479,7 +1503,7 @@ function LiveRoomPage() {
         : parts
       ).slice(-MAX_RENDERED_CAPTION_LINES);
     },
-    [activeCaptionParts, finalizedCaptionParts, hideOriginals, roomMode],
+    [activeCaptionParts, effectiveRoomMode, finalizedCaptionParts, hideOriginals],
   );
   const captionFontPercent = Math.round(fontScale * 100);
   const shouldShowStatusChip = status === "live" || status === "ended";
@@ -1508,7 +1532,7 @@ function LiveRoomPage() {
             />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white/85">
-                ekto live captions
+                {liveRoomTitle}
               </p>
               <p className="mt-0.5 inline-flex max-w-full items-center gap-1.5 truncate rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[0.68rem] uppercase tracking-[0.08em] text-white/50">
                 <span className="h-1 w-1 shrink-0 rounded-full bg-white/35" />
@@ -1544,12 +1568,12 @@ function LiveRoomPage() {
                   {visibleCaptionParts.map((caption, index) => (
                     <p
                       key={caption.key}
-                      className={`live-caption-text whitespace-pre-line leading-tight [overflow-wrap:anywhere] ${getCaptionWeightClassName(caption, roomMode)} ${caption.className}`}
+                      className={`live-caption-text whitespace-pre-line leading-tight [overflow-wrap:anywhere] ${getCaptionWeightClassName(caption, effectiveRoomMode)} ${caption.className}`}
                       style={{
                         opacity: getCaptionOpacity(
                           visibleCaptionParts,
                           index,
-                          roomMode,
+                          effectiveRoomMode,
                         ),
                       }}
                     >
@@ -1680,7 +1704,7 @@ function LiveRoomPage() {
               visibleCaptionParts={visibleCaptionParts}
               emptyCaptionMessage={emptyCaptionMessage}
               fontScale={fontScale}
-              roomMode={roomMode}
+              roomMode={effectiveRoomMode}
             />,
             miniCaptionRoot,
           )
