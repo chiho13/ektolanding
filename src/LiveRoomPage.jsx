@@ -93,7 +93,6 @@ const MINI_CAPTION_WINDOW_STYLES = `
     line-height: 1.16;
     overflow-wrap: anywhere;
     white-space: pre-line;
-    transition: line-height 180ms ease-out;
   }
 
   .mini-caption-line.translation-active,
