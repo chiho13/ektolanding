@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Share2, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { PictureInPicture2, Share2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import appIcon from "./assets/ekto.png";
 
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
 const MAX_RENDERED_CAPTION_LINES = 10;
+const MAX_MINI_CAPTION_LINES = 2;
 const FONT_SCALE_STORAGE_KEY = "ekto.live.fontScale";
 const DEFAULT_FONT_SCALE = 1;
 const MIN_FONT_SCALE = 0.75;
@@ -13,6 +15,11 @@ const FONT_SCALE_STEP = 0.05;
 const ROOM_CODE_PATTERN = /^[A-Z0-9]{6,24}$/;
 const RETRYABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
 const ROOM_FULL_CLOSE_CODE = 4409;
+const DESKTOP_MEDIA_QUERY = "(min-width: 768px) and (hover: hover) and (pointer: fine)";
+const MINI_CAPTION_WINDOW_SIZE = {
+  width: 520,
+  height: 140,
+};
 const QR_CODE_OPTIONS = {
   color: {
     dark: "#111827",
@@ -23,7 +30,117 @@ const QR_CODE_OPTIONS = {
 };
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
+const MotionP = motion.p;
 const MotionSection = motion.section;
+
+const MINI_CAPTION_WINDOW_STYLES = `
+  :root {
+    color-scheme: dark;
+    font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #ekto-mini-caption-root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+  }
+
+  body {
+    min-width: 320px;
+  }
+
+  .mini-caption-window {
+    display: grid;
+    height: 100%;
+    min-height: 0;
+    padding: 10px 16px 12px;
+    background: #000;
+  }
+
+  .mini-caption-stage {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .mini-caption-stack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 7px;
+    text-align: center;
+  }
+
+  .mini-caption-line {
+    margin: 0;
+    color: #fff;
+    font-size: calc(1.05rem * var(--caption-font-scale, 1));
+    font-weight: 650;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+
+  .mini-caption-line.translation-active,
+  .mini-caption-line.translation-history {
+    color: #8aeb9e;
+  }
+
+  .mini-caption-line.caption-history {
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .mini-caption-line.translation-history {
+    opacity: 0.82;
+  }
+
+  .mini-caption-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 1rem;
+    font-weight: 650;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  @media (max-height: 150px), (max-width: 300px) {
+    .mini-caption-window {
+      padding: 8px 12px 10px;
+    }
+
+    .mini-caption-stack {
+      gap: 4px;
+    }
+
+    .mini-caption-line {
+      font-size: calc(0.95rem * var(--caption-font-scale, 1));
+    }
+
+    .mini-caption-empty {
+      font-size: 0.88rem;
+    }
+  }
+`;
 
 function clampFontScale(value) {
   if (value === null || value === undefined || value === "") {
@@ -582,6 +699,48 @@ function LiveRoomShareDialog({
   );
 }
 
+function getMiniCaptionClassName(part) {
+  return `mini-caption-line ${part.role}`;
+}
+
+function MiniCaptionWindowContent({
+  visibleCaptionParts,
+  emptyCaptionMessage,
+  fontScale,
+}) {
+  const miniCaptionParts = visibleCaptionParts.slice(-MAX_MINI_CAPTION_LINES);
+
+  return (
+    <div
+      className="mini-caption-window"
+      style={{ "--caption-font-scale": fontScale }}
+    >
+      <div className="mini-caption-stage" aria-live="polite">
+        {miniCaptionParts.length === 0 ? (
+          <p className="mini-caption-empty">{emptyCaptionMessage}</p>
+        ) : (
+          <div className="mini-caption-stack">
+            <AnimatePresence initial={false}>
+              {miniCaptionParts.map((caption) => (
+                <MotionP
+                  key={caption.key}
+                  className={getMiniCaptionClassName(caption)}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                >
+                  {caption.text}
+                </MotionP>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function LiveRoomPage() {
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const canShareLiveRoom = Boolean(code && isValidRoomCode(code));
@@ -594,6 +753,10 @@ function LiveRoomPage() {
   const [fontScale, setFontScale] = useState(readStoredFontScale);
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
+  const [isMiniCaptionSupported, setIsMiniCaptionSupported] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
+  const [miniCaptionWindow, setMiniCaptionWindow] = useState(null);
+  const [miniCaptionRoot, setMiniCaptionRoot] = useState(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [shareFeedback, setShareFeedback] = useState("");
   const lastActiveCaptionTextRef = useRef("");
@@ -620,6 +783,8 @@ function LiveRoomPage() {
     }
     setStatus(normalizedStatus);
   }, []);
+  const shouldShowMiniCaptionButton =
+    isMiniCaptionSupported && isDesktopViewport;
 
   function showShareFeedback(message) {
     window.clearTimeout(shareFeedbackTimerRef.current);
@@ -627,6 +792,55 @@ function LiveRoomPage() {
     shareFeedbackTimerRef.current = window.setTimeout(() => {
       setShareFeedback("");
     }, 1600);
+  }
+
+  async function openMiniCaptionWindow() {
+    const documentPictureInPicture = window.documentPictureInPicture;
+
+    if (!isDesktopViewport || !documentPictureInPicture) {
+      return;
+    }
+
+    if (miniCaptionWindow && !miniCaptionWindow.closed) {
+      miniCaptionWindow.focus();
+      return;
+    }
+
+    let nextMiniCaptionWindow;
+
+    try {
+      nextMiniCaptionWindow = await documentPictureInPicture.requestWindow({
+        width: MINI_CAPTION_WINDOW_SIZE.width,
+        height: MINI_CAPTION_WINDOW_SIZE.height,
+        disallowReturnToOpener: false,
+      });
+    } catch {
+      return;
+    }
+
+    nextMiniCaptionWindow.document.title = "ekto live captions";
+    nextMiniCaptionWindow.document.head.innerHTML = "";
+    nextMiniCaptionWindow.document.body.innerHTML = "";
+
+    const style = nextMiniCaptionWindow.document.createElement("style");
+    style.textContent = MINI_CAPTION_WINDOW_STYLES;
+    nextMiniCaptionWindow.document.head.append(style);
+
+    const root = nextMiniCaptionWindow.document.createElement("div");
+    root.id = "ekto-mini-caption-root";
+    nextMiniCaptionWindow.document.body.append(root);
+
+    nextMiniCaptionWindow.addEventListener(
+      "pagehide",
+      () => {
+        setMiniCaptionWindow(null);
+        setMiniCaptionRoot(null);
+      },
+      { once: true },
+    );
+
+    setMiniCaptionWindow(nextMiniCaptionWindow);
+    setMiniCaptionRoot(root);
   }
 
   async function copyLiveRoomLink() {
@@ -664,6 +878,35 @@ function LiveRoomPage() {
       // Ignore storage failures; the control should still work for this page.
     }
   }, [fontScale]);
+
+  useEffect(() => {
+    setIsMiniCaptionSupported(
+      typeof window.documentPictureInPicture?.requestWindow === "function",
+    );
+
+    return () => {
+      const activeMiniCaptionWindow = window.documentPictureInPicture?.window;
+
+      if (activeMiniCaptionWindow && !activeMiniCaptionWindow.closed) {
+        activeMiniCaptionWindow.close();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+
+    function updateDesktopViewport(eventOrQuery) {
+      setIsDesktopViewport(eventOrQuery.matches);
+    }
+
+    updateDesktopViewport(mediaQuery);
+    mediaQuery.addEventListener("change", updateDesktopViewport);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateDesktopViewport);
+    };
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -1194,6 +1437,25 @@ function LiveRoomPage() {
                 <Share2 size={16} strokeWidth={2.3} />
               </button>
             ) : null}
+            {shouldShowMiniCaptionButton ? (
+              <button
+                type="button"
+                aria-label={
+                  miniCaptionWindow
+                    ? "Focus mini captions window"
+                    : "Open mini captions window"
+                }
+                title={
+                  miniCaptionWindow
+                    ? "Focus mini captions window"
+                    : "Open mini captions window"
+                }
+                onClick={openMiniCaptionWindow}
+                className="grid h-10 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white"
+              >
+                <PictureInPicture2 size={17} strokeWidth={2.3} />
+              </button>
+            ) : null}
             <button
               type="button"
               aria-label="Caption font size settings"
@@ -1227,6 +1489,16 @@ function LiveRoomPage() {
           />
         ) : null}
       </AnimatePresence>
+      {miniCaptionRoot
+        ? createPortal(
+            <MiniCaptionWindowContent
+              visibleCaptionParts={visibleCaptionParts}
+              emptyCaptionMessage={emptyCaptionMessage}
+              fontScale={fontScale}
+            />,
+            miniCaptionRoot,
+          )
+        : null}
     </main>
   );
 }
