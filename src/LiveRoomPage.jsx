@@ -88,7 +88,7 @@ const MINI_CAPTION_WINDOW_STYLES = `
   .mini-caption-line {
     margin: 0;
     color: #fff;
-    font-size: calc(1.05rem * var(--caption-font-scale, 1));
+    font-size: calc(1.28rem * var(--caption-font-scale, 1));
     font-weight: 650;
     line-height: 1.12;
     overflow-wrap: anywhere;
@@ -116,7 +116,7 @@ const MINI_CAPTION_WINDOW_STYLES = `
     justify-content: center;
     margin: 0;
     color: rgba(255, 255, 255, 0.62);
-    font-size: 1rem;
+    font-size: 1.12rem;
     font-weight: 650;
     line-height: 1.2;
     overflow-wrap: anywhere;
@@ -133,11 +133,11 @@ const MINI_CAPTION_WINDOW_STYLES = `
     }
 
     .mini-caption-line {
-      font-size: calc(0.95rem * var(--caption-font-scale, 1));
+      font-size: calc(1.12rem * var(--caption-font-scale, 1));
     }
 
     .mini-caption-empty {
-      font-size: 0.88rem;
+      font-size: 1rem;
     }
   }
 `;
