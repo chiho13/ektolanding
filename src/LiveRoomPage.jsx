@@ -31,7 +31,6 @@ const QR_CODE_OPTIONS = {
 };
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
-const MotionP = motion.p;
 const MotionSection = motion.section;
 
 const MINI_CAPTION_WINDOW_STYLES = `
@@ -91,9 +90,10 @@ const MINI_CAPTION_WINDOW_STYLES = `
     color: #fff;
     font-size: calc(1.28rem * var(--caption-font-scale, 1));
     font-weight: 650;
-    line-height: 1.12;
+    line-height: 1.16;
     overflow-wrap: anywhere;
     white-space: pre-line;
+    transition: line-height 180ms ease-out;
   }
 
   .mini-caption-line.translation-active,
@@ -721,20 +721,14 @@ function MiniCaptionWindowContent({
           <p className="mini-caption-empty">{emptyCaptionMessage}</p>
         ) : (
           <div className="mini-caption-stack">
-            <AnimatePresence initial={false}>
-              {miniCaptionParts.map((caption) => (
-                <MotionP
-                  key={caption.key}
-                  className={getMiniCaptionClassName(caption)}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.18, ease: "easeOut" }}
-                >
-                  {caption.text}
-                </MotionP>
-              ))}
-            </AnimatePresence>
+            {miniCaptionParts.map((caption) => (
+              <p
+                key={caption.key}
+                className={getMiniCaptionClassName(caption)}
+              >
+                {caption.text}
+              </p>
+            ))}
           </div>
         )}
       </div>
