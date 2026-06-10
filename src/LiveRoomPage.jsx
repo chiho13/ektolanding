@@ -20,6 +20,7 @@ const MINI_CAPTION_WINDOW_SIZE = {
   width: 520,
   height: 140,
 };
+const MINI_CAPTION_WINDOW_TITLE = "Live captions";
 const QR_CODE_OPTIONS = {
   color: {
     dark: "#111827",
@@ -818,7 +819,7 @@ function LiveRoomPage() {
       return;
     }
 
-    nextMiniCaptionWindow.document.title = "ekto live captions";
+    nextMiniCaptionWindow.document.title = MINI_CAPTION_WINDOW_TITLE;
     nextMiniCaptionWindow.document.head.innerHTML = "";
     nextMiniCaptionWindow.document.body.innerHTML = "";
 
