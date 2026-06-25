@@ -419,7 +419,15 @@ function isTranslateMessage(message) {
 }
 
 function getMessageMode(message) {
-  return normalizeRoomMode(message?.mode);
+  return (
+    normalizeRoomMode(message?.mode) ||
+    normalizeRoomMode(message?.roomMode) ||
+    normalizeRoomMode(message?.displayMode) ||
+    normalizeRoomMode(message?.room?.mode) ||
+    normalizeRoomMode(message?.settings?.mode) ||
+    normalizeRoomMode(message?.session?.mode) ||
+    normalizeRoomMode(message?.broadcast?.mode)
+  );
 }
 
 function getMessageHideOriginals(message) {
@@ -720,7 +728,10 @@ function getSnapshotDisplayState(message) {
         mode: getMessageMode(item) || state.mode,
         hideOriginals: getMessageHideOriginals(item) ?? state.hideOriginals,
       }),
-      { mode: null, hideOriginals: false },
+      {
+        mode: getMessageMode(message),
+        hideOriginals: getMessageHideOriginals(message) ?? false,
+      },
     );
 }
 
@@ -1313,7 +1324,9 @@ function LiveRoomPage() {
       if (message.type === "snapshot") {
         const snapshotState = getSnapshotDisplayState(message);
         const nextStatus = message.status || "waiting";
-        setRoomMode(snapshotState.mode);
+        if (snapshotState.mode) {
+          setRoomMode(snapshotState.mode);
+        }
         setHideOriginals(snapshotState.hideOriginals);
         appendedPrefixedFinalLinesRef.current = new Set();
         setFinalizedCaptionParts(
