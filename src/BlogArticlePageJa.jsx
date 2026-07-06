@@ -62,9 +62,10 @@ function BlogArticlePageJa() {
 
       <main className="px-6 py-16">
         <article className="max-w-[1000px] mx-auto">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-2">
             Blog
           </p>
+          <p className="text-sm text-slate-500 mb-6">2026年7月更新</p>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
             講義におすすめのライブ字幕アプリ5選
           </h1>

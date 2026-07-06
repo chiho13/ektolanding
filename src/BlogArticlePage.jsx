@@ -65,11 +65,12 @@ function BlogArticlePage() {
 
       <main className="px-6 py-16">
         <article className="max-w-[1000px] mx-auto">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-2">
             Blog
           </p>
+          <p className="text-sm text-slate-500 mb-6">Updated July 2026</p>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
-            Top 5 Best Live Caption Apps for Lectures in 2025
+            Top 5 Best Live Caption Apps for Lectures in 2026
           </h1>
           <p className="text-lg leading-8 text-slate-700 mb-8">
             Finding the best live caption app for lectures matters most when

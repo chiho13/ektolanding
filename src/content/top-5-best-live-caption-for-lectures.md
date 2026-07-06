@@ -1,4 +1,4 @@
-# Top 5 Best Live Caption Apps for Lectures in 2025
+# Top 5 Best Live Caption Apps for Lectures in 2026
 
 Finding the best live caption app for lectures matters most when you need to keep up with fast-speaking professors, technical vocabulary, and multilingual classrooms. For international students studying abroad, the challenge is even harder: you often need both real-time captions and real-time translation at the same time.
 
