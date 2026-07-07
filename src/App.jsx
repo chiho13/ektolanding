@@ -2,7 +2,85 @@ import { useState, useEffect } from "react";
 import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/ekto.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
+import appStoreQr from "./assets/appstore-qr.svg";
 import { rotatingWords } from "./i18n";
+
+const APP_STORE_URL = "https://apps.apple.com/app/id6740196773";
+
+const useCases = [
+  {
+    title: "Live captions for lectures and seminars",
+    description:
+      "Follow fast-talking lecturers word for word, even from the back row. Save transcripts to review before exams.",
+    href: "/blog/how-to-understand-lectures-in-a-foreign-language/",
+  },
+  {
+    title: "Real-time translation at conferences and events",
+    description:
+      "Understand talks, panels, and networking conversations when speakers use another language — no interpreter needed.",
+    href: "/blog/live-translation-for-business-conferences/",
+  },
+  {
+    title: "Captions for deaf and hard-of-hearing users",
+    description:
+      "Read what is being said in dinners, appointments, and events in real time, and reply with Big Reply when it is easier to show than speak.",
+    href: "/blog/live-captions-for-deaf-hard-of-hearing-events/",
+  },
+  {
+    title: "Live captions for church sermons",
+    description:
+      "Follow sermons and services in your own language. Live Link lets the whole congregation read along on their own phones.",
+  },
+  {
+    title: "Real-time conversation translator",
+    description:
+      "Talk with anyone face to face. Two-Way Mode translates both sides of the conversation as you speak.",
+  },
+  {
+    title: "Doctor's appointments and travel",
+    description:
+      "Don't nod along and hope you understood. Read every detail at appointments, help desks, and tours where mishearing is not an option.",
+  },
+];
+
+const faqs = [
+  {
+    question: "Is ekto free to download?",
+    answer:
+      "Yes. ekto is free to download on the App Store, so you can try live captions and translation right away. A premium subscription unlocks unlimited captions and translation, with each live session supporting up to 2 hours.",
+  },
+  {
+    question: "How accurate are the live captions?",
+    answer:
+      "ekto uses advanced AI speech recognition designed for real-world listening, so captions stay accurate even when you are seated far from the speaker. You can also add custom words to improve accuracy for names, jargon, and technical terms.",
+  },
+  {
+    question: "What languages does ekto translate?",
+    answer:
+      "ekto translates speech between 37+ languages in real time, with automatic language detection. You can read live captions in the original language or translated subtitles in yours.",
+  },
+  {
+    question: "Does ekto work offline?",
+    answer:
+      "No. ekto needs an internet connection to deliver its most accurate live captions and translation. Microphone access is also required.",
+  },
+  {
+    question: "Does ekto record or store my audio?",
+    answer:
+      "No audio is stored, and nothing you capture is used for AI training. You can optionally save transcripts of your sessions to review later, and they stay under your control.",
+  },
+  {
+    question: "Can I use ekto for lectures, church services, or conferences?",
+    answer:
+      "Yes. ekto is built for in-person events like lectures, sermons, conferences, meetings, and tours. Picture-in-picture mode keeps captions visible while you take notes, and Live Link lets an audience follow along on their own devices through a web link.",
+  },
+  {
+    question:
+      "How is ekto different from Google Translate's conversation mode?",
+    answer:
+      "Google Translate's conversation mode is built for two-way language exchange: it reads translations aloud with text-to-speech, which is great for short back-and-forth chats. ekto is built for continuous, hands-free listening instead. Tap once and it keeps up with multi-hour lectures and talks, shows live captions on screen, captures speech from across the room, saves transcripts, and generates AI summaries of what was said.",
+  },
+];
 
 const pricingPlans = [
   {
@@ -25,6 +103,7 @@ const pricingPlans = [
 
 function App() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,6 +111,13 @@ function App() {
     }, 2500); // Change word every 2.5 seconds
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setShowStickyBar(window.scrollY > 500);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   // Star rating component with proper half-star support
@@ -202,23 +288,56 @@ function App() {
                 </span>
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                Understand what&apos;s being said, anywhere
+                Live captions and translation so you never miss a word
               </h1>
-              <p className="text-lg md:text-xl text-gray-200 mb-4 md:mb-6 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                Live captions and live translation for study abroad lectures,
-                international conferences, meetings, and face-to-face
-                conversations.
+              <p className="text-lg md:text-xl text-gray-200 mb-6 md:mb-8 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
+                Too fast, too quiet, or a strong accent? Tap once and ekto turns
+                speech into real-time captions or translated subtitles in 37+
+                languages — lectures, seminars, conferences, sermons, and
+                face-to-face conversations.
               </p>
 
+              {/* CTA */}
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                <a
+                  href={APP_STORE_URL}
+                  className="inline-flex items-center justify-center rounded-xl bg-white px-7 py-3.5 text-lg font-bold text-blue-800 shadow-xl transition-all duration-300 hover:scale-105 hover:bg-blue-50"
+                  aria-label="Download ekto free on the App Store"
+                >
+                  Download Free
+                </a>
+                <a
+                  href={APP_STORE_URL}
+                  aria-label="Download ekto on the App Store"
+                  className="shrink-0"
+                >
+                  <img
+                    src={appStoreButton}
+                    alt="Download ekto: Live AI Captions on the App Store"
+                    className="h-12 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
+                  />
+                </a>
+                <div className="hidden lg:flex items-center gap-3 rounded-xl bg-white/95 p-2 pr-3 shadow-xl">
+                  <img
+                    src={appStoreQr}
+                    alt="QR code to download ekto on the App Store"
+                    className="h-16 w-16 rounded-md"
+                  />
+                  <span className="max-w-32 text-xs font-medium leading-snug text-slate-700">
+                    Scan with your iPhone to download
+                  </span>
+                </div>
+              </div>
+
               {/* Social Proof */}
-              <div className="z-1000 mb-6 md:mb-8">
+              <div className="z-1000">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-2">
                     <StarRating rating={4.5} reviews={16} />
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs font-medium text-blue-900">
                     <span className="rounded-full bg-white px-3 py-1.5">
-                      In-person events
+                      Free to download
                     </span>
                     <span className="rounded-full bg-blue-100 px-3 py-1.5">
                       37+ languages
@@ -229,17 +348,6 @@ function App() {
                   </div>
                 </div>
               </div>
-
-              <a
-                href="https://apps.apple.com/app/id6740196773"
-                aria-label="Download ekto on the App Store"
-              >
-                <img
-                  src={appStoreButton}
-                  alt="Download ekto: Live AI Captions on the App Store"
-                  className="w-3/4 sm:w-2/3 md:w-1/2 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
-                />
-              </a>
             </div>
 
             {/* Right side - Mockup Image */}
@@ -393,6 +501,60 @@ function App() {
                 multilingual conversations in shared, real-world spaces.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases Section */}
+      <section className="px-6 py-16 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              One app for lectures, conferences, sermons, and conversations
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Wherever you need to understand what is being said in person,
+              ekto keeps up in real time.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {useCases.map((useCase) => (
+              <div
+                key={useCase.title}
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm"
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  {useCase.title}
+                </h3>
+                <p className="text-gray-700 leading-7">{useCase.description}</p>
+                {useCase.href && (
+                  <a
+                    href={useCase.href}
+                    className="mt-4 inline-flex font-semibold text-blue-700 hover:text-blue-800"
+                  >
+                    Learn more
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Mid-page CTA */}
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-blue-700 px-6 py-10 text-center shadow-xl">
+            <h3 className="text-2xl font-bold text-white">
+              Try live captions at your next lecture, meeting, or service
+            </h3>
+            <a
+              href={APP_STORE_URL}
+              className="inline-flex items-center justify-center rounded-xl bg-white px-7 py-3.5 text-lg font-bold text-blue-800 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-blue-50"
+              aria-label="Download ekto free on the App Store"
+            >
+              Download Free
+            </a>
+            <p className="text-sm text-blue-100">
+              4.5 stars on the App Store • 37+ languages • No signup required
+            </p>
           </div>
         </div>
       </section>
@@ -559,6 +721,48 @@ function App() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="px-6 py-16 bg-blue-50">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Frequently asked questions
+            </h2>
+            <p className="text-lg text-gray-600">
+              Everything you need to know before your first live session
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {faqs.map((faq) => (
+              <details
+                key={faq.question}
+                className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm open:shadow-md"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
+                  {faq.question}
+                  <svg
+                    className="h-5 w-5 shrink-0 text-blue-700 transition-transform duration-200 group-open:rotate-180"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </summary>
+                <p className="mt-4 leading-7 text-gray-700">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Download Section */}
       <section id="download" className="px-6 py-20 bg-gray-900">
         <div className="max-w-4xl mx-auto text-center">
@@ -588,13 +792,46 @@ function App() {
 
       {/* Footer */}
       <footer className="px-6 py-8 bg-gray-800">
-        <div className="max-w-6xl mx-auto text-center text-gray-400">
+        <div className="max-w-6xl mx-auto text-center text-gray-400 pb-16 sm:pb-0">
           <p>
             &copy; {new Date().getFullYear()} ekto: Live AI Captions. All rights
             reserved.
           </p>
         </div>
       </footer>
+
+      {/* Sticky mobile download bar */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(15,23,42,0.12)] backdrop-blur-md transition-transform duration-300 sm:hidden ${
+          showStickyBar ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <img
+              src={appIcon}
+              alt=""
+              aria-hidden="true"
+              className="h-10 w-10 shrink-0 rounded-lg shadow"
+            />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-gray-900">
+                ekto: Live AI Captions
+              </p>
+              <p className="text-xs text-gray-600">
+                4.5 stars • 37+ languages
+              </p>
+            </div>
+          </div>
+          <a
+            href={APP_STORE_URL}
+            className="shrink-0 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg"
+            aria-label="Download ekto free on the App Store"
+          >
+            Download Free
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

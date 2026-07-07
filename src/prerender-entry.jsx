@@ -1,4 +1,5 @@
 import { renderToString } from "react-dom/server";
+import App from "./App.jsx";
 import BlogIndexPage from "./BlogIndexPage.jsx";
 import BlogArticlePage from "./BlogArticlePage.jsx";
 import ForeignLanguageLecturesPage from "./ForeignLanguageLecturesPage.jsx";
@@ -14,6 +15,7 @@ import DeafHardOfHearingCaptionsPageJa from "./DeafHardOfHearingCaptionsPageJa.j
 // rendered into its <div id="root"> at build time. Keep this in sync with the
 // Rollup inputs in vite.config.js.
 const pages = [
+  ["index.html", App],
   ["blog/index.html", BlogIndexPage],
   ["blog/top-5-best-live-caption-apps-for-lectures/index.html", BlogArticlePage],
   ["blog/how-to-understand-lectures-in-a-foreign-language/index.html", ForeignLanguageLecturesPage],

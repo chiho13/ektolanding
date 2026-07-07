@@ -43,4 +43,4 @@ for (const [rel, appHtml] of Object.entries(rendered)) {
 }
 
 await rm(ssrDir, { recursive: true, force: true });
-console.log(`Prerendered ${count} blog pages into static HTML.`);
+console.log(`Prerendered ${count} pages into static HTML.`);
