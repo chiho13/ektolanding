@@ -445,8 +445,8 @@ function App() {
                 Real-Time AI Captions
               </h3>
               <p className="text-gray-700">
-                Get instant captions powered by advanced AI for in-person
-                conversations and live events with superior accuracy.
+                Get accurate captions for live events, plus speaker
+                identification for meetings (beta).
               </p>
             </div>
 
