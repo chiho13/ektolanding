@@ -94,9 +94,9 @@ const pricingPlans = [
     cadence: "per month",
   },
   {
-    name: "Yearly",
-    price: "$134.99",
-    cadence: "per year",
+    name: "Quarterly",
+    price: "$59.99",
+    cadence: "per 3 months",
     badge: "Best value",
   },
 ];
