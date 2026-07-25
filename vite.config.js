@@ -14,6 +14,7 @@ export default defineConfig({
       input: {
         main: resolve(rootDir, "index.html"),
         liveRoom: resolve(rootDir, "live/index.html"),
+        eventOrganizers: resolve(rootDir, "for-event-organizers/index.html"),
         blogIndex: resolve(rootDir, "blog/index.html"),
         lectureCaptionsArticle: resolve(
           rootDir,

@@ -10,12 +10,14 @@ import BlogArticlePageJa from "./BlogArticlePageJa.jsx";
 import ForeignLanguageLecturesPageJa from "./ForeignLanguageLecturesPageJa.jsx";
 import BusinessConferenceTranslationPageJa from "./BusinessConferenceTranslationPageJa.jsx";
 import DeafHardOfHearingCaptionsPageJa from "./DeafHardOfHearingCaptionsPageJa.jsx";
+import EventOrganizersPage from "./EventOrganizersPage.jsx";
 
 // Maps each built HTML file (relative to dist/) to the component that should be
 // rendered into its <div id="root"> at build time. Keep this in sync with the
 // Rollup inputs in vite.config.js.
 const pages = [
   ["index.html", App],
+  ["for-event-organizers/index.html", EventOrganizersPage],
   ["blog/index.html", BlogIndexPage],
   ["blog/top-5-best-live-caption-apps-for-lectures/index.html", BlogArticlePage],
   ["blog/how-to-understand-lectures-in-a-foreign-language/index.html", ForeignLanguageLecturesPage],

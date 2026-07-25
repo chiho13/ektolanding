@@ -190,6 +190,12 @@ function App() {
           </div>
           <div className="flex items-center gap-6">
             <a
+              href="/for-event-organizers/"
+              className="hidden md:inline-flex text-sm font-semibold text-gray-700 hover:text-blue-700"
+            >
+              For event organizers
+            </a>
+            <a
               href="/blog/"
               className="hidden sm:inline-flex text-sm font-semibold text-gray-700 hover:text-blue-700"
             >
