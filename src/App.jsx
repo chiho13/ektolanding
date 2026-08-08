@@ -3,7 +3,6 @@ import appStoreButton from "./assets/downloadbtn.svg";
 import appIcon from "./assets/ekto.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
 import appStoreQr from "./assets/appstore-qr.svg";
-import { rotatingWords } from "./i18n";
 
 const APP_STORE_URL = "https://apps.apple.com/app/id6740196773";
 
@@ -102,16 +101,7 @@ const pricingPlans = [
 ];
 
 function App() {
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWordIndex((prev) => (prev + 1) % rotatingWords.length);
-    }, 2500); // Change word every 2.5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setShowStickyBar(window.scrollY > 500);
@@ -254,115 +244,107 @@ function App() {
       </header>
 
       {/* Hero Section */}
-      <section
-        className="px-6 py-20 overflow-x-clip"
-        style={{
-          backgroundColor: "#1362BF",
-          // backgroundImage: `url(${backgroundImage})`,
-          // backgroundSize: 'cover',
-          // backgroundPosition: 'center',
-          // backgroundRepeat: 'no-repeat',
-          // minHeight: '100vh',
-        }}
-      >
-        <div className="max-w-6xl mx-auto ">
-          <div className="grid lg:grid-cols-2 items-center ">
+      <section className="relative isolate overflow-hidden bg-[#07152c] px-6 py-16 md:py-20 lg:py-24">
+        <div
+          className="absolute -left-40 top-0 h-96 w-96 rounded-full bg-blue-600/25 blur-3xl"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute -right-24 bottom-0 h-128 w-lg rounded-full bg-cyan-400/10 blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-7xl">
+          <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,1.08fr)] lg:gap-16">
             {/* Left side - Content */}
-            <div className="relative z-10">
-              <p className="inline-flex min-h-10 max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium leading-none text-blue-50 shadow-lg backdrop-blur-sm mb-6">
-                <span className="shrink-0 text-blue-100">Keeps up with</span>
-                <span className="inline-flex h-5 min-w-0 items-center overflow-hidden text-sm font-semibold">
-                  <span
-                    key={currentWordIndex}
-                    className="inline-block truncate whitespace-nowrap"
-                    aria-hidden="true"
-                    style={{
-                      animation: "fadeInUp 2.5s ease-in-out",
-                      background:
-                        "linear-gradient(135deg, #76e387ff, #a9eba8ff)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    {rotatingWords[currentWordIndex].word}
-                  </span>
-                </span>
-                <span className="sr-only">
-                  lectures, meetings, conferences, and sermons in English and
-                  Japanese
-                </span>
+            <div className="relative z-10 max-w-xl">
+              <p className="mb-5 text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">
+                Understand anyone, anywhere
               </p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                Live captions and translation so you never miss a word
+              <h1 className="mb-6 text-5xl font-bold leading-[1.05] tracking-[-0.04em] text-white sm:text-6xl lg:text-[4rem]">
+                <span className="bg-linear-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent">
+                  Live translation
+                </span>{" "}
+                that keeps up
               </h1>
-              <p className="text-lg md:text-xl text-gray-200 mb-6 md:mb-8 leading-relaxed drop-shadow-lg md:mr-32 xl:mr-0">
-                Too fast, too quiet, or a strong accent? Tap once and ekto turns
-                speech into real-time captions or translated subtitles in 37+
-                languages — lectures, seminars, conferences, sermons, and
-                face-to-face conversations.
+              <p className="mb-8 max-w-lg text-lg leading-8 text-slate-300 md:text-xl">
+                Real-time translation and captions for long meetings, lectures,
+                and everyday conversations. Follow every word in 37+ languages.
               </p>
 
               {/* CTA */}
-              <div className="flex flex-wrap items-center gap-4 mb-4">
-                <a
-                  href={APP_STORE_URL}
-                  className="inline-flex items-center justify-center rounded-xl bg-white px-7 py-3.5 text-lg font-bold text-blue-800 shadow-xl transition-all duration-300 hover:scale-105 hover:bg-blue-50"
-                  aria-label="Download ekto free on the App Store"
-                >
-                  Download Free
-                </a>
+              <div className="mb-7 flex flex-wrap items-center gap-4">
                 <a
                   href={APP_STORE_URL}
                   aria-label="Download ekto on the App Store"
-                  className="shrink-0"
+                  className="shrink-0 transition-transform duration-200 hover:-translate-y-0.5"
                 >
                   <img
                     src={appStoreButton}
                     alt="Download ekto: Live AI Captions on the App Store"
-                    className="h-12 hover:scale-105 transition-all duration-300 cursor-pointer drop-shadow-lg"
+                    className="h-14 drop-shadow-xl"
                   />
                 </a>
-                <div className="hidden lg:flex items-center gap-3 rounded-xl bg-white/95 p-2 pr-3 shadow-xl">
+                <div className="hidden items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-2.5 pr-4 backdrop-blur-sm lg:flex">
                   <img
                     src={appStoreQr}
                     alt="QR code to download ekto on the App Store"
-                    className="h-16 w-16 rounded-md"
+                    className="h-14 w-14 rounded-lg bg-white p-1"
                   />
-                  <span className="max-w-32 text-xs font-medium leading-snug text-slate-700">
-                    Scan with your iPhone to download
+                  <span className="max-w-28 text-xs font-medium leading-snug text-slate-300">
+                    Scan to download on iPhone
                   </span>
                 </div>
               </div>
 
               {/* Social Proof */}
-              <div className="z-1000">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-2">
-                    <StarRating rating={4.5} reviews={16} />
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-xs font-medium text-blue-900">
-                    <span className="rounded-full bg-white px-3 py-1.5">
-                      Free to download
-                    </span>
-                    <span className="rounded-full bg-blue-100 px-3 py-1.5">
-                      37+ languages
-                    </span>
-                    <span className="rounded-full bg-emerald-100 px-3 py-1.5">
-                      No setup required
-                    </span>
-                  </div>
+              <div className="flex flex-col gap-4">
+                <StarRating rating={4.5} reviews={16} />
+                <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-300">
+                  {["Free to download", "37+ languages", "No setup required"].map(
+                    (item) => (
+                      <span key={item} className="inline-flex items-center gap-2">
+                        <svg
+                          className="h-4 w-4 text-emerald-300"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.704 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.296-7.293a1 1 0 011.408 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {item}
+                      </span>
+                    ),
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Right side - Mockup Image */}
-            <div className="flex justify-center lg:justify-end lg:overflow-visible lg:-mr-32 xl:-mr-48">
-              <img
-                src={backgroundImage}
-                alt="ekto showing live captions and real-time translation on iPhone"
-                className="w-full h-[600px] lg:h-[500px] lg:w-auto lg:max-w-none object-contain"
+            {/* Right side - Product demo */}
+            <div className="relative mx-auto w-full max-w-150 lg:mx-0 lg:ml-auto">
+              <div
+                className="absolute -inset-5 rounded-[2.75rem] bg-linear-to-br from-blue-500/30 via-cyan-400/10 to-emerald-300/20 blur-2xl"
+                aria-hidden="true"
               />
+              <div className="relative overflow-hidden rounded-[2.25rem] border border-white/15 bg-white/6 p-3 shadow-[0_32px_80px_rgba(0,0,0,0.45)] backdrop-blur-sm">
+                <video
+                  className="aspect-square w-full rounded-3xl bg-slate-950 object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls
+                  preload="metadata"
+                  poster={backgroundImage}
+                  aria-label="Demo of ekto generating live captions and translations"
+                >
+                  <source src="/productdemo.mp4" type="video/mp4" />
+                  Your browser does not support embedded video.
+                </video>
+              </div>
             </div>
           </div>
         </div>
