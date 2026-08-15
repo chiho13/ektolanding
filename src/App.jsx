@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import appStoreButton from "./assets/downloadbtn.svg";
+import appStoreButton from "./assets/download-on-the-app-store-white.svg";
 import appIcon from "./assets/ekto.png";
 import backgroundImage from "./assets/ektolanding4.jpg";
 import appStoreQr from "./assets/appstore-qr.svg";
@@ -175,7 +175,7 @@ function App() {
               className="w-10 h-10 rounded-lg shadow-lg"
             />
             <span className="text-xl font-bold text-gray-800 hidden sm:inline">
-              ekto: Live AI Captions
+              ekto
             </span>
           </div>
           <div className="flex items-center gap-6">
@@ -272,7 +272,7 @@ function App() {
               </p>
 
               {/* CTA */}
-              <div className="mb-7 flex flex-wrap items-center gap-4">
+              <div className="mb-5 flex flex-wrap items-center gap-4">
                 <a
                   href={APP_STORE_URL}
                   aria-label="Download ekto on the App Store"
@@ -295,6 +295,27 @@ function App() {
                   </span>
                 </div>
               </div>
+
+              <a
+                href="https://www.uneed.best/tool/ekto-live-translator"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View ekto Live Translator on Uneed (opens in a new tab)"
+                className="relative mb-7 inline-flex aspect-[639/171] w-[250px] overflow-hidden rounded-xl bg-slate-200 shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-cyan-950/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+              >
+                <span
+                  className="absolute inset-0 animate-pulse bg-linear-to-r from-slate-200 via-white to-slate-200"
+                  aria-hidden="true"
+                />
+                <img
+                  src="https://www.uneed.best/POTD2A.png"
+                  alt="Uneed Product of the Day #2 badge"
+                  width="639"
+                  height="171"
+                  decoding="async"
+                  className="relative h-full w-full object-contain"
+                />
+              </a>
 
               {/* Social Proof */}
               <div className="flex flex-col gap-4">
