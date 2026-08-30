@@ -3,6 +3,14 @@ import { createPortal } from "react-dom";
 import { PictureInPicture2, Share2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import appIcon from "./assets/ekto.png";
+import {
+  DEFAULT_LIVE_APPEARANCE,
+  getLiveFontFamily,
+  getSpeakerColor,
+  getStructuredMessageRows,
+  getStructuredRowKey,
+  normalizeLiveAppearance,
+} from "./liveRoomProtocol.js";
 
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
 const MAX_RENDERED_CAPTION_LINES = 10;
@@ -68,6 +76,7 @@ const MINI_CAPTION_WINDOW_STYLES = `
     min-height: 0;
     padding: 10px 16px 12px;
     background: #000;
+    font-family: var(--caption-font-family, "Poppins", system-ui, sans-serif);
   }
 
   .mini-caption-stage {
@@ -94,6 +103,31 @@ const MINI_CAPTION_WINDOW_STYLES = `
     line-height: 1.16;
     overflow-wrap: anywhere;
     white-space: pre-line;
+  }
+
+  .mini-caption-row {
+    min-width: 0;
+  }
+
+  .mini-speaker-label {
+    margin: 0 0 2px;
+    font-size: calc(0.65rem * var(--caption-font-scale, 1));
+    font-weight: 650;
+    letter-spacing: 0.03em;
+  }
+
+  .mini-caption-lane {
+    margin: 0;
+    color: #fff;
+    font-size: calc(1.28rem * var(--caption-font-scale, 1));
+    font-weight: 650;
+    line-height: 1.16;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+
+  .mini-caption-translation {
+    margin-top: 2px;
   }
 
   .mini-caption-line.translation-active,
@@ -130,6 +164,10 @@ const MINI_CAPTION_WINDOW_STYLES = `
     }
 
     .mini-caption-line {
+      font-size: calc(1.12rem * var(--caption-font-scale, 1));
+    }
+
+    .mini-caption-lane {
       font-size: calc(1.12rem * var(--caption-font-scale, 1));
     }
 
@@ -908,22 +946,103 @@ function getMiniCaptionClassName(part) {
   return `mini-caption-line ${part.role}`;
 }
 
+function StructuredCaptionRow({
+  row,
+  appearance,
+  hideOriginals,
+  isEmphasized,
+  roomMode,
+  variant = "main",
+}) {
+  const color = getSpeakerColor(
+    appearance.translationColor,
+    row.speakerNumber,
+  );
+  const opacity = isEmphasized
+    ? 1
+    : roomMode === "captions"
+      ? FADED_CAPTION_OPACITY
+      : 0.8;
+  const isMini = variant === "mini";
+  const rowClassName = isMini ? "mini-caption-row" : "live-caption-row";
+  const labelClassName = isMini ? "mini-speaker-label" : "live-speaker-label";
+  const laneClassName = isMini ? "mini-caption-lane" : "live-caption-lane";
+  const translationClassName = isMini
+    ? "mini-caption-translation"
+    : "live-caption-translation";
+  const weight = isEmphasized ? 700 : 500;
+
+  return (
+    <div className={rowClassName} style={{ opacity }} data-row-id={row.id}>
+      {row.speakerNumber ? (
+        <p className={labelClassName} style={{ color }}>
+          Speaker {row.speakerNumber}
+        </p>
+      ) : null}
+      {!hideOriginals && row.original ? (
+        <p className={laneClassName} style={{ color: "#fff", fontWeight: weight }}>
+          {row.original}
+        </p>
+      ) : null}
+      {row.translation ? (
+        <p
+          className={`${laneClassName} ${translationClassName}`}
+          style={{ color, fontWeight: weight }}
+        >
+          {row.translation}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function MiniCaptionWindowContent({
   visibleCaptionParts,
+  visibleStructuredRows,
+  appearance,
   emptyCaptionMessage,
   fontScale,
+  hideOriginals,
   roomMode,
 }) {
   const miniCaptionParts = visibleCaptionParts.slice(-MAX_MINI_CAPTION_LINES);
+  const miniStructuredRows = visibleStructuredRows === null
+    ? null
+    : visibleStructuredRows.slice(roomMode === "translate" ? -1 : -2);
+  const hasStructuredContent = (miniStructuredRows?.length ?? 0) > 0;
+  const hasLegacyContent = miniCaptionParts.length > 0;
+  const structuredHasActiveRow = miniStructuredRows?.some(
+    (row) => row.state === "active",
+  );
 
   return (
     <div
       className="mini-caption-window"
-      style={{ "--caption-font-scale": fontScale }}
+      style={{
+        "--caption-font-scale": fontScale,
+        "--caption-font-family": getLiveFontFamily(appearance.fontStyle),
+      }}
     >
       <div className="mini-caption-stage" aria-live="polite">
-        {miniCaptionParts.length === 0 ? (
+        {!hasStructuredContent && !hasLegacyContent ? (
           <p className="mini-caption-empty">{emptyCaptionMessage}</p>
+        ) : miniStructuredRows !== null ? (
+          <div className="mini-caption-stack">
+            {miniStructuredRows.map((row, index) => (
+              <StructuredCaptionRow
+                key={getStructuredRowKey(row)}
+                row={row}
+                appearance={appearance}
+                hideOriginals={hideOriginals}
+                isEmphasized={
+                  row.state === "active" ||
+                  (!structuredHasActiveRow && index === miniStructuredRows.length - 1)
+                }
+                roomMode={roomMode}
+                variant="mini"
+              />
+            ))}
+          </div>
         ) : (
           <div className="mini-caption-stack">
             {miniCaptionParts.map((caption, index) => (
@@ -951,6 +1070,8 @@ function LiveRoomPage() {
   const [status, setStatus] = useState("connecting");
   const [finalizedCaptionParts, setFinalizedCaptionParts] = useState([]);
   const [activeCaptionParts, setActiveCaptionParts] = useState([]);
+  const [structuredRows, setStructuredRows] = useState(null);
+  const [appearance, setAppearance] = useState(DEFAULT_LIVE_APPEARANCE);
   const [roomMode, setRoomMode] = useState(null);
   const [hideOriginals, setHideOriginals] = useState(false);
   const [fontScale, setFontScale] = useState(readStoredFontScale);
@@ -967,6 +1088,7 @@ function LiveRoomPage() {
   const lastActiveCaptionTextRef = useRef("");
   const appendedPrefixedFinalLinesRef = useRef(new Set());
   const messageSequenceRef = useRef(0);
+  const structuredRowsSeenRef = useRef(false);
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef(null);
   const socketRef = useRef(null);
@@ -1175,6 +1297,10 @@ function LiveRoomPage() {
           setRoomMode(nextMode);
         }
 
+        if (!isCancelled && Object.hasOwn(payload || {}, "appearance")) {
+          setAppearance(normalizeLiveAppearance(payload.appearance));
+        }
+
         if (isCancelled || !nextStatus) {
           return;
         }
@@ -1321,33 +1447,48 @@ function LiveRoomPage() {
         setHideOriginals(nextHideOriginals);
       }
 
+      if (Object.hasOwn(message, "appearance")) {
+        setAppearance(normalizeLiveAppearance(message.appearance));
+      }
+
       if (message.type === "snapshot") {
         const snapshotState = getSnapshotDisplayState(message);
         const nextStatus = message.status || "waiting";
+        setAppearance(normalizeLiveAppearance(message.appearance));
         if (snapshotState.mode) {
           setRoomMode(snapshotState.mode);
         }
         setHideOriginals(snapshotState.hideOriginals);
         appendedPrefixedFinalLinesRef.current = new Set();
-        setFinalizedCaptionParts(
-          Array.isArray(message.history)
-            ? message.history.flatMap((item, index) =>
-                typeof item.text === "string"
-                  ? getFinalCaptionParts(item, "", `snapshot-${index}`)
-                  : [],
-              )
-            : [],
-        );
-        const partialText = message.latestPartial?.text || "";
-        lastActiveCaptionTextRef.current =
-          getMessageCaptionText(message.latestPartial) ||
-          getActiveCaptionText(partialText) ||
-          lastActiveCaptionTextRef.current;
-        setActiveCaptionParts(
-          message.latestPartial
-            ? getPartialCaptionParts(message.latestPartial, "partial")
-            : [],
-        );
+        const snapshotRows = getStructuredMessageRows(message);
+        structuredRowsSeenRef.current = snapshotRows !== null;
+        setStructuredRows(snapshotRows);
+
+        if (snapshotRows !== null) {
+          lastActiveCaptionTextRef.current = "";
+          setFinalizedCaptionParts([]);
+          setActiveCaptionParts([]);
+        } else {
+          setFinalizedCaptionParts(
+            Array.isArray(message.history)
+              ? message.history.flatMap((item, index) =>
+                  typeof item.text === "string"
+                    ? getFinalCaptionParts(item, "", `snapshot-${index}`)
+                    : [],
+                )
+              : [],
+          );
+          const partialText = message.latestPartial?.text || "";
+          lastActiveCaptionTextRef.current =
+            getMessageCaptionText(message.latestPartial) ||
+            getActiveCaptionText(partialText) ||
+            lastActiveCaptionTextRef.current;
+          setActiveCaptionParts(
+            message.latestPartial
+              ? getPartialCaptionParts(message.latestPartial, "partial")
+              : [],
+          );
+        }
         viewerSocketAttachedRef.current = true;
         liveReconnectRequestedRef.current = false;
         applyRoomStatus(nextStatus);
@@ -1371,6 +1512,20 @@ function LiveRoomPage() {
       }
 
       if (message.type === "partial") {
+        const nextRows = getStructuredMessageRows(message);
+        if (nextRows !== null) {
+          structuredRowsSeenRef.current = true;
+          setStructuredRows(nextRows);
+          setFinalizedCaptionParts([]);
+          setActiveCaptionParts([]);
+          applyRoomStatus("live");
+          return;
+        }
+        if (structuredRowsSeenRef.current) {
+          applyRoomStatus("live");
+          return;
+        }
+
         const partialText = message.text || "";
         lastActiveCaptionTextRef.current =
           isTranslateMessage(message)
@@ -1425,6 +1580,20 @@ function LiveRoomPage() {
       }
 
       if (message.type === "final") {
+        const nextRows = getStructuredMessageRows(message);
+        if (nextRows !== null) {
+          structuredRowsSeenRef.current = true;
+          setStructuredRows(nextRows);
+          setFinalizedCaptionParts([]);
+          setActiveCaptionParts([]);
+          applyRoomStatus("live");
+          return;
+        }
+        if (structuredRowsSeenRef.current) {
+          applyRoomStatus("live");
+          return;
+        }
+
         messageSequenceRef.current += 1;
         const partsToAppend = getFinalCaptionParts(
           message,
@@ -1441,7 +1610,7 @@ function LiveRoomPage() {
       }
 
       if (message.type === "ended") {
-        if (typeof message.text === "string") {
+        if (!structuredRowsSeenRef.current && typeof message.text === "string") {
           messageSequenceRef.current += 1;
           const partsToAppend = getFinalCaptionParts(
             message,
@@ -1450,8 +1619,10 @@ function LiveRoomPage() {
           );
           setFinalizedCaptionParts((parts) => [...parts, ...partsToAppend]);
         }
-        lastActiveCaptionTextRef.current = "";
-        setActiveCaptionParts([]);
+        if (!structuredRowsSeenRef.current) {
+          lastActiveCaptionTextRef.current = "";
+          setActiveCaptionParts([]);
+        }
 
         if (isRetryableRoomStatus(message.status)) {
           applyRoomStatus("waiting");
@@ -1518,6 +1689,28 @@ function LiveRoomPage() {
     },
     [activeCaptionParts, effectiveRoomMode, finalizedCaptionParts, hideOriginals],
   );
+  const visibleStructuredRows = useMemo(() => {
+    if (structuredRows === null) {
+      return null;
+    }
+
+    const shouldHideOriginals =
+      effectiveRoomMode === "translate" && hideOriginals;
+
+    return structuredRows
+      .filter(
+        (row) =>
+          (!shouldHideOriginals && Boolean(row.original)) ||
+          Boolean(row.translation),
+      )
+      .slice(-MAX_RENDERED_CAPTION_LINES);
+  }, [effectiveRoomMode, hideOriginals, structuredRows]);
+  const structuredHasActiveRow = visibleStructuredRows?.some(
+    (row) => row.state === "active",
+  );
+  const hasVisibleCaptions = visibleStructuredRows !== null
+    ? visibleStructuredRows.length > 0
+    : visibleCaptionParts.length > 0;
   const captionFontPercent = Math.round(fontScale * 100);
   const shouldShowStatusChip = status === "live" || status === "ended";
   const emptyCaptionMessage = status === "invalid"
@@ -1533,7 +1726,10 @@ function LiveRoomPage() {
   return (
     <main
       className="live-room-page bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6"
-      style={{ "--caption-font-scale": fontScale }}
+      style={{
+        "--caption-font-scale": fontScale,
+        "--caption-font-family": getLiveFontFamily(appearance.fontStyle),
+      }}
     >
       <section className="live-room-shell mx-auto flex max-w-6xl flex-col">
         <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
@@ -1571,14 +1767,31 @@ function LiveRoomPage() {
 
         <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
           <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-0 text-center md:px-10 md:pb-10 md:pt-0">
-            {visibleCaptionParts.length === 0 ? (
+            {!hasVisibleCaptions ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 {emptyCaptionMessage}
               </div>
             ) : (
               <div className="relative min-h-0 overflow-hidden">
                 <div className="absolute inset-x-0 bottom-0 space-y-2 md:space-y-3 md:px-44">
-                  {visibleCaptionParts.map((caption, index) => (
+                  {visibleStructuredRows !== null
+                    ? visibleStructuredRows.map((row, index) => (
+                        <StructuredCaptionRow
+                          key={getStructuredRowKey(row)}
+                          row={row}
+                          appearance={appearance}
+                          hideOriginals={
+                            effectiveRoomMode === "translate" && hideOriginals
+                          }
+                          isEmphasized={
+                            row.state === "active" ||
+                            (!structuredHasActiveRow &&
+                              index === visibleStructuredRows.length - 1)
+                          }
+                          roomMode={effectiveRoomMode}
+                        />
+                      ))
+                    : visibleCaptionParts.map((caption, index) => (
                     <p
                       key={caption.key}
                       className={`live-caption-text whitespace-pre-line leading-tight [overflow-wrap:anywhere] ${getCaptionWeightClassName(caption, effectiveRoomMode)} ${caption.className}`}
@@ -1592,7 +1805,7 @@ function LiveRoomPage() {
                     >
                       {caption.text}
                     </p>
-                  ))}
+                      ))}
                 </div>
               </div>
             )}
@@ -1715,8 +1928,13 @@ function LiveRoomPage() {
         ? createPortal(
             <MiniCaptionWindowContent
               visibleCaptionParts={visibleCaptionParts}
+              visibleStructuredRows={visibleStructuredRows}
+              appearance={appearance}
               emptyCaptionMessage={emptyCaptionMessage}
               fontScale={fontScale}
+              hideOriginals={
+                effectiveRoomMode === "translate" && hideOriginals
+              }
               roomMode={effectiveRoomMode}
             />,
             miniCaptionRoot,

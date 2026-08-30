@@ -44,7 +44,31 @@ html,
 }
 
 .live-caption-text {
+  font-family: var(--caption-font-family, "Poppins", system-ui, sans-serif);
   font-size: calc(1.5rem * var(--caption-font-scale, 1));
+}
+
+.live-caption-row {
+  font-family: var(--caption-font-family, "Poppins", system-ui, sans-serif);
+}
+
+.live-speaker-label {
+  margin-bottom: 0.2rem;
+  font-size: calc(0.72rem * var(--caption-font-scale, 1));
+  font-weight: 650;
+  letter-spacing: 0.03em;
+}
+
+.live-caption-lane {
+  margin: 0;
+  font-size: calc(1.5rem * var(--caption-font-scale, 1));
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.live-caption-translation {
+  margin-top: 0.2rem;
 }
 
 @supports (height: 100dvh) {
@@ -67,6 +91,14 @@ html,
   }
 
   .live-caption-text {
+    font-size: calc(3rem * var(--caption-font-scale, 1));
+  }
+
+  .live-speaker-label {
+    font-size: calc(1rem * var(--caption-font-scale, 1));
+  }
+
+  .live-caption-lane {
     font-size: calc(3rem * var(--caption-font-scale, 1));
   }
 
