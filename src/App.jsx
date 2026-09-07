@@ -89,12 +89,12 @@ const pricingPlans = [
   },
   {
     name: "Monthly",
-    price: "$29.99",
+    price: "$34.99",
     cadence: "per month",
   },
   {
     name: "Quarterly",
-    price: "$59.99",
+    price: "$79.99",
     cadence: "per 3 months",
     badge: "Best value",
   },
