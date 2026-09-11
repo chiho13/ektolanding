@@ -94,7 +94,7 @@ const pricingPlans = [
   },
   {
     name: "Quarterly",
-    price: "$79.99",
+    price: "$69.99",
     cadence: "per 3 months",
     badge: "Best value",
   },
@@ -321,25 +321,27 @@ function App() {
               <div className="flex flex-col gap-4">
                 <StarRating rating={4.5} reviews={16} />
                 <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-300">
-                  {["Free to download", "37+ languages", "No setup required"].map(
-                    (item) => (
-                      <span key={item} className="inline-flex items-center gap-2">
-                        <svg
-                          className="h-4 w-4 text-emerald-300"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.704 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.296-7.293a1 1 0 011.408 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        {item}
-                      </span>
-                    ),
-                  )}
+                  {[
+                    "Free to download",
+                    "37+ languages",
+                    "No setup required",
+                  ].map((item) => (
+                    <span key={item} className="inline-flex items-center gap-2">
+                      <svg
+                        className="h-4 w-4 text-emerald-300"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.704 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.296-7.293a1 1 0 011.408 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {item}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
@@ -522,8 +524,8 @@ function App() {
               One app for lectures, conferences, sermons, and conversations
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Wherever you need to understand what is being said in person,
-              ekto keeps up in real time.
+              Wherever you need to understand what is being said in person, ekto
+              keeps up in real time.
             </p>
           </div>
 
@@ -678,8 +680,8 @@ function App() {
                 Live Translation for Business Conferences
               </h3>
               <p className="text-base leading-7 text-slate-700 mb-5">
-                Understand talks, panels, and sessions when speakers use
-                another language.
+                Understand talks, panels, and sessions when speakers use another
+                language.
               </p>
               <a
                 href="/blog/live-translation-for-business-conferences/"
@@ -827,9 +829,7 @@ function App() {
               <p className="truncate text-sm font-bold text-gray-900">
                 ekto: Live AI Captions
               </p>
-              <p className="text-xs text-gray-600">
-                4.5 stars • 37+ languages
-              </p>
+              <p className="text-xs text-gray-600">4.5 stars • 37+ languages</p>
             </div>
           </div>
           <a
