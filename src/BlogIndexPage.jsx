@@ -2,6 +2,13 @@ import appIcon from "./assets/ekto.png";
 
 const articles = [
   {
+    title: "How to Practice English with Korean-to-English Live Translation",
+    description:
+      "Use Korean-to-English live translation to find expressions, say them aloud, and practice English for everyday situations.",
+    href: "/blog/practice-english-with-korean-to-english-live-translation/",
+    category: "English practice",
+  },
+  {
     title: "Live Captions for Deaf and Hard-of-Hearing People at In-Person Events",
     description:
       "How fast live captions and Big Reply help people follow speech, respond clearly, and stay independent in real-world places.",
@@ -57,6 +64,11 @@ function BlogIndexPage() {
 
       <main className="px-6 py-16">
         <section className="max-w-[1000px] mx-auto">
+          <nav aria-label="Blog language" className="mb-8 flex flex-wrap gap-4 text-sm">
+            <span aria-current="page" className="font-semibold text-slate-900">English</span>
+            <a href="/ja/blog/" lang="ja" className="font-semibold text-blue-700 underline underline-offset-4">日本語</a>
+            <a href="/ko/blog/" lang="ko" className="font-semibold text-blue-700 underline underline-offset-4">한국어</a>
+          </nav>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-4">
             Blog
           </p>
@@ -65,7 +77,7 @@ function BlogIndexPage() {
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-slate-700 mb-12">
             Practical guides for using live translation and live captions at
-            conferences, lectures, events, and in-person conversations.
+            conferences, lectures, events, in-person conversations, and English practice.
           </p>
 
           <div className="grid gap-6">
@@ -95,14 +107,6 @@ function BlogIndexPage() {
             ))}
           </div>
 
-          <div className="mt-12 text-sm text-slate-600">
-            <a
-              href="/ja/blog/"
-              className="font-semibold text-blue-700 underline underline-offset-4"
-            >
-              日本語のブログを見る
-            </a>
-          </div>
         </section>
       </main>
     </div>

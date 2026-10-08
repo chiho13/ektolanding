@@ -729,6 +729,20 @@ function App() {
               </a>
             </article>
           </div>
+          <article className="mt-6 flex flex-col gap-5 rounded-2xl border border-blue-200 bg-blue-50 p-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="mb-2 text-sm font-semibold text-blue-700">English practice</p>
+              <h3 className="mb-2 text-xl font-bold text-slate-900">
+                How to Practice English with Korean-to-English Live Translation
+              </h3>
+              <p className="text-base leading-7 text-slate-700">
+                Speak Korean, read your words in English, and practice saying them yourself with a simple daily routine.
+              </p>
+            </div>
+            <a href="/blog/practice-english-with-korean-to-english-live-translation/" className="shrink-0 font-semibold text-blue-700 hover:text-blue-800">
+              Read article →
+            </a>
+          </article>
         </div>
       </section>
 

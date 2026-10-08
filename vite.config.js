@@ -32,6 +32,15 @@ export default defineConfig({
           rootDir,
           "blog/live-captions-for-deaf-hard-of-hearing-events/index.html"
         ),
+        englishPracticeArticle: resolve(
+          rootDir,
+          "blog/practice-english-with-korean-to-english-live-translation/index.html"
+        ),
+        blogIndexKo: resolve(rootDir, "ko/blog/index.html"),
+        koreanEnglishPracticeArticle: resolve(
+          rootDir,
+          "ko/blog/practice-english-with-korean-to-english-live-translation/index.html"
+        ),
         blogIndexJa: resolve(rootDir, "ja/blog/index.html"),
         lectureCaptionsArticleJa: resolve(
           rootDir,

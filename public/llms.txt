@@ -23,6 +23,7 @@ ekto listens continuously and turns speech into accurate live captions or transl
 - Churches and community events
 - Doctor's appointments and waiting rooms
 - Everyday face-to-face conversations
+- Finding English expressions by translating Korean speech and practicing the translated sentences
 
 ## Features
 
@@ -37,6 +38,9 @@ ekto listens continuously and turns speech into accurate live captions or transl
 - Website: https://voicetranslate.app/
 - App Store: https://apps.apple.com/app/id6740196773
 - Blog: https://voicetranslate.app/blog/
+- Korean blog: https://voicetranslate.app/ko/blog/
+- Korean-to-English translation for English practice (English guide): https://voicetranslate.app/blog/practice-english-with-korean-to-english-live-translation/
+- Korean-to-English translation for English practice (Korean guide): https://voicetranslate.app/ko/blog/practice-english-with-korean-to-english-live-translation/
 - Live captions for Deaf and hard-of-hearing people: https://voicetranslate.app/blog/live-captions-for-deaf-hard-of-hearing-events/
 - Live translation for business conferences: https://voicetranslate.app/blog/live-translation-for-business-conferences/
 - Best live caption apps for lectures: https://voicetranslate.app/blog/top-5-best-live-caption-apps-for-lectures/
