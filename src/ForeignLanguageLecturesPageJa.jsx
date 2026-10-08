@@ -93,6 +93,11 @@ function ForeignLanguageLecturesPageJa() {
 
       <main className="px-6 py-16">
         <article className="max-w-[1000px] mx-auto">
+          <nav aria-label="記事の言語" className="mb-6 flex flex-wrap gap-4 text-sm">
+            <a href="/blog/how-to-understand-lectures-in-a-foreign-language/" lang="en" className="font-semibold text-blue-700 underline underline-offset-4">English</a>
+            <span aria-current="page" className="font-semibold text-slate-900">日本語</span>
+            <a href="/ko/blog/how-to-understand-lectures-in-a-foreign-language/" lang="ko" className="font-semibold text-blue-700 underline underline-offset-4">한국어</a>
+          </nav>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-2">
             Blog
           </p>

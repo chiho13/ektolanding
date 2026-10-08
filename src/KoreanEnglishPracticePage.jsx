@@ -114,7 +114,7 @@ function KoreanEnglishPracticePage() {
             <p className="mt-4 text-sm leading-6 text-slate-400">무료 다운로드 · 프리미엄 기능은 구독이 필요할 수 있습니다</p>
           </section>
           <footer className="mt-10 text-base leading-7 text-slate-600">
-            <p>강의나 회의에서 번역을 활용하는 방법도 궁금하다면 <a href="/blog/how-to-understand-lectures-in-a-foreign-language/" className="font-semibold text-blue-700 underline underline-offset-4">외국어 강의 이해하기 가이드 (영문)</a>를 읽어 보세요.</p>
+            <p>강의나 회의에서 번역을 활용하는 방법도 궁금하다면 <a href="/ko/blog/how-to-understand-lectures-in-a-foreign-language/" className="font-semibold text-blue-700 underline underline-offset-4">외국어 강의 이해하기 가이드</a>를 읽어 보세요.</p>
           </footer>
         </article>
       </main>

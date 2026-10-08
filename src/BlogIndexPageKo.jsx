@@ -22,7 +22,7 @@ function BlogIndexPageKo() {
           </nav>
           <p className="mb-4 text-sm font-semibold text-blue-700">ekto 블로그</p>
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-5xl">실시간 번역과 영어 회화 연습 가이드</h1>
-          <p className="mb-12 max-w-3xl text-lg leading-8 text-slate-700">한국어와 영어 사이의 실시간 번역을 활용하는 방법을 소개합니다. 설정부터 일상에서 쓸 표현 연습까지, ekto와 함께 시작해 보세요.</p>
+          <p className="mb-12 max-w-3xl text-lg leading-8 text-slate-700">강의와 일상에서 실시간 자막과 번역을 활용하는 방법을 소개합니다. 외국어 강의를 따라가고 영어 표현을 연습하는 과정을 ekto와 함께 시작해 보세요.</p>
 
           <article className="rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-lg">
             <p className="mb-3 text-sm font-semibold text-blue-700">영어 회화 연습</p>
@@ -31,6 +31,14 @@ function BlogIndexPageKo() {
             </h2>
             <p className="mb-4 text-lg leading-8 text-slate-700">한국어로 말한 내용을 영어 번역으로 확인하고 직접 말해 보세요. 상황별 예문과 하루 5분 연습 루틴을 소개합니다.</p>
             <a href="/ko/blog/practice-english-with-korean-to-english-live-translation/" className="inline-flex font-semibold text-blue-700 hover:text-blue-800">가이드 읽기 →</a>
+          </article>
+          <article className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-lg">
+            <p className="mb-3 text-sm font-semibold text-blue-700">유학과 강의</p>
+            <h2 className="mb-3 text-2xl font-bold text-slate-900">
+              <a href="/ko/blog/how-to-understand-lectures-in-a-foreign-language/" className="hover:text-blue-700">외국어 강의를 이해하는 방법</a>
+            </h2>
+            <p className="mb-4 text-lg leading-8 text-slate-700">실시간 자막과 번역으로 강의를 따라가고, 저장한 강의 기록으로 복습하는 유학생을 위한 9가지 팁을 소개합니다.</p>
+            <a href="/ko/blog/how-to-understand-lectures-in-a-foreign-language/" className="inline-flex font-semibold text-blue-700 hover:text-blue-800">가이드 읽기 →</a>
           </article>
         </section>
       </main>

@@ -36,6 +36,10 @@ export default defineConfig({
           rootDir,
           "blog/practice-english-with-korean-to-english-live-translation/index.html"
         ),
+        foreignLanguageLecturesArticleKo: resolve(
+          rootDir,
+          "ko/blog/how-to-understand-lectures-in-a-foreign-language/index.html"
+        ),
         blogIndexKo: resolve(rootDir, "ko/blog/index.html"),
         koreanEnglishPracticeArticle: resolve(
           rootDir,

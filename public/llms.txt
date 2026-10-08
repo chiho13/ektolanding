@@ -43,4 +43,5 @@ ekto listens continuously and turns speech into accurate live captions or transl
 - Korean-to-English translation for English practice (Korean guide): https://voicetranslate.app/ko/blog/practice-english-with-korean-to-english-live-translation/
 - Live captions for Deaf and hard-of-hearing people: https://voicetranslate.app/blog/live-captions-for-deaf-hard-of-hearing-events/
 - Live translation for business conferences: https://voicetranslate.app/blog/live-translation-for-business-conferences/
+- Understanding lectures in a foreign language (Korean guide): https://voicetranslate.app/ko/blog/how-to-understand-lectures-in-a-foreign-language/
 - Best live caption apps for lectures: https://voicetranslate.app/blog/top-5-best-live-caption-apps-for-lectures/
