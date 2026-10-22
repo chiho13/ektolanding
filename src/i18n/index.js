@@ -1,2 +1,2 @@
-export { translations, supportedLanguages, getDefaultLanguage, rotatingWords } from "./translations";
-export { useLanguage } from "./useLanguage";
+export { translations, getTranslation, validateTranslations } from "./translations.js";
+export { locales, supportedLanguages, getLocale, getLocaleFromPath, getArticlePath, getBlogPath } from "./locales.js";

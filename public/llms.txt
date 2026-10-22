@@ -39,6 +39,9 @@ ekto listens continuously and turns speech into accurate live captions or transl
 - App Store: https://apps.apple.com/app/id6740196773
 - Blog: https://voicetranslate.app/blog/
 - Korean blog: https://voicetranslate.app/ko/blog/
+- Spanish blog: https://voicetranslate.app/es/blog/
+- Real-time conversation translation into Spanish (Spanish guide): https://voicetranslate.app/es/blog/traductor-de-conversaciones-en-tiempo-real/
+- Understanding lectures and work meetings in English (Spanish guide): https://voicetranslate.app/es/blog/como-entender-clases-y-reuniones-de-trabajo-en-ingles/
 - Korean-to-English translation for English practice (English guide): https://voicetranslate.app/blog/practice-english-with-korean-to-english-live-translation/
 - Korean-to-English translation for English practice (Korean guide): https://voicetranslate.app/ko/blog/practice-english-with-korean-to-english-live-translation/
 - Live captions for Deaf and hard-of-hearing people: https://voicetranslate.app/blog/live-captions-for-deaf-hard-of-hearing-events/

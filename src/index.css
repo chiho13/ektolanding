@@ -16,6 +16,23 @@
   font-family: "Noto Sans JP", "Poppins", system-ui, sans-serif;
 }
 
+:lang(ko) {
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  word-break: keep-all;
+}
+
+:lang(zh-Hans) {
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+.landing-page {
+  overflow-wrap: anywhere;
+}
+
+.landing-page [hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-width: 320px;

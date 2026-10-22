@@ -11,7 +11,7 @@ const articles = [
   {
     title: "Live Captions for Deaf and Hard-of-Hearing People at In-Person Events",
     description:
-      "How fast live captions and Big Reply help people follow speech, respond clearly, and stay independent in real-world places.",
+      "How fast live captions and Type Reply help people follow speech, respond clearly, and stay independent in real-world places.",
     href: "/blog/live-captions-for-deaf-hard-of-hearing-events/",
     category: "Accessibility",
   },
@@ -68,6 +68,7 @@ function BlogIndexPage() {
             <span aria-current="page" className="font-semibold text-slate-900">English</span>
             <a href="/ja/blog/" lang="ja" className="font-semibold text-blue-700 underline underline-offset-4">日本語</a>
             <a href="/ko/blog/" lang="ko" className="font-semibold text-blue-700 underline underline-offset-4">한국어</a>
+            <a href="/es/blog/" lang="es" className="font-semibold text-blue-700 underline underline-offset-4">Español</a>
           </nav>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-4">
             Blog

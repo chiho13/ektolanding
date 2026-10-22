@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 import LiveRoomPage from "./LiveRoomPage.jsx";
 import { Analytics } from "@vercel/analytics/react";
+import { getLocaleFromPath } from "./i18n/locales.js";
 
 const Page = window.location.pathname.startsWith("/live/")
   ? LiveRoomPage
@@ -12,7 +13,7 @@ const Page = window.location.pathname.startsWith("/live/")
 const rootEl = document.getElementById("root");
 const tree = (
   <StrictMode>
-    <Page />
+    <Page locale={getLocaleFromPath(window.location.pathname).code} />
     <Analytics />
   </StrictMode>
 );

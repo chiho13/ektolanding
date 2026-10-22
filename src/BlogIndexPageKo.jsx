@@ -19,6 +19,7 @@ function BlogIndexPageKo() {
             <a href="/blog/" lang="en" className="font-semibold text-blue-700 underline underline-offset-4">English</a>
             <a href="/ja/blog/" lang="ja" className="font-semibold text-blue-700 underline underline-offset-4">日本語</a>
             <span aria-current="page" className="font-semibold text-slate-900">한국어</span>
+            <a href="/es/blog/" lang="es" className="font-semibold text-blue-700 underline underline-offset-4">Español</a>
           </nav>
           <p className="mb-4 text-sm font-semibold text-blue-700">ekto 블로그</p>
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-5xl">실시간 번역과 영어 회화 연습 가이드</h1>

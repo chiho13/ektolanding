@@ -4,7 +4,7 @@ const articles = [
   {
     title: "聴覚障害・難聴の人のための対面イベント向けライブ字幕",
     description:
-      "速いライブ字幕とBig Replyで、現実の場所で話を追い、返答し、自立して行動しやすくする方法を解説します。",
+      "速いライブ字幕と「返信を入力」で、現実の場所で話を追い、返答し、自立して行動しやすくする方法を解説します。",
     href: "/ja/blog/live-captions-for-deaf-hard-of-hearing-events/",
     category: "アクセシビリティ",
   },
@@ -57,6 +57,12 @@ function BlogIndexPageJa() {
 
       <main className="px-6 py-16">
         <section className="max-w-[1000px] mx-auto">
+          <nav aria-label="ブログの言語" className="mb-8 flex flex-wrap gap-4 text-sm">
+            <a href="/blog/" lang="en" className="font-semibold text-blue-700 underline underline-offset-4">English</a>
+            <span aria-current="page" className="font-semibold text-slate-900">日本語</span>
+            <a href="/ko/blog/" lang="ko" className="font-semibold text-blue-700 underline underline-offset-4">한국어</a>
+            <a href="/es/blog/" lang="es" className="font-semibold text-blue-700 underline underline-offset-4">Español</a>
+          </nav>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700 mb-4">
             Blog
           </p>

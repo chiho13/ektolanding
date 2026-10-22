@@ -15,6 +15,9 @@ import KoreanEnglishPracticePage from "./KoreanEnglishPracticePage.jsx";
 import BlogIndexPageKo from "./BlogIndexPageKo.jsx";
 import EnglishPracticePage from "./EnglishPracticePage.jsx";
 import ForeignLanguageLecturesPageKo from "./ForeignLanguageLecturesPageKo.jsx";
+import BlogIndexPageEs from "./BlogIndexPageEs.jsx";
+import SpanishLecturesWorkPage from "./SpanishLecturesWorkPage.jsx";
+import SpanishConversationsPage from "./SpanishConversationsPage.jsx";
 
 // Maps each built HTML file (relative to dist/) to the component that should be
 // rendered into its <div id="root"> at build time. Keep this in sync with the
@@ -31,6 +34,9 @@ const pages = [
   ["ko/blog/index.html", BlogIndexPageKo],
   ["ko/blog/how-to-understand-lectures-in-a-foreign-language/index.html", ForeignLanguageLecturesPageKo],
   ["ko/blog/practice-english-with-korean-to-english-live-translation/index.html", KoreanEnglishPracticePage],
+  ["es/blog/index.html", BlogIndexPageEs],
+  ["es/blog/como-entender-clases-y-reuniones-de-trabajo-en-ingles/index.html", SpanishLecturesWorkPage],
+  ["es/blog/traductor-de-conversaciones-en-tiempo-real/index.html", SpanishConversationsPage],
   ["ja/blog/index.html", BlogIndexPageJa],
   ["ja/blog/top-5-best-live-caption-apps-for-lectures/index.html", BlogArticlePageJa],
   ["ja/blog/how-to-understand-lectures-in-a-foreign-language/index.html", ForeignLanguageLecturesPageJa],
@@ -44,4 +50,8 @@ export function renderAll() {
     out[htmlPath] = renderToString(<Component />);
   }
   return out;
+}
+
+export function renderLandingPage(locale) {
+  return renderToString(<App locale={locale} />);
 }

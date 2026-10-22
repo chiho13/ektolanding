@@ -52,7 +52,7 @@ function DeafHardOfHearingCaptionsPageJa() {
           <figure className="mb-12 overflow-hidden rounded-2xl bg-white border border-slate-200">
             <img
               src="/blog/bigreply.png"
-              alt="iPhone showing live captions for a dinner question and Big Reply text for the response medium rare"
+              alt="夕食の質問のライブ字幕と、「返信を入力」で表示した返答「ミディアムレア」を映したiPhone"
               className="w-full max-h-[560px] object-contain"
             />
           </figure>
@@ -106,10 +106,10 @@ function DeafHardOfHearingCaptionsPageJa() {
 
           <section className="mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-5">
-              Big Replyで返答を分かりやすく伝える
+              「返信を入力」で返答を分かりやすく伝える
             </h2>
             <p className="text-lg leading-8 text-slate-700 mb-5">
-              話を理解することは、会話の片側にすぎません。自分の返答を分かりやすく伝えたい場面もあります。Big Replyでは、入力した返答を大きな文字で表示し、相手に見せられます。
+              話を理解することは、会話の片側にすぎません。自分の返答を分かりやすく伝えたい場面もあります。「返信を入力」では、入力した返答を大きな文字で表示し、画面を反転させて相手に見せられます。
             </p>
             <p className="text-lg leading-8 text-slate-700">
               レストラン、クリニック、ホテルの受付、空港カウンター、騒がしい部屋など、視覚的な返答のほうが伝わりやすい場面で役立ちます。

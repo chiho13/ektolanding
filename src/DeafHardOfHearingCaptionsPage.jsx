@@ -56,7 +56,7 @@ function DeafHardOfHearingCaptionsPage() {
           <figure className="mb-12 overflow-hidden rounded-2xl bg-white border border-slate-200">
             <img
               src="/blog/bigreply.png"
-              alt="iPhone showing live captions for a dinner question and Big Reply text for the response medium rare"
+              alt="iPhone showing live captions for a dinner question and Type Reply text for the response medium rare"
               className="w-full max-h-[560px] object-contain"
             />
           </figure>
@@ -125,12 +125,13 @@ function DeafHardOfHearingCaptionsPage() {
 
           <section className="mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-5">
-              Big Reply Helps You Answer Clearly
+              Type Reply Helps You Answer Clearly
             </h2>
             <p className="text-lg leading-8 text-slate-700 mb-5">
               Understanding speech is only one side of a conversation. Sometimes
-              you also need a simple way to answer. Big Reply lets you type a
-              response in large text and show it to another person.
+              you also need a simple way to answer. Type Reply lets you type a
+              response in large text and flip the screen so the other person
+              can read it.
             </p>
             <p className="text-lg leading-8 text-slate-700">
               That can help at restaurants, clinics, hotel desks, airport
