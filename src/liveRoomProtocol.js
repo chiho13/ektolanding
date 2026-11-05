@@ -34,6 +34,11 @@ const SPEAKER_PALETTE = Object.freeze([
 ]);
 const SPEAKER_NEUTRAL = "#c7c7c7";
 
+export function getRoomTitle(statusPayload) {
+  const title = statusPayload?.title;
+  return typeof title === "string" ? title.trim() || null : null;
+}
+
 export function normalizeLiveAppearance(appearance) {
   if (!appearance || typeof appearance !== "object" || Array.isArray(appearance)) {
     return DEFAULT_LIVE_APPEARANCE;

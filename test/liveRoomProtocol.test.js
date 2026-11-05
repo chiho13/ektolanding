@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   DEFAULT_LIVE_APPEARANCE,
   getLiveFontFamily,
+  getRoomTitle,
   getSpeakerColor,
   getStructuredMessageRows,
   getStructuredRowKey,
@@ -11,6 +12,15 @@ import {
   normalizeLiveAppearance,
   normalizeStructuredRows,
 } from "../src/liveRoomProtocol.js";
+
+test("status payloads can add or clear a title and support older relays", () => {
+  assert.equal(getRoomTitle({ status: "waiting", title: "  春の講演  " }), "春の講演");
+  assert.equal(getRoomTitle({ status: "live", title: "New title" }), "New title");
+  assert.equal(getRoomTitle({ status: "live", title: null }), null);
+  assert.equal(getRoomTitle({ status: "live", title: "  " }), null);
+  assert.equal(getRoomTitle({ status: "live" }), null);
+  assert.equal(getRoomTitle({ status: "live", title: 42 }), null);
+});
 
 function makeRow(overrides = {}) {
   return {

@@ -6,6 +6,7 @@ import appIcon from "./assets/ekto.png";
 import {
   DEFAULT_LIVE_APPEARANCE,
   getLiveFontFamily,
+  getRoomTitle,
   getSpeakerColor,
   getStructuredMessageRows,
   getStructuredRowKey,
@@ -1073,6 +1074,7 @@ function LiveRoomPage() {
   const [structuredRows, setStructuredRows] = useState(null);
   const [appearance, setAppearance] = useState(DEFAULT_LIVE_APPEARANCE);
   const [roomMode, setRoomMode] = useState(null);
+  const [roomTitle, setRoomTitle] = useState(null);
   const [hideOriginals, setHideOriginals] = useState(false);
   const [fontScale, setFontScale] = useState(readStoredFontScale);
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
@@ -1283,8 +1285,11 @@ function LiveRoomPage() {
     }
 
     let isCancelled = false;
+    let statusRequestID = 0;
+    let latestTitleResponseID = 0;
 
     async function refreshRoomStatus() {
+      const requestID = ++statusRequestID;
       try {
         const response = await fetch(getRoomStatusUrl(code), {
           cache: "no-store",
@@ -1303,6 +1308,11 @@ function LiveRoomPage() {
 
         if (isCancelled || !nextStatus) {
           return;
+        }
+
+        if (requestID > latestTitleResponseID) {
+          latestTitleResponseID = requestID;
+          setRoomTitle(getRoomTitle(payload));
         }
 
         if (nextStatus === "live") {
@@ -1740,9 +1750,9 @@ function LiveRoomPage() {
               className="h-9 w-9 rounded-lg shadow-lg"
             />
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white/85">
-                {liveRoomTitle}
-              </p>
+              <h1 dir="auto" className="line-clamp-2 text-sm font-semibold text-white/85 [overflow-wrap:anywhere]">
+                {roomTitle ?? liveRoomTitle}
+              </h1>
               <p className="mt-0.5 inline-flex max-w-full items-center gap-1.5 truncate rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[0.68rem] uppercase tracking-[0.08em] text-white/50">
                 <span className="h-1 w-1 shrink-0 rounded-full bg-white/35" />
                 Broadcast {code || "unknown"}
