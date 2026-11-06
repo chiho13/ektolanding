@@ -6,6 +6,7 @@ import {
   advanceAudienceCaptionPresentation,
   getAudienceCaptionRows,
   getLiveFontFamily,
+  getMiniAudienceCaptionRows,
   getRoomLogoUrl,
   getRoomTitle,
   getSpeakerColor,
@@ -202,63 +203,71 @@ test("a missing secondary translation produces no row when structured originals 
   assert.deepEqual(getAudienceCaptionRows(unavailable, "es", true, structured), []);
 });
 
-test("translated views show at most one original before the first translation", () => {
-  const first = makeRow({ translation: "" });
-  const next = makeRow({ id: "sentence-43", original: "Next sentence", translation: "" });
-  assert.deepEqual(getTranslationDisplayRows([], [first, next], false), [next]);
-  assert.deepEqual(getTranslationDisplayRows([], [first, next], true), []);
-
-  const primary = { ...first, translation: "Bonjour" };
-  assert.deepEqual(getTranslationDisplayRows([primary], [primary, next], false), [primary]);
-});
-
-test("secondary and tertiary views wait to add the next bilingual row until the hold expires", () => {
-  const first = makeRow({ original: "Hello", state: "final" });
+test("the original transcript is independent of which translation has arrived", () => {
+  const first = makeRow({ state: "final" });
   const next = makeRow({
-    id: "sentence-43", original: "Hello again", translation: "Rebonjour", speakerNumber: 3,
+    id: "sentence-43", original: "The next sentence", translation: "", speakerNumber: 3,
   });
+  const last = makeRow({
+    id: "sentence-44", original: "Still speaking", translation: "", speakerNumber: 4,
+  });
+  const originals = [first, next, last];
+  const primary = getTranslationDisplayRows(originals, { hideOriginals: false });
+  assert.deepEqual(primary, originals);
+  assert.deepEqual(getTranslationDisplayRows(originals, { hideOriginals: true }), [first]);
+
   const firstResult = {
     sentenceId: 42, original: first.original, state: "translated",
     translations: { es: "Hola", ja: "こんにちは" },
   };
   const nextResult = {
     sentenceId: 43, original: next.original, state: "translated",
-    translations: { es: "Hola de nuevo", ja: "またこんにちは" },
+    translations: { es: "La siguiente frase", ja: "次の文" },
   };
-  const originals = [first, next];
+  const sourceRows = (rows) => rows.map(({ id, original, speakerNumber, state }) =>
+    ({ id, original, speakerNumber, state }),
+  );
 
   for (const language of ["es", "ja"]) {
+    const display = (audienceTranslations, rows = originals) =>
+      getTranslationDisplayRows(rows, { hideOriginals: false, audienceTranslations });
+
+    const beforeTranslation = display([]);
+    assert.deepEqual(sourceRows(beforeTranslation), sourceRows(primary));
+    assert.ok(beforeTranslation.every((row) => row.translation === ""));
+
     const firstTranslation = getAudienceCaptionRows([firstResult], language, false, originals);
     const shown = advanceAudienceCaptionPresentation(
       { language, shownIDs: new Set(), nextRowAt: 0 }, firstTranslation, language, 100,
     );
-    assert.deepEqual(getTranslationDisplayRows(firstTranslation, originals, false), firstTranslation);
+    const updated = { ...last, original: "Still speaking now" };
+    assert.deepEqual(display(firstTranslation, [first, next, updated]).at(-1), updated);
 
     const ready = getAudienceCaptionRows([firstResult, nextResult], language, false, originals);
     const holding = advanceAudienceCaptionPresentation(shown, ready, language, 599);
-    assert.deepEqual(getTranslationDisplayRows(
-      ready.filter((row) => holding.shownIDs.has(row.id)), originals, false,
-    ), firstTranslation);
+    const duringHold = display(ready.filter((row) => holding.shownIDs.has(row.id)));
+    assert.deepEqual(duringHold, [firstTranslation[0], next, last]);
+    assert.deepEqual(getMiniAudienceCaptionRows(duringHold), [firstTranslation[0], last]);
 
     const released = advanceAudienceCaptionPresentation(shown, ready, language, 600);
-    assert.deepEqual(getTranslationDisplayRows(
-      ready.filter((row) => released.shownIDs.has(row.id)), originals, false,
-    ), ready);
+    const afterHold = display(ready.filter((row) => released.shownIDs.has(row.id)));
+    assert.deepEqual(sourceRows(afterHold), sourceRows(primary));
+    assert.equal(afterHold[1].translation, nextResult.translations[language]);
   }
 });
 
-test("legacy audience streams use a single original while waiting for the first translation", () => {
+test("legacy audience views keep streaming the active original when translations are visible", () => {
   const parts = [
-    { key: "first", role: "caption-active", text: "Earlier original" },
     { key: "draft", role: "caption-active", text: "Live original" },
     { key: "primary", role: "translation-active", text: "Primary translation" },
   ];
   const original = { id: "legacy-draft", original: "Live original", translation: "", state: "active" };
-  assert.deepEqual(getTranslationDisplayRows([], null, false, parts), [original]);
-  assert.deepEqual(getTranslationDisplayRows([], null, true, parts), []);
   const translated = [makeRow()];
-  assert.deepEqual(getTranslationDisplayRows(translated, null, false, parts), translated);
-  assert.deepEqual(getTranslationDisplayRows([], [], false, parts), []);
+  const options = { hideOriginals: false, audienceTranslations: translated, legacyCaptionParts: parts };
+  assert.deepEqual(getTranslationDisplayRows(null, options), [...translated, original]);
+  assert.deepEqual(getTranslationDisplayRows(null, { ...options, hideOriginals: true }), translated);
+  assert.deepEqual(getTranslationDisplayRows([], options), []);
+  assert.equal(getTranslationDisplayRows(null, { hideOriginals: false }), null);
 });
 
 test("additional languages show ready rows one at a time with a 500 ms hold", () => {

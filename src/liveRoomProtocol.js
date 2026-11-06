@@ -223,20 +223,41 @@ export function getAudienceCaptionRows(rows, language, hideOriginals, structured
   });
 }
 
-export function getTranslationDisplayRows(translatedRows, structuredRows, hideOriginals, legacyCaptionParts = []) {
-  if (translatedRows.length > 0 || hideOriginals) return translatedRows;
+export function getTranslationDisplayRows(structuredRows, {
+  hideOriginals, audienceTranslations = null, legacyCaptionParts = [],
+}) {
+  if (audienceTranslations === null) {
+    return hideOriginals ? structuredRows?.filter((row) => row.translation.trim()) ?? null : structuredRows;
+  }
+  if (hideOriginals) return audienceTranslations;
 
   if (structuredRows !== null) {
-    const latest = structuredRows.findLast((row) => row.original.trim());
-    return latest ? [{ ...latest, translation: "" }] : [];
+    const translatedByID = new Map(audienceTranslations.map((row) => [row.id, row]));
+    return structuredRows.filter((row) => row.original.trim()).map((row) => {
+      const translated = translatedByID.get(row.id);
+      return translated
+        ? { ...row, translation: translated.translation, language: translated.language }
+        : { ...row, translation: "" };
+    });
   }
 
   const latest = legacyCaptionParts.findLast(
     ({ role, text }) => role === "caption-active" && text.trim(),
   );
-  return latest ? [{
+  if (!latest || latest.text.trim() === audienceTranslations.at(-1)?.original.trim()) {
+    return audienceTranslations;
+  }
+  return [...audienceTranslations, {
     id: `legacy-${latest.key}`, original: latest.text, translation: "", state: "active",
-  }] : [];
+  }];
+}
+
+export function getMiniAudienceCaptionRows(rows) {
+  const latest = rows.at(-1);
+  if (!latest || latest.translation) return rows.slice(-1);
+
+  const latestTranslated = rows.findLast((row) => row.translation);
+  return latestTranslated ? [latestTranslated, latest] : [latest];
 }
 
 export function advanceAudienceCaptionPresentation(presentation, rows, language, now) {
