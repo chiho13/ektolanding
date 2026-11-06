@@ -7,15 +7,14 @@ import {
   DEFAULT_LIVE_APPEARANCE,
   advanceAudienceCaptionPresentation,
   getAudienceCaptionRows,
-  getAudienceTranscriptRows,
   getLiveFontFamily,
-  getMiniAudienceCaptionRows,
   getRoomLogoUrl,
   getRoomTitle,
   getSpeakerColor,
   getStructuredMessageRows,
   getStructuredRowKey,
   getTargetLanguages,
+  getTranslationDisplayRows,
   normalizeLiveAppearance,
   resolveCaptionLanguage,
   upsertAudienceCaption,
@@ -565,6 +564,13 @@ function promoteCaptionPartToActive(part) {
   return part;
 }
 
+function getLegacyTranslationDisplayParts(parts, hideOriginals) {
+  if (hideOriginals) return parts.filter((part) => !isOriginalCaptionPart(part));
+
+  const lastTranslationIndex = parts.findLastIndex((part) => !isOriginalCaptionPart(part));
+  return lastTranslationIndex < 0 ? parts.slice(-1) : parts.slice(0, lastTranslationIndex + 1);
+}
+
 function keepLatestTranslateSentenceActive(parts) {
   if (parts.some(isActiveCaptionPart)) {
     return parts;
@@ -990,7 +996,6 @@ function StructuredCaptionRow({
 function MiniCaptionWindowContent({
   visibleCaptionParts,
   visibleStructuredRows,
-  showAudienceTranscript,
   appearance,
   emptyCaptionMessage,
   fontScale,
@@ -998,9 +1003,7 @@ function MiniCaptionWindowContent({
   roomMode,
 }) {
   const miniCaptionParts = visibleCaptionParts.slice(-MAX_MINI_CAPTION_LINES);
-  const miniStructuredRows = showAudienceTranscript
-    ? getMiniAudienceCaptionRows(visibleStructuredRows)
-    : visibleStructuredRows?.slice(roomMode === "translate" ? -1 : -2) ?? null;
+  const miniStructuredRows = visibleStructuredRows?.slice(roomMode === "translate" ? -1 : -2) ?? null;
   const hasVisibleCaptions = (miniStructuredRows ?? miniCaptionParts).length > 0;
   const structuredHasActiveRow = miniStructuredRows?.some(
     (row) => row.state === "active",
@@ -1785,21 +1788,16 @@ function LiveRoomPage() {
 
   const visibleCaptionParts = useMemo(
     () => {
-      const shouldHideOriginals =
-        effectiveRoomMode === "translate" && hideOriginals;
       const rawParts =
         effectiveRoomMode === "translate" && activeCaptionParts.length > 0
           ? activeCaptionParts
           : [...finalizedCaptionParts, ...activeCaptionParts];
       const parts =
         effectiveRoomMode === "translate"
-          ? keepLatestTranslateSentenceActive(rawParts)
+          ? keepLatestTranslateSentenceActive(getLegacyTranslationDisplayParts(rawParts, hideOriginals))
           : keepLatestCaptionSentenceActive(rawParts);
 
-      return (shouldHideOriginals
-        ? parts.filter((part) => !isOriginalCaptionPart(part))
-        : parts
-      ).slice(-MAX_RENDERED_CAPTION_LINES);
+      return parts.slice(-MAX_RENDERED_CAPTION_LINES);
     },
     [activeCaptionParts, effectiveRoomMode, finalizedCaptionParts, hideOriginals],
   );
@@ -1818,37 +1816,28 @@ function LiveRoomPage() {
   const pacedAudienceRows = usePacedAudienceCaptionRows(
     readyAudienceRows, isSecondaryCaptionLanguage ? selectedCaptionLanguage : null,
   );
-  const showAudienceTranscript = isSecondaryCaptionLanguage && !hideOriginals;
   const visibleStructuredRows = useMemo(() => {
     if (selectedCaptionLanguage === "original") {
       return (structuredRows ?? []).filter((row) => row.original).map((row) => ({
         ...row, translation: "",
       })).slice(-MAX_RENDERED_CAPTION_LINES);
     }
-    if (showAudienceTranscript) {
-      return getAudienceTranscriptRows(structuredRows, activeCaptionParts, pacedAudienceRows)
-        .slice(-MAX_RENDERED_CAPTION_LINES);
-    }
     if (isSecondaryCaptionLanguage) {
-      return pacedAudienceRows;
+      return getTranslationDisplayRows(pacedAudienceRows, structuredRows, hideOriginals, activeCaptionParts);
     }
     if (structuredRows === null) {
       return null;
     }
 
-    const shouldHideOriginals =
-      effectiveRoomMode === "translate" && hideOriginals;
-
-    return structuredRows
-      .filter(
-        (row) =>
-          (!shouldHideOriginals && Boolean(row.original)) ||
-          Boolean(row.translation),
+    const rows = effectiveRoomMode === "translate"
+      ? getTranslationDisplayRows(
+        structuredRows.filter((row) => row.translation.trim()), structuredRows, hideOriginals,
       )
-      .slice(-MAX_RENDERED_CAPTION_LINES);
+      : structuredRows;
+    return rows.slice(-MAX_RENDERED_CAPTION_LINES);
   }, [
     activeCaptionParts, effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage,
-    pacedAudienceRows, selectedCaptionLanguage, showAudienceTranscript, structuredRows,
+    pacedAudienceRows, selectedCaptionLanguage, structuredRows,
   ]);
   const structuredHasActiveRow = visibleStructuredRows?.some(
     (row) => row.state === "active",
@@ -2090,7 +2079,6 @@ function LiveRoomPage() {
             <MiniCaptionWindowContent
               visibleCaptionParts={visibleCaptionParts}
               visibleStructuredRows={visibleStructuredRows}
-              showAudienceTranscript={showAudienceTranscript}
               appearance={appearance}
               emptyCaptionMessage={emptyCaptionMessage}
               fontScale={fontScale}

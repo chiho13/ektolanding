@@ -223,32 +223,20 @@ export function getAudienceCaptionRows(rows, language, hideOriginals, structured
   });
 }
 
-export function getAudienceTranscriptRows(structuredRows, legacyCaptionParts, translatedRows) {
+export function getTranslationDisplayRows(translatedRows, structuredRows, hideOriginals, legacyCaptionParts = []) {
+  if (translatedRows.length > 0 || hideOriginals) return translatedRows;
+
   if (structuredRows !== null) {
-    const translatedByID = new Map(translatedRows.map((row) => [row.id, row]));
-    return structuredRows
-      .filter((row) => row.original.trim())
-      .map((row) => translatedByID.get(row.id) ?? { ...row, translation: "" });
+    const latest = structuredRows.findLast((row) => row.original.trim());
+    return latest ? [{ ...latest, translation: "" }] : [];
   }
 
   const latest = legacyCaptionParts.findLast(
     ({ role, text }) => role === "caption-active" && text.trim(),
   );
-  if (!latest || latest.text.trim() === translatedRows.at(-1)?.original.trim()) {
-    return translatedRows;
-  }
-  return [...translatedRows, {
+  return latest ? [{
     id: `legacy-${latest.key}`, original: latest.text, translation: "", state: "active",
-  }];
-}
-
-export function getMiniAudienceCaptionRows(rows) {
-  const latest = rows.at(-1);
-  if (!latest) return [];
-  if (latest.translation) return [latest];
-
-  const latestTranslated = rows.findLast((row) => row.translation);
-  return latestTranslated ? [latestTranslated, latest] : [latest];
+  }] : [];
 }
 
 export function advanceAudienceCaptionPresentation(presentation, rows, language, now) {
