@@ -146,3 +146,53 @@ export function getStructuredMessageRows(message) {
 export function getStructuredRowKey(row) {
   return row.id;
 }
+
+const CAPTION_LANGUAGE_CODE = /^[a-z]{2,3}(?:-[a-z]{4})?(?:-(?:[a-z]{2}|[0-9]{3}))?$/i;
+
+export function getTargetLanguages(value) {
+  if (!Array.isArray(value) || value.length < 2 || value.length > 5 ||
+      !value.every((code) => typeof code === "string" &&
+        CAPTION_LANGUAGE_CODE.test(code) && code.toLowerCase() !== "und") ||
+      new Set(value.map((code) => code.toLowerCase())).size !== value.length) return [];
+  return value;
+}
+
+export function resolveCaptionLanguage(languages, selection, roomMode, hideOriginals) {
+  if (roomMode !== "translate" || languages.length < 2) return null;
+  if (languages.includes(selection) || (selection === "original" && !hideOriginals)) return selection;
+  return languages[0];
+}
+
+export function upsertAudienceCaption(rows, event) {
+  const { sentenceId, revision, original, speakerNumber, state, translations } = event ?? {};
+  if (!Number.isSafeInteger(sentenceId) || sentenceId < 0 ||
+      !Number.isSafeInteger(revision) || revision < 1 ||
+      typeof original !== "string" || !original.trim() ||
+      !["pending", "translated", "unavailable"].includes(state)) return rows;
+
+  const index = rows.findIndex((row) => row.sentenceId === sentenceId);
+  const previous = rows[index];
+  if (previous && (revision < previous.revision ||
+      (revision === previous.revision && (previous.state !== "pending" || state === "pending")))) return rows;
+
+  const next = rows.filter((row) => row.sentenceId !== sentenceId);
+  next.push({ sentenceId, revision, original, speakerNumber: normalizeSpeakerNumber(speakerNumber), state, translations });
+  return next.sort((first, second) => first.sentenceId - second.sentenceId).slice(-10);
+}
+
+export function getAudienceCaptionRows(rows, language, hideOriginals) {
+  return rows.flatMap((row) => {
+    if (row.state === "pending") return [];
+
+    const text = row.state === "translated" && row.translations?.[language];
+    const translated = typeof text === "string" && text.trim().length > 0;
+    return [{
+      id: "audience-" + row.sentenceId,
+      speakerNumber: row.speakerNumber,
+      original: hideOriginals ? "" : row.original,
+      translation: translated ? text : hideOriginals ? "Translation unavailable" : "",
+      language: translated ? language : undefined,
+      state: "final",
+    }];
+  });
+}

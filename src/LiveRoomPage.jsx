@@ -5,12 +5,16 @@ import { AnimatePresence, motion } from "motion/react";
 import appIcon from "./assets/ekto.png";
 import {
   DEFAULT_LIVE_APPEARANCE,
+  getAudienceCaptionRows,
   getLiveFontFamily,
   getRoomTitle,
   getSpeakerColor,
   getStructuredMessageRows,
   getStructuredRowKey,
+  getTargetLanguages,
   normalizeLiveAppearance,
+  resolveCaptionLanguage,
+  upsertAudienceCaption,
 } from "./liveRoomProtocol.js";
 
 const RECONNECT_DELAYS_MS = [1000, 2000, 5000, 10000];
@@ -18,6 +22,9 @@ const MAX_RENDERED_CAPTION_LINES = 10;
 const MAX_MINI_CAPTION_LINES = 2;
 const FONT_SCALE_STORAGE_KEY = "ekto.live.fontScale";
 const DEFAULT_FONT_SCALE = 1;
+const captionLanguageNames = typeof Intl.DisplayNames === "function"
+  ? new Intl.DisplayNames(["en"], { type: "language" })
+  : null;
 const MIN_FONT_SCALE = 0.75;
 const MAX_FONT_SCALE = 1.6;
 const FONT_SCALE_STEP = 0.05;
@@ -981,7 +988,7 @@ function StructuredCaptionRow({
         </p>
       ) : null}
       {!hideOriginals && row.original ? (
-        <p className={laneClassName} style={{ color: "#fff", fontWeight: weight }}>
+        <p className={laneClassName} dir="auto" style={{ color: "#fff", fontWeight: weight }}>
           {row.original}
         </p>
       ) : null}
@@ -989,6 +996,8 @@ function StructuredCaptionRow({
         <p
           className={`${laneClassName} ${translationClassName}`}
           style={{ color, fontWeight: weight }}
+          dir="auto"
+          lang={row.language}
         >
           {row.translation}
         </p>
@@ -1072,6 +1081,9 @@ function LiveRoomPage() {
   const [finalizedCaptionParts, setFinalizedCaptionParts] = useState([]);
   const [activeCaptionParts, setActiveCaptionParts] = useState([]);
   const [structuredRows, setStructuredRows] = useState(null);
+  const [targetLanguages, setTargetLanguages] = useState([]);
+  const [audienceRows, setAudienceRows] = useState([]);
+  const [captionLanguage, setCaptionLanguage] = useState(null);
   const [appearance, setAppearance] = useState(DEFAULT_LIVE_APPEARANCE);
   const [roomMode, setRoomMode] = useState(null);
   const [roomTitle, setRoomTitle] = useState(null);
@@ -1447,6 +1459,25 @@ function LiveRoomPage() {
         return;
       }
 
+      if (message.type === "audience_caption") {
+        setAudienceRows((rows) => upsertAudienceCaption(rows, message));
+        return;
+      }
+
+      if (message.type === "snapshot" ||
+          (message.type === "status" && Object.hasOwn(message, "targetLanguages"))) {
+        const languages = getTargetLanguages(message.targetLanguages);
+        setTargetLanguages(languages);
+        setCaptionLanguage((selection) =>
+          resolveCaptionLanguage(languages, selection, "translate", message.hideOriginals === true),
+        );
+        if (message.type === "snapshot") {
+          setAudienceRows(languages.length && Array.isArray(message.audienceRows)
+            ? message.audienceRows.reduce(upsertAudienceCaption, [])
+            : []);
+        }
+      }
+
       const nextMode = getMessageMode(message);
       if (nextMode) {
         setRoomMode(nextMode);
@@ -1455,6 +1486,9 @@ function LiveRoomPage() {
       const nextHideOriginals = getMessageHideOriginals(message);
       if (nextHideOriginals !== null) {
         setHideOriginals(nextHideOriginals);
+        if (nextHideOriginals) {
+          setCaptionLanguage((selection) => selection === "original" ? null : selection);
+        }
       }
 
       if (Object.hasOwn(message, "appearance")) {
@@ -1620,6 +1654,9 @@ function LiveRoomPage() {
       }
 
       if (message.type === "ended") {
+        setAudienceRows((rows) => rows.map((row) =>
+          row.state === "pending" ? { ...row, state: "unavailable" } : row,
+        ));
         if (!structuredRowsSeenRef.current && typeof message.text === "string") {
           messageSequenceRef.current += 1;
           const partsToAppend = getFinalCaptionParts(
@@ -1699,7 +1736,18 @@ function LiveRoomPage() {
     },
     [activeCaptionParts, effectiveRoomMode, finalizedCaptionParts, hideOriginals],
   );
+  const selectedCaptionLanguage = resolveCaptionLanguage(
+    targetLanguages, captionLanguage, effectiveRoomMode, hideOriginals,
+  );
   const visibleStructuredRows = useMemo(() => {
+    if (selectedCaptionLanguage === "original") {
+      return (structuredRows ?? []).filter((row) => row.original).map((row) => ({
+        ...row, translation: "",
+      })).slice(-MAX_RENDERED_CAPTION_LINES);
+    }
+    if (selectedCaptionLanguage && selectedCaptionLanguage !== targetLanguages[0]) {
+      return getAudienceCaptionRows(audienceRows, selectedCaptionLanguage, hideOriginals);
+    }
     if (structuredRows === null) {
       return null;
     }
@@ -1714,7 +1762,7 @@ function LiveRoomPage() {
           Boolean(row.translation),
       )
       .slice(-MAX_RENDERED_CAPTION_LINES);
-  }, [effectiveRoomMode, hideOriginals, structuredRows]);
+  }, [audienceRows, effectiveRoomMode, hideOriginals, selectedCaptionLanguage, structuredRows, targetLanguages]);
   const structuredHasActiveRow = visibleStructuredRows?.some(
     (row) => row.state === "active",
   );
@@ -1824,6 +1872,19 @@ function LiveRoomPage() {
             ref={fontControlRef}
             className="absolute right-3 top-3 z-20 flex items-start gap-2 md:right-4 md:top-4"
           >
+            {selectedCaptionLanguage ? (
+              <select
+                aria-label="Caption language"
+                value={selectedCaptionLanguage}
+                onChange={(event) => setCaptionLanguage(event.target.value)}
+                className="h-10 max-w-36 cursor-pointer rounded-md border border-white/15 bg-neutral-950/80 px-2 text-sm text-white shadow-lg"
+              >
+                {targetLanguages.map((language) => (
+                  <option key={language} value={language}>{captionLanguageNames?.of(language) ?? language}</option>
+                ))}
+                {!hideOriginals ? <option value="original">Original</option> : null}
+              </select>
+            ) : null}
             {isFontControlOpen ? (
               <div className="absolute right-0 top-11 flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
                 <button

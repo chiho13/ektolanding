@@ -3,14 +3,18 @@ import assert from "node:assert/strict";
 
 import {
   DEFAULT_LIVE_APPEARANCE,
+  getAudienceCaptionRows,
   getLiveFontFamily,
   getRoomTitle,
   getSpeakerColor,
   getStructuredMessageRows,
   getStructuredRowKey,
+  getTargetLanguages,
   getTranslationColor,
   normalizeLiveAppearance,
   normalizeStructuredRows,
+  resolveCaptionLanguage,
+  upsertAudienceCaption,
 } from "../src/liveRoomProtocol.js";
 
 test("status payloads can add or clear a title and support older relays", () => {
@@ -77,4 +81,39 @@ test("speaker colors mirror the app dark palette and avoid the selected family",
   assert.equal(getSpeakerColor("mint", 5), "#9bb5ff");
   assert.equal(getSpeakerColor("mint", 6), "#c7c7c7");
   assert.equal(getSpeakerColor("accent", 6), "#c7c7c7");
+});
+
+test("the language picker requires at least two distinct translated targets in Translate mode", () => {
+  for (const value of [undefined, [], ["fr"], ["fr", "FR"], ["fr", "original"]]) {
+    assert.equal(resolveCaptionLanguage(getTargetLanguages(value), null, "translate", false), null);
+  }
+  const languages = getTargetLanguages(["fr", "es", "ja", "de", "zh-Hant"]);
+  assert.equal(resolveCaptionLanguage(languages, null, "captions", false), null);
+  assert.equal(resolveCaptionLanguage(languages, null, "translate", false), "fr");
+  assert.equal(resolveCaptionLanguage(languages, "es", "translate", false), "es");
+  assert.equal(resolveCaptionLanguage(languages, "it", "translate", false), "fr");
+  assert.equal(resolveCaptionLanguage(languages, "original", "translate", false), "original");
+  assert.equal(resolveCaptionLanguage(languages, "original", "translate", true), "fr");
+});
+
+test("secondary captions update in place and fall back only when originals are visible", () => {
+  const pending = { sentenceId: 10, revision: 2, original: "Hello again", state: "pending" };
+  const rows = upsertAudienceCaption([], pending);
+  assert.deepEqual(getAudienceCaptionRows(rows, "es", false), []);
+  assert.equal(upsertAudienceCaption(rows, {
+    ...pending, revision: 1, state: "translated", translations: { es: "Hola" },
+  }), rows);
+  const result = upsertAudienceCaption(rows, {
+    ...pending, state: "translated", translations: { es: "Hola de nuevo" },
+  });
+  const paired = getAudienceCaptionRows(result, "es", false)[0];
+  assert.equal(paired.original, "Hello again");
+  assert.equal(paired.translation, "Hola de nuevo");
+  const translationOnly = getAudienceCaptionRows(result, "es", true)[0];
+  assert.equal(translationOnly.original, "");
+  assert.equal(translationOnly.translation, "Hola de nuevo");
+  const fallback = upsertAudienceCaption(rows, { ...pending, state: "unavailable" });
+  assert.equal(getAudienceCaptionRows(fallback, "es", false)[0].original, "Hello again");
+  assert.equal(getAudienceCaptionRows(fallback, "es", true)[0].original, "");
+  assert.equal(getAudienceCaptionRows(fallback, "es", true)[0].translation, "Translation unavailable");
 });
