@@ -189,19 +189,44 @@ export function upsertAudienceCaption(rows, event) {
   return next.sort((first, second) => first.sentenceId - second.sentenceId).slice(-10);
 }
 
-export function getAudienceCaptionRows(rows, language, hideOriginals) {
+function getAudienceTranslation(row, language) {
+  const text = row?.state === "translated" && row.translations?.[language];
+  return typeof text === "string" && text.trim() ? text : "";
+}
+
+export function getAudienceCaptionRows(rows, language, hideOriginals, structuredRows = null) {
+  if (!hideOriginals && structuredRows !== null) {
+    const audienceByID = new Map(rows.map((row) => [`sentence-${row.sentenceId}`, row]));
+
+    return structuredRows.filter((row) => row.original.trim()).map((row) => {
+      const audience = audienceByID.get(row.id);
+      const translation = audience?.original.trim() === row.original.trim()
+        ? getAudienceTranslation(audience, language)
+        : "";
+      return { ...row, translation, language: translation ? language : undefined };
+    });
+  }
+
   return rows.flatMap((row) => {
     if (row.state === "pending") return [];
 
-    const text = row.state === "translated" && row.translations?.[language];
-    const translated = typeof text === "string" && text.trim().length > 0;
+    const translation = getAudienceTranslation(row, language);
     return [{
       id: "audience-" + row.sentenceId,
       speakerNumber: row.speakerNumber,
       original: hideOriginals ? "" : row.original,
-      translation: translated ? text : hideOriginals ? "Translation unavailable" : "",
-      language: translated ? language : undefined,
+      translation: translation || (hideOriginals ? "Translation unavailable" : ""),
+      language: translation ? language : undefined,
       state: "final",
     }];
   });
+}
+
+export function getMiniAudienceCaptionRows(rows) {
+  const newest = rows.at(-1);
+  if (!newest) return [];
+  if (newest.translation) return [newest];
+
+  const latestTranslated = rows.findLast((row) => row.translation);
+  return latestTranslated ? [latestTranslated, newest] : [newest];
 }

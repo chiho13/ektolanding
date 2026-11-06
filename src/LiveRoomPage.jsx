@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { PictureInPicture2, Share2, X } from "lucide-react";
+import { ChevronDown, PictureInPicture2, Share2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import appIcon from "./assets/ekto.png";
 import {
   DEFAULT_LIVE_APPEARANCE,
   getAudienceCaptionRows,
   getLiveFontFamily,
+  getMiniAudienceCaptionRows,
   getRoomLogoUrl,
   getRoomTitle,
   getSpeakerColor,
@@ -1015,11 +1016,12 @@ function MiniCaptionWindowContent({
   fontScale,
   hideOriginals,
   roomMode,
+  showStreamingAudienceOriginals,
 }) {
   const miniCaptionParts = visibleCaptionParts.slice(-MAX_MINI_CAPTION_LINES);
-  const miniStructuredRows = visibleStructuredRows === null
-    ? null
-    : visibleStructuredRows.slice(roomMode === "translate" ? -1 : -2);
+  const miniStructuredRows = showStreamingAudienceOriginals
+    ? getMiniAudienceCaptionRows(visibleStructuredRows)
+    : visibleStructuredRows?.slice(roomMode === "translate" ? -1 : -2) ?? null;
   const hasStructuredContent = (miniStructuredRows?.length ?? 0) > 0;
   const hasLegacyContent = miniCaptionParts.length > 0;
   const structuredHasActiveRow = miniStructuredRows?.some(
@@ -1070,6 +1072,33 @@ function MiniCaptionWindowContent({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function CaptionLanguagePicker({ languages, language, hideOriginals, onChange }) {
+  const options = languages.map((code) => ({
+    code,
+    label: captionLanguageNames?.of(code) ?? code,
+  }));
+  if (!hideOriginals) options.push({ code: "original", label: "Original" });
+
+  return (
+    <div className="relative grid h-10 w-36 min-w-0 grid-cols-[minmax(0,1fr)_1rem] items-center gap-2 rounded-md border border-white/15 bg-neutral-950/80 px-2 text-sm text-white shadow-lg focus-within:ring-2 focus-within:ring-[#8aeb9e]">
+      <span aria-hidden="true" className="pointer-events-none truncate">
+        {options.find((option) => option.code === language)?.label}
+      </span>
+      <ChevronDown aria-hidden="true" className="pointer-events-none" size={16} />
+      <select
+        aria-label="Caption language"
+        value={language}
+        onChange={(event) => onChange(event.target.value)}
+        className="absolute inset-0 h-full w-full cursor-pointer text-base opacity-0"
+      >
+        {options.map(({ code, label }) => (
+          <option key={code} value={code}>{label}</option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -1757,14 +1786,18 @@ function LiveRoomPage() {
   const selectedCaptionLanguage = resolveCaptionLanguage(
     targetLanguages, captionLanguage, effectiveRoomMode, hideOriginals,
   );
+  const isSecondaryCaptionLanguage = selectedCaptionLanguage !== null &&
+    selectedCaptionLanguage !== "original" && selectedCaptionLanguage !== targetLanguages[0];
+  const showStreamingAudienceOriginals = isSecondaryCaptionLanguage &&
+    !hideOriginals && structuredRows !== null;
   const visibleStructuredRows = useMemo(() => {
     if (selectedCaptionLanguage === "original") {
       return (structuredRows ?? []).filter((row) => row.original).map((row) => ({
         ...row, translation: "",
       })).slice(-MAX_RENDERED_CAPTION_LINES);
     }
-    if (selectedCaptionLanguage && selectedCaptionLanguage !== targetLanguages[0]) {
-      return getAudienceCaptionRows(audienceRows, selectedCaptionLanguage, hideOriginals);
+    if (isSecondaryCaptionLanguage) {
+      return getAudienceCaptionRows(audienceRows, selectedCaptionLanguage, hideOriginals, structuredRows);
     }
     if (structuredRows === null) {
       return null;
@@ -1780,7 +1813,7 @@ function LiveRoomPage() {
           Boolean(row.translation),
       )
       .slice(-MAX_RENDERED_CAPTION_LINES);
-  }, [audienceRows, effectiveRoomMode, hideOriginals, selectedCaptionLanguage, structuredRows, targetLanguages]);
+  }, [audienceRows, effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, selectedCaptionLanguage, structuredRows]);
   const structuredHasActiveRow = visibleStructuredRows?.some(
     (row) => row.state === "active",
   );
@@ -1888,17 +1921,12 @@ function LiveRoomPage() {
             className="absolute right-3 top-3 z-20 flex items-start gap-2 md:right-4 md:top-4"
           >
             {selectedCaptionLanguage ? (
-              <select
-                aria-label="Caption language"
-                value={selectedCaptionLanguage}
-                onChange={(event) => setCaptionLanguage(event.target.value)}
-                className="h-10 max-w-36 cursor-pointer rounded-md border border-white/15 bg-neutral-950/80 px-2 text-sm text-white shadow-lg"
-              >
-                {targetLanguages.map((language) => (
-                  <option key={language} value={language}>{captionLanguageNames?.of(language) ?? language}</option>
-                ))}
-                {!hideOriginals ? <option value="original">Original</option> : null}
-              </select>
+              <CaptionLanguagePicker
+                languages={targetLanguages}
+                language={selectedCaptionLanguage}
+                hideOriginals={hideOriginals}
+                onChange={setCaptionLanguage}
+              />
             ) : null}
             {isFontControlOpen ? (
               <div className="absolute right-0 top-11 flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
@@ -2022,6 +2050,7 @@ function LiveRoomPage() {
                 effectiveRoomMode === "translate" && hideOriginals
               }
               roomMode={effectiveRoomMode}
+              showStreamingAudienceOriginals={showStreamingAudienceOriginals}
             />,
             miniCaptionRoot,
           )
