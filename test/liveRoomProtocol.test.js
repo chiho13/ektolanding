@@ -123,7 +123,9 @@ test("the language picker requires at least two distinct translated targets in T
 test("secondary captions update in place and fall back only when originals are visible", () => {
   const pending = { sentenceId: 10, revision: 2, original: "Hello again", state: "pending" };
   const rows = upsertAudienceCaption([], pending);
-  assert.deepEqual(getAudienceCaptionRows(rows, "es", false), []);
+  const [pendingOriginal] = getAudienceCaptionRows(rows, "es", false);
+  assert.equal(pendingOriginal.original, "Hello again");
+  assert.equal(pendingOriginal.translation, "");
   assert.equal(upsertAudienceCaption(rows, {
     ...pending, revision: 1, state: "translated", translations: { es: "Hola" },
   }), rows);
@@ -140,6 +142,28 @@ test("secondary captions update in place and fall back only when originals are v
   assert.equal(getAudienceCaptionRows(fallback, "es", false)[0].original, "Hello again");
   assert.equal(getAudienceCaptionRows(fallback, "es", true)[0].original, "");
   assert.equal(getAudienceCaptionRows(fallback, "es", true)[0].translation, "Translation unavailable");
+});
+
+test("secondary viewers receive live originals from frames without structured rows", () => {
+  const pending = { sentenceId: 42, revision: 1, original: "Hello", state: "pending" };
+  const audience = upsertAudienceCaption([], pending);
+  const parts = [
+    { key: "previous", role: "caption-history", text: "Previous" },
+    { key: "same", role: "caption-active", text: " Hello " },
+    { key: "current", role: "caption-active", text: "Next sentence" },
+    { key: "primary", role: "translation-active", text: "Phrase suivante" },
+  ];
+
+  assert.deepEqual(
+    getAudienceCaptionRows([], "es", false, null, parts).map((row) => row.original),
+    [" Hello ", "Next sentence"],
+  );
+  assert.deepEqual(
+    getAudienceCaptionRows(audience, "es", false, null, parts)
+      .map(({ original, translation, state }) => [original, translation, state]),
+    [["Hello", "", "final"], ["Next sentence", "", "active"]],
+  );
+  assert.deepEqual(getAudienceCaptionRows(audience, "es", true, null, parts), []);
 });
 
 test("secondary language keeps live originals and adds late translations to the matching row", () => {

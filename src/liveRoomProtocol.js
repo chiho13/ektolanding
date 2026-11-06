@@ -194,7 +194,9 @@ function getAudienceTranslation(row, language) {
   return typeof text === "string" && text.trim() ? text : "";
 }
 
-export function getAudienceCaptionRows(rows, language, hideOriginals, structuredRows = null) {
+export function getAudienceCaptionRows(
+  rows, language, hideOriginals, structuredRows = null, legacyCaptionParts = [],
+) {
   if (!hideOriginals && structuredRows !== null) {
     const audienceByID = new Map(rows.map((row) => [`sentence-${row.sentenceId}`, row]));
 
@@ -207,8 +209,8 @@ export function getAudienceCaptionRows(rows, language, hideOriginals, structured
     });
   }
 
-  return rows.flatMap((row) => {
-    if (row.state === "pending") return [];
+  const audienceRows = rows.flatMap((row) => {
+    if (hideOriginals && row.state === "pending") return [];
 
     const translation = getAudienceTranslation(row, language);
     return [{
@@ -220,6 +222,17 @@ export function getAudienceCaptionRows(rows, language, hideOriginals, structured
       state: "final",
     }];
   });
+  if (hideOriginals) return audienceRows;
+
+  const latestOriginal = audienceRows.at(-1)?.original.trim();
+  const liveOriginals = legacyCaptionParts
+    .filter(({ role, text }) =>
+      role === "caption-active" && text.trim() && text.trim() !== latestOriginal,
+    )
+    .map(({ key, text }) => ({
+      id: `legacy-${key}`, original: text, translation: "", state: "active",
+    }));
+  return [...audienceRows, ...liveOriginals];
 }
 
 export function getMiniAudienceCaptionRows(rows) {

@@ -1788,8 +1788,7 @@ function LiveRoomPage() {
   );
   const isSecondaryCaptionLanguage = selectedCaptionLanguage !== null &&
     selectedCaptionLanguage !== "original" && selectedCaptionLanguage !== targetLanguages[0];
-  const showStreamingAudienceOriginals = isSecondaryCaptionLanguage &&
-    !hideOriginals && structuredRows !== null;
+  const showStreamingAudienceOriginals = isSecondaryCaptionLanguage && !hideOriginals;
   const visibleStructuredRows = useMemo(() => {
     if (selectedCaptionLanguage === "original") {
       return (structuredRows ?? []).filter((row) => row.original).map((row) => ({
@@ -1797,7 +1796,9 @@ function LiveRoomPage() {
       })).slice(-MAX_RENDERED_CAPTION_LINES);
     }
     if (isSecondaryCaptionLanguage) {
-      return getAudienceCaptionRows(audienceRows, selectedCaptionLanguage, hideOriginals, structuredRows);
+      return getAudienceCaptionRows(
+        audienceRows, selectedCaptionLanguage, hideOriginals, structuredRows, activeCaptionParts,
+      ).slice(-MAX_RENDERED_CAPTION_LINES);
     }
     if (structuredRows === null) {
       return null;
@@ -1813,7 +1814,7 @@ function LiveRoomPage() {
           Boolean(row.translation),
       )
       .slice(-MAX_RENDERED_CAPTION_LINES);
-  }, [audienceRows, effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, selectedCaptionLanguage, structuredRows]);
+  }, [activeCaptionParts, audienceRows, effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, selectedCaptionLanguage, structuredRows]);
   const structuredHasActiveRow = visibleStructuredRows?.some(
     (row) => row.state === "active",
   );
