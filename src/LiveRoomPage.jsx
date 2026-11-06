@@ -1084,11 +1084,11 @@ function CaptionLanguagePicker({ languages, language, hideOriginals, onChange })
   if (!hideOriginals) options.push({ code: "original", label: "Original" });
 
   return (
-    <div className="relative grid h-10 w-36 min-w-0 grid-cols-[minmax(0,1fr)_1rem] items-center gap-2 rounded-md border border-white/15 bg-neutral-950/80 px-2 text-sm text-white shadow-lg focus-within:ring-2 focus-within:ring-[#8aeb9e]">
-      <span aria-hidden="true" className="pointer-events-none truncate">
+    <div className="relative flex h-10 w-36 min-w-0 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/80 px-3 text-sm text-white shadow-lg focus-within:ring-2 focus-within:ring-[#8aeb9e]">
+      <span aria-hidden="true" className="pointer-events-none min-w-0 flex-1 truncate">
         {options.find((option) => option.code === language)?.label}
       </span>
-      <ChevronDown aria-hidden="true" className="pointer-events-none" size={16} />
+      <ChevronDown aria-hidden="true" className="pointer-events-none shrink-0" size={16} />
       <select
         aria-label="Caption language"
         value={language}
