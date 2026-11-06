@@ -7,6 +7,7 @@ import {
   DEFAULT_LIVE_APPEARANCE,
   getAudienceCaptionRows,
   getLiveFontFamily,
+  getRoomLogoUrl,
   getRoomTitle,
   getSpeakerColor,
   getStructuredMessageRows,
@@ -1073,6 +1074,20 @@ function MiniCaptionWindowContent({
   );
 }
 
+function LiveRoomLogo({ logoUrl }) {
+  const [failed, setFailed] = useState(false);
+  const custom = logoUrl && !failed;
+
+  return (
+    <img
+      src={custom ? logoUrl : appIcon}
+      alt={custom ? "Host logo" : "ekto"}
+      className="h-9 w-9 shrink-0 rounded-lg object-contain shadow-lg"
+      onError={custom ? () => setFailed(true) : undefined}
+    />
+  );
+}
+
 function LiveRoomPage() {
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const canShareLiveRoom = Boolean(code && isValidRoomCode(code));
@@ -1087,6 +1102,7 @@ function LiveRoomPage() {
   const [appearance, setAppearance] = useState(DEFAULT_LIVE_APPEARANCE);
   const [roomMode, setRoomMode] = useState(null);
   const [roomTitle, setRoomTitle] = useState(null);
+  const [roomLogoUrl, setRoomLogoUrl] = useState(null);
   const [hideOriginals, setHideOriginals] = useState(false);
   const [fontScale, setFontScale] = useState(readStoredFontScale);
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
@@ -1298,12 +1314,13 @@ function LiveRoomPage() {
 
     let isCancelled = false;
     let statusRequestID = 0;
-    let latestTitleResponseID = 0;
+    let latestBrandingResponseID = 0;
+    const statusUrl = getRoomStatusUrl(code);
 
     async function refreshRoomStatus() {
       const requestID = ++statusRequestID;
       try {
-        const response = await fetch(getRoomStatusUrl(code), {
+        const response = await fetch(statusUrl, {
           cache: "no-store",
         });
         const payload = await response.json().catch(() => null);
@@ -1322,9 +1339,10 @@ function LiveRoomPage() {
           return;
         }
 
-        if (requestID > latestTitleResponseID) {
-          latestTitleResponseID = requestID;
+        if (requestID > latestBrandingResponseID) {
+          latestBrandingResponseID = requestID;
           setRoomTitle(getRoomTitle(payload));
+          setRoomLogoUrl(getRoomLogoUrl(payload, statusUrl));
         }
 
         if (nextStatus === "live") {
@@ -1771,6 +1789,7 @@ function LiveRoomPage() {
     : visibleCaptionParts.length > 0;
   const captionFontPercent = Math.round(fontScale * 100);
   const shouldShowStatusChip = status === "live" || status === "ended";
+  const logoUrl = status === "ended" ? null : roomLogoUrl;
   const emptyCaptionMessage = status === "invalid"
     ? "This live link is invalid."
     : status === "full"
@@ -1792,11 +1811,7 @@ function LiveRoomPage() {
       <section className="live-room-shell mx-auto flex max-w-6xl flex-col">
         <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
           <div className="flex min-w-0 items-center gap-3">
-            <img
-              src={appIcon}
-              alt="ekto"
-              className="h-9 w-9 rounded-lg shadow-lg"
-            />
+            <LiveRoomLogo key={logoUrl} logoUrl={logoUrl} />
             <div className="min-w-0">
               <h1 dir="auto" className="line-clamp-2 text-sm font-semibold text-white/85 [overflow-wrap:anywhere]">
                 {roomTitle ?? liveRoomTitle}

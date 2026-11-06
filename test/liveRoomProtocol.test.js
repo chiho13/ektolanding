@@ -5,6 +5,7 @@ import {
   DEFAULT_LIVE_APPEARANCE,
   getAudienceCaptionRows,
   getLiveFontFamily,
+  getRoomLogoUrl,
   getRoomTitle,
   getSpeakerColor,
   getStructuredMessageRows,
@@ -24,6 +25,28 @@ test("status payloads can add or clear a title and support older relays", () => 
   assert.equal(getRoomTitle({ status: "live", title: "  " }), null);
   assert.equal(getRoomTitle({ status: "live" }), null);
   assert.equal(getRoomTitle({ status: "live", title: 42 }), null);
+});
+
+test("waiting and live status can add, replace, or clear the viewer logo", () => {
+  const statusUrl = "https://broadcast.voicetranslate.app/rooms/DEMO24/status";
+  const firstVersion = "a".repeat(64);
+  const replacement = "b".repeat(64);
+  assert.equal(
+    getRoomLogoUrl({ status: "waiting", logoVersion: firstVersion }, statusUrl),
+    statusUrl.replace("/status", "/logo/" + firstVersion)
+  );
+  assert.equal(
+    getRoomLogoUrl({ status: "live", logoVersion: replacement }, statusUrl),
+    statusUrl.replace("/status", "/logo/" + replacement)
+  );
+  assert.equal(getRoomLogoUrl({ status: "live" }, statusUrl), null);
+  assert.equal(getRoomLogoUrl({ status: "ended", logoVersion: replacement }, statusUrl), null);
+  assert.equal(getRoomLogoUrl({ status: "expired", logoVersion: replacement }, statusUrl), null);
+  assert.equal(getRoomLogoUrl({ status: "live", logoVersion: "https://other.test/image.png" }, statusUrl), null);
+  assert.equal(
+    getRoomLogoUrl({ status: "live", logoVersion: replacement }, "/api/rooms/DEMO24/status"),
+    "/api/rooms/DEMO24/logo/" + replacement
+  );
 });
 
 function makeRow(overrides = {}) {

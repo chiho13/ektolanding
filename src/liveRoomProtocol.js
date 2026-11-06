@@ -39,6 +39,15 @@ export function getRoomTitle(statusPayload) {
   return typeof title === "string" ? title.trim() || null : null;
 }
 
+export function getRoomLogoUrl(statusPayload, statusUrl) {
+  const { status, logoVersion } = statusPayload ?? {};
+  if ((status !== "waiting" && status !== "live") ||
+      typeof logoVersion !== "string" || !/^[a-f0-9]{64}$/.test(logoVersion)) {
+    return null;
+  }
+  return statusUrl.replace(/\/status$/, "/logo/" + logoVersion);
+}
+
 export function normalizeLiveAppearance(appearance) {
   if (!appearance || typeof appearance !== "object" || Array.isArray(appearance)) {
     return DEFAULT_LIVE_APPEARANCE;
