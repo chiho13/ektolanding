@@ -5,7 +5,6 @@ import {
   DEFAULT_LIVE_APPEARANCE,
   getAudienceCaptionRows,
   getLiveFontFamily,
-  getMiniAudienceCaptionRows,
   getRoomLogoUrl,
   getRoomTitle,
   getSpeakerColor,
@@ -120,12 +119,11 @@ test("the language picker requires at least two distinct translated targets in T
   assert.equal(resolveCaptionLanguage(languages, "original", "translate", true), "fr");
 });
 
-test("secondary captions update in place and fall back only when originals are visible", () => {
+test("secondary captions without structured rows wait for the selected translation", () => {
   const pending = { sentenceId: 10, revision: 2, original: "Hello again", state: "pending" };
   const rows = upsertAudienceCaption([], pending);
-  const [pendingOriginal] = getAudienceCaptionRows(rows, "es", false);
-  assert.equal(pendingOriginal.original, "Hello again");
-  assert.equal(pendingOriginal.translation, "");
+  assert.deepEqual(getAudienceCaptionRows(rows, "es", false), []);
+  assert.deepEqual(getAudienceCaptionRows(rows, "es", true), []);
   assert.equal(upsertAudienceCaption(rows, {
     ...pending, revision: 1, state: "translated", translations: { es: "Hola" },
   }), rows);
@@ -138,56 +136,41 @@ test("secondary captions update in place and fall back only when originals are v
   const translationOnly = getAudienceCaptionRows(result, "es", true)[0];
   assert.equal(translationOnly.original, "");
   assert.equal(translationOnly.translation, "Hola de nuevo");
-  const fallback = upsertAudienceCaption(rows, { ...pending, state: "unavailable" });
-  assert.equal(getAudienceCaptionRows(fallback, "es", false)[0].original, "Hello again");
-  assert.equal(getAudienceCaptionRows(fallback, "es", true)[0].original, "");
-  assert.equal(getAudienceCaptionRows(fallback, "es", true)[0].translation, "Translation unavailable");
+  assert.deepEqual(getAudienceCaptionRows(result, "ja", false), []);
+  const unavailable = upsertAudienceCaption(rows, { ...pending, state: "unavailable" });
+  assert.deepEqual(getAudienceCaptionRows(unavailable, "es", false), []);
+  assert.deepEqual(getAudienceCaptionRows(unavailable, "es", true), []);
 });
 
-test("secondary viewers receive live originals from frames without structured rows", () => {
-  const pending = { sentenceId: 42, revision: 1, original: "Hello", state: "pending" };
-  const audience = upsertAudienceCaption([], pending);
-  const parts = [
-    { key: "previous", role: "caption-history", text: "Previous" },
-    { key: "same", role: "caption-active", text: " Hello " },
-    { key: "current", role: "caption-active", text: "Next sentence" },
-    { key: "primary", role: "translation-active", text: "Phrase suivante" },
-  ];
-
-  assert.deepEqual(
-    getAudienceCaptionRows([], "es", false, null, parts).map((row) => row.original),
-    [" Hello ", "Next sentence"],
-  );
-  assert.deepEqual(
-    getAudienceCaptionRows(audience, "es", false, null, parts)
-      .map(({ original, translation, state }) => [original, translation, state]),
-    [["Hello", "", "final"], ["Next sentence", "", "active"]],
-  );
-  assert.deepEqual(getAudienceCaptionRows(audience, "es", true, null, parts), []);
-});
-
-test("secondary language keeps live originals and adds late translations to the matching row", () => {
+test("secondary and tertiary captions advance only when their own translation arrives", () => {
   const first = makeRow({ original: " Hello ", state: "final" });
-  const active = makeRow({ id: "sentence-43", original: "Next sentence", speakerNumber: 3 });
+  const active = makeRow({
+    id: "sentence-43", original: "Next sentence", translation: "Phrase suivante", speakerNumber: 3,
+  });
   const structured = [first, active];
-  const pending = { sentenceId: 42, revision: 1, original: "Hello", state: "pending" };
+  const previous = {
+    sentenceId: 42, revision: 1, original: "Hello",
+    state: "translated", translations: { es: "Hola", ja: "こんにちは" },
+  };
+  const pending = { sentenceId: 43, revision: 1, original: "Next sentence", state: "pending" };
 
-  for (const audience of [[], upsertAudienceCaption([], pending)]) {
-    const visible = getAudienceCaptionRows(audience, "es", false, structured);
-    assert.deepEqual(visible.map(({ translation }) => translation), ["", ""]);
-    assert.deepEqual(visible.map(({ original }) => original), [" Hello ", "Next sentence"]);
-    assert.equal(visible[1].state, "active");
-    assert.equal(visible[1].speakerNumber, 3);
-  }
+  assert.deepEqual(getAudienceCaptionRows([], "es", false, structured), []);
+  const audience = upsertAudienceCaption([previous], pending);
+  assert.deepEqual(
+    getAudienceCaptionRows(audience, "es", false, structured),
+    [{ ...first, translation: "Hola", language: "es" }],
+  );
 
-  const translated = upsertAudienceCaption([pending], {
-    ...pending, state: "translated", translations: { es: "Hola", ja: "こんにちは" },
+  const translated = upsertAudienceCaption(audience, {
+    ...pending, state: "translated", translations: { es: "Siguiente frase" },
   });
   const visible = getAudienceCaptionRows(translated, "es", false, structured);
   assert.deepEqual(visible.map(getStructuredRowKey), structured.map(getStructuredRowKey));
-  assert.deepEqual(visible.map(({ translation }) => translation), ["Hola", ""]);
-  assert.equal(visible[0].language, "es");
-  assert.equal(getAudienceCaptionRows(translated, "ja", false, structured)[0].translation, "こんにちは");
+  assert.deepEqual(visible[1], { ...active, translation: "Siguiente frase", language: "es" });
+  assert.deepEqual(
+    getAudienceCaptionRows(translated, "ja", false, structured),
+    [{ ...first, translation: "こんにちは", language: "ja" }],
+  );
   assert.deepEqual(getAudienceCaptionRows(translated, "es", false, []), []);
 });
 
@@ -198,7 +181,7 @@ test("secondary translations wait for the matching source revision", () => {
   const revised = { ...pending, revision: 2, original: corrected.original };
   let audience = upsertAudienceCaption([], older);
 
-  assert.equal(getAudienceCaptionRows(audience, "es", false, [corrected])[0].translation, "");
+  assert.deepEqual(getAudienceCaptionRows(audience, "es", false, [corrected]), []);
   audience = upsertAudienceCaption(audience, revised);
   assert.equal(upsertAudienceCaption(audience, older), audience);
   audience = upsertAudienceCaption(audience, {
@@ -206,31 +189,13 @@ test("secondary translations wait for the matching source revision", () => {
   });
   assert.equal(getAudienceCaptionRows(audience, "es", false, [corrected])[0].translation, "Hola de nuevo");
   const sameTextDifferentSentence = { ...corrected, id: "sentence-43" };
-  assert.equal(getAudienceCaptionRows(audience, "es", false, [sameTextDifferentSentence])[0].translation, "");
+  assert.deepEqual(getAudienceCaptionRows(audience, "es", false, [sameTextDifferentSentence]), []);
 });
 
-test("secondary captions respect hide originals while a translation is pending or unavailable", () => {
+test("a missing secondary translation produces no row when structured originals are available", () => {
   const structured = [makeRow()];
   const pending = { sentenceId: 42, revision: 1, original: "Hello", state: "pending" };
-  const audience = upsertAudienceCaption([], pending);
-  assert.deepEqual(getAudienceCaptionRows(audience, "es", true, structured), []);
-
-  const failed = upsertAudienceCaption(audience, { ...pending, state: "unavailable" });
-  const [hidden] = getAudienceCaptionRows(failed, "es", true, structured);
-  assert.equal(hidden.original, "");
-  assert.equal(hidden.translation, "Translation unavailable");
-  const [visible] = getAudienceCaptionRows(failed, "es", false, structured);
-  assert.equal(visible.original, "Hello");
-  assert.equal(visible.translation, "");
-});
-
-test("mini captions keep the latest translated pair above the newest original", () => {
-  const translated = makeRow({ translation: "Hola", state: "final" });
-  const pending = makeRow({ id: "sentence-43", translation: "", state: "final" });
-  const active = makeRow({ id: "sentence-44", translation: "" });
-  assert.deepEqual(getMiniAudienceCaptionRows([]), []);
-  assert.deepEqual(getMiniAudienceCaptionRows([pending, active]), [active]);
-  assert.deepEqual(getMiniAudienceCaptionRows([translated, pending, active]), [translated, active]);
-  const ready = { ...active, translation: "Adiós" };
-  assert.deepEqual(getMiniAudienceCaptionRows([translated, pending, ready]), [ready]);
+  const unavailable = upsertAudienceCaption([], { ...pending, state: "unavailable" });
+  assert.deepEqual(getAudienceCaptionRows(unavailable, "es", false, structured), []);
+  assert.deepEqual(getAudienceCaptionRows(unavailable, "es", true, structured), []);
 });

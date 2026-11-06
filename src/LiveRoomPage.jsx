@@ -7,7 +7,6 @@ import {
   DEFAULT_LIVE_APPEARANCE,
   getAudienceCaptionRows,
   getLiveFontFamily,
-  getMiniAudienceCaptionRows,
   getRoomLogoUrl,
   getRoomTitle,
   getSpeakerColor,
@@ -1016,14 +1015,10 @@ function MiniCaptionWindowContent({
   fontScale,
   hideOriginals,
   roomMode,
-  showStreamingAudienceOriginals,
 }) {
   const miniCaptionParts = visibleCaptionParts.slice(-MAX_MINI_CAPTION_LINES);
-  const miniStructuredRows = showStreamingAudienceOriginals
-    ? getMiniAudienceCaptionRows(visibleStructuredRows)
-    : visibleStructuredRows?.slice(roomMode === "translate" ? -1 : -2) ?? null;
-  const hasStructuredContent = (miniStructuredRows?.length ?? 0) > 0;
-  const hasLegacyContent = miniCaptionParts.length > 0;
+  const miniStructuredRows = visibleStructuredRows?.slice(roomMode === "translate" ? -1 : -2) ?? null;
+  const hasVisibleCaptions = (miniStructuredRows ?? miniCaptionParts).length > 0;
   const structuredHasActiveRow = miniStructuredRows?.some(
     (row) => row.state === "active",
   );
@@ -1037,7 +1032,7 @@ function MiniCaptionWindowContent({
       }}
     >
       <div className="mini-caption-stage" aria-live="polite">
-        {!hasStructuredContent && !hasLegacyContent ? (
+        {!hasVisibleCaptions ? (
           <p className="mini-caption-empty">{emptyCaptionMessage}</p>
         ) : miniStructuredRows !== null ? (
           <div className="mini-caption-stack">
@@ -1788,7 +1783,6 @@ function LiveRoomPage() {
   );
   const isSecondaryCaptionLanguage = selectedCaptionLanguage !== null &&
     selectedCaptionLanguage !== "original" && selectedCaptionLanguage !== targetLanguages[0];
-  const showStreamingAudienceOriginals = isSecondaryCaptionLanguage && !hideOriginals;
   const visibleStructuredRows = useMemo(() => {
     if (selectedCaptionLanguage === "original") {
       return (structuredRows ?? []).filter((row) => row.original).map((row) => ({
@@ -1797,7 +1791,7 @@ function LiveRoomPage() {
     }
     if (isSecondaryCaptionLanguage) {
       return getAudienceCaptionRows(
-        audienceRows, selectedCaptionLanguage, hideOriginals, structuredRows, activeCaptionParts,
+        audienceRows, selectedCaptionLanguage, hideOriginals, structuredRows,
       ).slice(-MAX_RENDERED_CAPTION_LINES);
     }
     if (structuredRows === null) {
@@ -1814,7 +1808,7 @@ function LiveRoomPage() {
           Boolean(row.translation),
       )
       .slice(-MAX_RENDERED_CAPTION_LINES);
-  }, [activeCaptionParts, audienceRows, effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, selectedCaptionLanguage, structuredRows]);
+  }, [audienceRows, effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, selectedCaptionLanguage, structuredRows]);
   const structuredHasActiveRow = visibleStructuredRows?.some(
     (row) => row.state === "active",
   );
@@ -2051,7 +2045,6 @@ function LiveRoomPage() {
                 effectiveRoomMode === "translate" && hideOriginals
               }
               roomMode={effectiveRoomMode}
-              showStreamingAudienceOriginals={showStreamingAudienceOriginals}
             />,
             miniCaptionRoot,
           )
