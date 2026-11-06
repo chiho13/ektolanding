@@ -7,6 +7,7 @@ import {
   DEFAULT_LIVE_APPEARANCE,
   advanceAudienceCaptionPresentation,
   getAudienceCaptionRows,
+  getAudienceOriginalPreview,
   getLiveFontFamily,
   getRoomLogoUrl,
   getRoomTitle,
@@ -985,9 +986,35 @@ function StructuredCaptionRow({
   );
 }
 
+function AudienceOriginalPreview({ text, isMini = false }) {
+  return (
+    <div
+      className={isMini ? "mini-caption-lane" : "live-caption-text live-caption-lane"}
+      role="group"
+      aria-label="Live original transcript"
+      aria-hidden={!text}
+      aria-live="off"
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-end",
+        flexShrink: 0,
+        height: isMini ? "1lh" : "2lh",
+        overflow: "hidden",
+        fontSize: isMini ? undefined : "calc(clamp(1rem, 2.5vw, 1.5rem) * var(--caption-font-scale, 1))",
+        fontWeight: 500,
+        color: "rgba(255, 255, 255, 0.75)",
+      }}
+    >
+      <p dir="auto" style={{ margin: 0, minWidth: 0 }}>{text}</p>
+    </div>
+  );
+}
+
 function MiniCaptionWindowContent({
   visibleCaptionParts,
   visibleStructuredRows,
+  audienceOriginalPreview,
   appearance,
   emptyCaptionMessage,
   fontScale,
@@ -996,7 +1023,8 @@ function MiniCaptionWindowContent({
 }) {
   const miniCaptionParts = visibleCaptionParts.slice(-MAX_MINI_CAPTION_LINES);
   const miniStructuredRows = visibleStructuredRows?.slice(roomMode === "translate" ? -1 : -2) ?? null;
-  const hasVisibleCaptions = (miniStructuredRows ?? miniCaptionParts).length > 0;
+  const hasVisibleCaptions = Boolean(audienceOriginalPreview) ||
+    (miniStructuredRows ?? miniCaptionParts).length > 0;
   const structuredHasActiveRow = miniStructuredRows?.some(
     (row) => row.state === "active",
   );
@@ -1028,6 +1056,9 @@ function MiniCaptionWindowContent({
                 variant="mini"
               />
             ))}
+            {audienceOriginalPreview !== null ? (
+              <AudienceOriginalPreview text={audienceOriginalPreview} isMini />
+            ) : null}
           </div>
         ) : (
           <div className="mini-caption-stack">
@@ -1837,12 +1868,14 @@ function LiveRoomPage() {
       )
       .slice(-MAX_RENDERED_CAPTION_LINES);
   }, [effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, pacedAudienceRows, selectedCaptionLanguage, structuredRows]);
+  const audienceOriginalPreview = isSecondaryCaptionLanguage && !hideOriginals
+    ? getAudienceOriginalPreview(structuredRows, activeCaptionParts, pacedAudienceRows.at(-1))
+    : null;
   const structuredHasActiveRow = visibleStructuredRows?.some(
     (row) => row.state === "active",
   );
-  const hasVisibleCaptions = visibleStructuredRows !== null
-    ? visibleStructuredRows.length > 0
-    : visibleCaptionParts.length > 0;
+  const hasVisibleCaptions = Boolean(audienceOriginalPreview) ||
+    (visibleStructuredRows ?? visibleCaptionParts).length > 0;
   const captionFontPercent = Math.round(fontScale * 100);
   const shouldShowStatusChip = status === "live" || status === "ended";
   const logoUrl = status === "ended" ? null : roomLogoUrl;
@@ -1950,6 +1983,9 @@ function LiveRoomPage() {
                       {caption.text}
                     </p>
                       ))}
+                  {audienceOriginalPreview !== null ? (
+                    <AudienceOriginalPreview text={audienceOriginalPreview} />
+                  ) : null}
                 </div>
               </div>
             )}
@@ -2079,6 +2115,7 @@ function LiveRoomPage() {
             <MiniCaptionWindowContent
               visibleCaptionParts={visibleCaptionParts}
               visibleStructuredRows={visibleStructuredRows}
+              audienceOriginalPreview={audienceOriginalPreview}
               appearance={appearance}
               emptyCaptionMessage={emptyCaptionMessage}
               fontScale={fontScale}

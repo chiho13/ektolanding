@@ -223,6 +223,18 @@ export function getAudienceCaptionRows(rows, language, hideOriginals, structured
   });
 }
 
+export function getAudienceOriginalPreview(structuredRows, legacyCaptionParts, latestTranslation) {
+  if (structuredRows !== null) {
+    const latest = structuredRows.findLast((row) => row.original.trim());
+    return latest && latest.id !== latestTranslation?.id ? latest.original : "";
+  }
+
+  const latest = legacyCaptionParts.findLast(
+    ({ role, text }) => role === "caption-active" && text.trim(),
+  );
+  return latest && latest.text.trim() !== latestTranslation?.original.trim() ? latest.text : "";
+}
+
 export function advanceAudienceCaptionPresentation(presentation, rows, language, now) {
   if (presentation.language !== language) {
     return {

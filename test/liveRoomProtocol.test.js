@@ -5,6 +5,7 @@ import {
   DEFAULT_LIVE_APPEARANCE,
   advanceAudienceCaptionPresentation,
   getAudienceCaptionRows,
+  getAudienceOriginalPreview,
   getLiveFontFamily,
   getRoomLogoUrl,
   getRoomTitle,
@@ -199,6 +200,50 @@ test("a missing secondary translation produces no row when structured originals 
   const unavailable = upsertAudienceCaption([], { ...pending, state: "unavailable" });
   assert.deepEqual(getAudienceCaptionRows(unavailable, "es", false, structured), []);
   assert.deepEqual(getAudienceCaptionRows(unavailable, "es", true, structured), []);
+});
+
+test("secondary and tertiary originals stream before their translated rows are shown", () => {
+  const first = makeRow({ original: "Hello", state: "final" });
+  const next = makeRow({ id: "sentence-43", original: "Hello", translation: "" });
+  const updated = { ...next, original: "Hello again" };
+  const firstResult = {
+    sentenceId: 42, original: first.original, state: "translated",
+    translations: { es: "Hola", ja: "こんにちは" },
+  };
+  const nextResult = {
+    sentenceId: 43, original: updated.original, state: "translated",
+    translations: { es: "Hola de nuevo", ja: "またこんにちは" },
+  };
+
+  for (const language of ["es", "ja"]) {
+    const firstTranslation = getAudienceCaptionRows([firstResult], language, false, [first]);
+    const shown = advanceAudienceCaptionPresentation(
+      { language, shownIDs: new Set(), nextRowAt: 0 }, firstTranslation, language, 100,
+    );
+    // Repeated speech is a new original when the sentence ID changes.
+    assert.equal(getAudienceOriginalPreview([first, next], [], firstTranslation[0]), "Hello");
+    assert.equal(getAudienceOriginalPreview([first, updated], [], firstTranslation[0]), "Hello again");
+
+    const ready = getAudienceCaptionRows([firstResult, nextResult], language, false, [first, updated]);
+    const holding = advanceAudienceCaptionPresentation(shown, ready, language, 599);
+    assert.deepEqual(ready.filter((row) => holding.shownIDs.has(row.id)), firstTranslation);
+    assert.equal(getAudienceOriginalPreview([first, updated], [], firstTranslation[0]), "Hello again");
+
+    const released = advanceAudienceCaptionPresentation(shown, ready, language, 600);
+    const latest = ready.findLast((row) => released.shownIDs.has(row.id));
+    assert.equal(latest.id, updated.id);
+    assert.equal(getAudienceOriginalPreview([first, updated], [], latest), "");
+  }
+});
+
+test("legacy originals can stream separately from the selected translation", () => {
+  const parts = [
+    { role: "caption-active", text: "Live original" },
+    { role: "translation-active", text: "Primary translation" },
+  ];
+  assert.equal(getAudienceOriginalPreview(null, parts, undefined), "Live original");
+  assert.equal(getAudienceOriginalPreview(null, parts, makeRow({ original: "Live original" })), "");
+  assert.equal(getAudienceOriginalPreview([], parts, undefined), "");
 });
 
 test("additional languages show ready rows one at a time with a 500 ms hold", () => {
