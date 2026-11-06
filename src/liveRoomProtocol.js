@@ -14,6 +14,7 @@ const TRANSLATION_COLORS = new Set([
   "purple",
 ]);
 const ROW_STATES = new Set(["active", "final"]);
+const AUDIENCE_CAPTION_HOLD_MS = 500;
 
 const TRANSLATION_COLOR_VALUES = Object.freeze({
   mint: "#8aeb9e",
@@ -212,7 +213,7 @@ export function getAudienceCaptionRows(rows, language, hideOriginals, structured
     if (!translation) return [];
 
     return [{
-      id: "audience-" + row.sentenceId,
+      id: "sentence-" + row.sentenceId,
       speakerNumber: row.speakerNumber,
       original: hideOriginals ? "" : row.original,
       translation,
@@ -220,4 +221,25 @@ export function getAudienceCaptionRows(rows, language, hideOriginals, structured
       state: "final",
     }];
   });
+}
+
+export function advanceAudienceCaptionPresentation(presentation, rows, language, now) {
+  if (presentation.language !== language) {
+    return {
+      language,
+      shownIDs: new Set(rows.map((row) => row.id)),
+      nextRowAt: rows.length ? now + AUDIENCE_CAPTION_HOLD_MS : 0,
+    };
+  }
+
+  if (now < presentation.nextRowAt) return presentation;
+  const nextRow = rows.find((row) => !presentation.shownIDs.has(row.id));
+  if (!nextRow) return presentation;
+
+  const shownIDs = new Set(rows
+    .filter((row) => presentation.shownIDs.has(row.id))
+    .map((row) => row.id));
+  shownIDs.add(nextRow.id);
+
+  return { language, shownIDs, nextRowAt: now + AUDIENCE_CAPTION_HOLD_MS };
 }

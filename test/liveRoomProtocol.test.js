@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   DEFAULT_LIVE_APPEARANCE,
+  advanceAudienceCaptionPresentation,
   getAudienceCaptionRows,
   getLiveFontFamily,
   getRoomLogoUrl,
@@ -198,4 +199,51 @@ test("a missing secondary translation produces no row when structured originals 
   const unavailable = upsertAudienceCaption([], { ...pending, state: "unavailable" });
   assert.deepEqual(getAudienceCaptionRows(unavailable, "es", false, structured), []);
   assert.deepEqual(getAudienceCaptionRows(unavailable, "es", true, structured), []);
+});
+
+test("additional languages show ready rows one at a time with a 500 ms hold", () => {
+  const initial = { language: "es", shownIDs: new Set(), nextRowAt: 0 };
+  const first = makeRow({ id: "sentence-1" });
+  const second = makeRow({ id: "sentence-2" });
+  const third = makeRow({ id: "sentence-3" });
+
+  const firstShown = advanceAudienceCaptionPresentation(initial, [first], "es", 100);
+  assert.deepEqual([...firstShown.shownIDs], [first.id]);
+  const burst = [first, second, third];
+  assert.equal(advanceAudienceCaptionPresentation(firstShown, burst, "es", 599), firstShown);
+
+  const secondShown = advanceAudienceCaptionPresentation(firstShown, burst, "es", 600);
+  assert.deepEqual([...secondShown.shownIDs], [first.id, second.id]);
+  assert.equal(advanceAudienceCaptionPresentation(secondShown, burst, "es", 1099), secondShown);
+
+  const thirdShown = advanceAudienceCaptionPresentation(secondShown, burst, "es", 1100);
+  assert.deepEqual([...thirdShown.shownIDs], [first.id, second.id, third.id]);
+});
+
+test("switching audience languages shows their available history and resets the hold", () => {
+  const first = makeRow({ id: "sentence-1" });
+  const second = makeRow({ id: "sentence-2" });
+  const third = makeRow({ id: "sentence-3" });
+  const previous = { language: "es", shownIDs: new Set([first.id]), nextRowAt: 500 };
+  const switched = advanceAudienceCaptionPresentation(previous, [first, second], "ja", 200);
+  assert.deepEqual([...switched.shownIDs], [first.id, second.id]);
+  assert.equal(advanceAudienceCaptionPresentation(switched, [first, second, third], "ja", 699), switched);
+  assert.equal(advanceAudienceCaptionPresentation(switched, [first, second, third], "ja", 700)
+    .shownIDs.has(third.id), true);
+});
+
+test("audience row IDs survive toggling originals without restarting the hold", () => {
+  const original = makeRow();
+  const audience = [{
+    sentenceId: 42, revision: 1, original: original.original,
+    state: "translated", translations: { es: "Hola" },
+  }];
+  const paired = getAudienceCaptionRows(audience, "es", false, [original]);
+  const translationOnly = getAudienceCaptionRows(audience, "es", true, [original]);
+  const initial = { language: "es", shownIDs: new Set(), nextRowAt: 0 };
+  const shown = advanceAudienceCaptionPresentation(initial, paired, "es", 100);
+
+  assert.equal(translationOnly[0].original, "");
+  assert.equal(translationOnly[0].id, paired[0].id);
+  assert.equal(advanceAudienceCaptionPresentation(shown, translationOnly, "es", 200), shown);
 });

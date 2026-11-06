@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, PictureInPicture2, Share2, X } from "lucide-react";
+import { ChevronDown, Maximize2, Minimize2, PictureInPicture2, Share2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import appIcon from "./assets/ekto.png";
 import {
   DEFAULT_LIVE_APPEARANCE,
+  advanceAudienceCaptionPresentation,
   getAudienceCaptionRows,
   getLiveFontFamily,
   getRoomLogoUrl,
@@ -47,6 +48,7 @@ const QR_CODE_OPTIONS = {
   margin: 1,
   width: 320,
 };
+const LIVE_ROOM_CONTROL_CLASS = "grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full border border-white/10 bg-white/[0.06] text-white/90 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8aeb9e]";
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
 const MotionSection = motion.section;
@@ -831,30 +833,6 @@ function LiveRoomQrCode({ qrCodeDataUrl, liveRoomUrl, className = "" }) {
   );
 }
 
-function DesktopQrCard({ liveRoomUrl, qrCodeDataUrl, onShareClick }) {
-  return (
-    <aside className="absolute bottom-4 left-4 z-20 hidden w-36 rounded-lg border border-white/10 bg-neutral-950/86 p-3 text-center shadow-2xl backdrop-blur lg:block">
-      <LiveRoomQrCode
-        qrCodeDataUrl={qrCodeDataUrl}
-        liveRoomUrl={liveRoomUrl}
-        className="mx-auto h-24 w-24"
-      />
-      <p className="mt-2 text-center text-xs font-semibold text-white/88">
-        Scan to Join
-      </p>
-      <button
-        type="button"
-        aria-label="Share live room"
-        onClick={onShareClick}
-        className="mx-auto mt-1.5 inline-flex cursor-pointer items-center justify-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[0.68rem] font-semibold text-white/52 transition hover:border-white/18 hover:bg-white/[0.08] hover:text-white/78"
-      >
-        <Share2 size={11} strokeWidth={2.2} />
-        Share
-      </button>
-    </aside>
-  );
-}
-
 function LiveRoomShareDialog({
   code,
   liveRoomUrl,
@@ -1079,7 +1057,7 @@ function CaptionLanguagePicker({ languages, language, hideOriginals, onChange })
   if (!hideOriginals) options.push({ code: "original", label: "Original" });
 
   return (
-    <div className="relative flex h-10 w-36 min-w-0 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/80 px-3 text-sm text-white shadow-lg focus-within:ring-2 focus-within:ring-[#8aeb9e]">
+    <div className="relative flex h-11 w-36 min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 text-sm text-white/90 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#8aeb9e]">
       <span aria-hidden="true" className="pointer-events-none min-w-0 flex-1 truncate">
         {options.find((option) => option.code === language)?.label}
       </span>
@@ -1112,6 +1090,37 @@ function LiveRoomLogo({ logoUrl }) {
   );
 }
 
+function usePacedAudienceCaptionRows(rows, language) {
+  const [presentation, setPresentation] = useState(() => ({
+    language: null,
+    shownIDs: new Set(),
+    nextRowAt: 0,
+  }));
+
+  useEffect(() => {
+    if (presentation.language === language &&
+        !rows.some((row) => !presentation.shownIDs.has(row.id))) return;
+
+    let timer;
+    function revealNext() {
+      const now = performance.now();
+      const next = advanceAudienceCaptionPresentation(presentation, rows, language, now);
+      if (next !== presentation) {
+        setPresentation(next);
+      } else {
+        timer = window.setTimeout(revealNext, Math.ceil(presentation.nextRowAt - now));
+      }
+    }
+    revealNext();
+    return () => window.clearTimeout(timer);
+  }, [language, presentation, rows]);
+
+  // Show the available history immediately on a language change.
+  return presentation.language === language
+    ? rows.filter((row) => presentation.shownIDs.has(row.id))
+    : rows;
+}
+
 function LiveRoomPage() {
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const canShareLiveRoom = Boolean(code && isValidRoomCode(code));
@@ -1130,6 +1139,7 @@ function LiveRoomPage() {
   const [hideOriginals, setHideOriginals] = useState(false);
   const [fontScale, setFontScale] = useState(readStoredFontScale);
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(false);
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
   const [isMiniCaptionSupported, setIsMiniCaptionSupported] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
@@ -1314,22 +1324,32 @@ function LiveRoomPage() {
   }, [liveRoomUrl]);
 
   useEffect(() => {
-    if (!isFontControlOpen) {
-      return undefined;
-    }
+    if (!isFontControlOpen && !isFocusMode) return undefined;
 
     function handlePointerDown(event) {
-      if (!fontControlRef.current?.contains(event.target)) {
+      if (isFontControlOpen && !fontControlRef.current?.contains(event.target)) {
         setIsFontControlOpen(false);
       }
     }
 
+    function handleKeyDown(event) {
+      if (event.key !== "Escape") return;
+      if (isFontControlOpen) {
+        setIsFontControlOpen(false);
+        fontControlRef.current?.querySelector("button")?.focus();
+      } else {
+        setIsFocusMode(false);
+      }
+    }
+
     window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isFontControlOpen]);
+  }, [isFontControlOpen, isFocusMode]);
 
   useEffect(() => {
     if (!code || !isValidRoomCode(code)) {
@@ -1783,6 +1803,16 @@ function LiveRoomPage() {
   );
   const isSecondaryCaptionLanguage = selectedCaptionLanguage !== null &&
     selectedCaptionLanguage !== "original" && selectedCaptionLanguage !== targetLanguages[0];
+  const readyAudienceRows = useMemo(
+    () => isSecondaryCaptionLanguage
+      ? getAudienceCaptionRows(audienceRows, selectedCaptionLanguage, hideOriginals, structuredRows)
+        .slice(-MAX_RENDERED_CAPTION_LINES)
+      : [],
+    [audienceRows, hideOriginals, isSecondaryCaptionLanguage, selectedCaptionLanguage, structuredRows],
+  );
+  const pacedAudienceRows = usePacedAudienceCaptionRows(
+    readyAudienceRows, isSecondaryCaptionLanguage ? selectedCaptionLanguage : null,
+  );
   const visibleStructuredRows = useMemo(() => {
     if (selectedCaptionLanguage === "original") {
       return (structuredRows ?? []).filter((row) => row.original).map((row) => ({
@@ -1790,9 +1820,7 @@ function LiveRoomPage() {
       })).slice(-MAX_RENDERED_CAPTION_LINES);
     }
     if (isSecondaryCaptionLanguage) {
-      return getAudienceCaptionRows(
-        audienceRows, selectedCaptionLanguage, hideOriginals, structuredRows,
-      ).slice(-MAX_RENDERED_CAPTION_LINES);
+      return pacedAudienceRows;
     }
     if (structuredRows === null) {
       return null;
@@ -1808,7 +1836,7 @@ function LiveRoomPage() {
           Boolean(row.translation),
       )
       .slice(-MAX_RENDERED_CAPTION_LINES);
-  }, [audienceRows, effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, selectedCaptionLanguage, structuredRows]);
+  }, [effectiveRoomMode, hideOriginals, isSecondaryCaptionLanguage, pacedAudienceRows, selectedCaptionLanguage, structuredRows]);
   const structuredHasActiveRow = visibleStructuredRows?.some(
     (row) => row.state === "active",
   );
@@ -1818,6 +1846,7 @@ function LiveRoomPage() {
   const captionFontPercent = Math.round(fontScale * 100);
   const shouldShowStatusChip = status === "live" || status === "ended";
   const logoUrl = status === "ended" ? null : roomLogoUrl;
+  const focusModeAction = isFocusMode ? "Exit focus mode" : "Enter focus mode";
   const emptyCaptionMessage = status === "invalid"
     ? "This live link is invalid."
     : status === "full"
@@ -1830,51 +1859,65 @@ function LiveRoomPage() {
 
   return (
     <main
-      className="live-room-page bg-neutral-950 px-3 py-3 text-white md:px-6 md:py-6"
+      className={`live-room-page text-white ${isFocusMode ? "live-room-page--focused bg-black" : "bg-neutral-950"}`}
       style={{
         "--caption-font-scale": fontScale,
         "--caption-font-family": getLiveFontFamily(appearance.fontStyle),
       }}
     >
-      <section className="live-room-shell mx-auto flex max-w-6xl flex-col">
-        <div className="mb-3 flex items-center justify-between gap-3 text-white/70">
-          <div className="flex min-w-0 items-center gap-3">
-            <LiveRoomLogo key={logoUrl} logoUrl={logoUrl} />
-            <div className="min-w-0">
-              <h1 dir="auto" className="line-clamp-2 text-sm font-semibold text-white/85 [overflow-wrap:anywhere]">
-                {roomTitle ?? liveRoomTitle}
-              </h1>
-              <p className="mt-0.5 inline-flex max-w-full items-center gap-1.5 truncate rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[0.68rem] uppercase tracking-[0.08em] text-white/50">
-                <span className="h-1 w-1 shrink-0 rounded-full bg-white/35" />
-                Broadcast {code || "unknown"}
-              </p>
-            </div>
-          </div>
-          {shouldShowStatusChip ? (
-            <div className="flex shrink-0 items-center gap-2 text-right font-mono text-xs font-medium text-white/70 md:text-sm">
-              {status === "live" ? (
-                <p className="inline-flex items-center gap-1.5 rounded-full border border-[#8aeb9e]/25 bg-[#8aeb9e]/10 px-2.5 py-1 text-[#8aeb9e]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
-                  LIVE
+      <section className={`live-room-shell mx-auto flex flex-col ${isFocusMode ? "" : "max-w-6xl"}`}>
+        {!isFocusMode ? (
+          <header className="mb-3 flex items-center justify-between gap-3 text-white/70">
+            <div className="flex min-w-0 items-center gap-3">
+              <LiveRoomLogo key={logoUrl} logoUrl={logoUrl} />
+              <div className="min-w-0">
+                <h1 dir="auto" className="line-clamp-2 text-sm font-semibold text-white/85 [overflow-wrap:anywhere]">
+                  {roomTitle ?? liveRoomTitle}
+                </h1>
+                <p className="mt-0.5 truncate font-mono text-[0.68rem] uppercase tracking-[0.08em] text-white/50">
+                  Broadcast {code || "unknown"}
                 </p>
-              ) : (
-                <p className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-white/60">
-                  Broadcast ended
-                </p>
-              )}
+              </div>
             </div>
-          ) : null}
-        </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {shouldShowStatusChip ? (
+                <div className="text-right font-mono text-xs font-medium md:text-sm">
+                  {status === "live" ? (
+                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#8aeb9e]/25 bg-[#8aeb9e]/10 px-2.5 py-1 text-[#8aeb9e]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#8aeb9e]" />
+                      LIVE
+                    </p>
+                  ) : (
+                    <p className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-white/60">
+                      Broadcast ended
+                    </p>
+                  )}
+                </div>
+              ) : null}
+              {canShareLiveRoom ? (
+                <button
+                  type="button"
+                  aria-label="Share live room"
+                  title="Share live room"
+                  onClick={() => setIsShareSheetOpen(true)}
+                  className={LIVE_ROOM_CONTROL_CLASS}
+                >
+                  <Share2 aria-hidden="true" size={17} />
+                </button>
+              ) : null}
+            </div>
+          </header>
+        ) : null}
 
-        <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg bg-black shadow-2xl ring-1 ring-white/10">
-          <div className="grid min-h-0 w-full grid-rows-[minmax(0,1fr)] overflow-hidden px-5 pb-6 pt-0 text-center md:px-10 md:pb-10 md:pt-0">
+        <div className={`relative flex min-h-0 flex-1 flex-col bg-black ${isFocusMode ? "" : "rounded-xl ring-1 ring-white/10"}`}>
+          <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden px-4 pb-4 text-center md:px-8 md:pb-6">
             {!hasVisibleCaptions ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 {emptyCaptionMessage}
               </div>
             ) : (
               <div className="relative min-h-0 overflow-hidden">
-                <div className="absolute inset-x-0 bottom-0 space-y-2 md:space-y-3 md:px-44">
+                <div className="absolute inset-x-0 bottom-0 mx-auto max-w-5xl space-y-2 md:space-y-3">
                   {visibleStructuredRows !== null
                     ? visibleStructuredRows.map((row, index) => (
                         <StructuredCaptionRow
@@ -1912,112 +1955,110 @@ function LiveRoomPage() {
             )}
           </div>
           <div
-            ref={fontControlRef}
-            className="absolute right-3 top-3 z-20 flex items-start gap-2 md:right-4 md:top-4"
+            role="group"
+            aria-label="Caption controls"
+            className={`relative z-20 flex shrink-0 items-center gap-2 px-3 py-2 md:px-4 ${isFocusMode ? "" : "rounded-b-xl border-t border-white/10 bg-neutral-950"}`}
           >
-            {selectedCaptionLanguage ? (
-              <CaptionLanguagePicker
-                languages={targetLanguages}
-                language={selectedCaptionLanguage}
-                hideOriginals={hideOriginals}
-                onChange={setCaptionLanguage}
-              />
-            ) : null}
-            {isFontControlOpen ? (
-              <div className="absolute right-0 top-11 flex h-10 items-center gap-2 rounded-md border border-white/15 bg-neutral-950/90 px-2 shadow-xl backdrop-blur">
-                <button
-                  type="button"
-                  aria-label="Decrease caption font size"
-                  title="Decrease caption font size"
-                  disabled={fontScale <= MIN_FONT_SCALE}
-                  onClick={() =>
-                    setFontScale((currentScale) =>
-                      clampFontScale(currentScale - FONT_SCALE_STEP),
-                    )
-                  }
-                  className="h-7 w-8 cursor-pointer rounded-sm border border-white/10 text-xs font-bold text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
-                >
-                  A-
-                </button>
-                <input
-                  aria-label="Caption font size"
-                  type="range"
-                  min={MIN_FONT_SCALE}
-                  max={MAX_FONT_SCALE}
-                  step={FONT_SCALE_STEP}
-                  value={fontScale}
-                  onChange={(event) =>
-                    setFontScale(clampFontScale(event.target.value))
-                  }
-                  className="h-7 w-24 cursor-pointer accent-[#8aeb9e] md:w-32"
-                />
-                <button
-                  type="button"
-                  aria-label="Increase caption font size"
-                  title="Increase caption font size"
-                  disabled={fontScale >= MAX_FONT_SCALE}
-                  onClick={() =>
-                    setFontScale((currentScale) =>
-                      clampFontScale(currentScale + FONT_SCALE_STEP),
-                    )
-                  }
-                  className="h-7 w-8 cursor-pointer rounded-sm border border-white/10 text-xs font-bold text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
-                >
-                  A+
-                </button>
-                <span className="w-9 text-right font-mono text-[0.65rem] font-semibold text-white/50">
-                  {captionFontPercent}%
-                </span>
+            {!isFocusMode ? (
+              <div className="flex min-w-0 items-center gap-2">
+                <div ref={fontControlRef} className="relative shrink-0">
+                  <button
+                    type="button"
+                    aria-label="Caption font size settings"
+                    aria-expanded={isFontControlOpen}
+                    aria-controls={isFontControlOpen ? "caption-font-controls" : undefined}
+                    title="Caption font size"
+                    onClick={() => setIsFontControlOpen((isOpen) => !isOpen)}
+                    className={`${LIVE_ROOM_CONTROL_CLASS} text-sm font-semibold aria-expanded:bg-white/15`}
+                  >
+                    Aa
+                  </button>
+                  {isFontControlOpen ? (
+                    <div id="caption-font-controls" className="absolute bottom-13 left-0 flex items-center gap-2 rounded-xl border border-white/15 bg-neutral-950 p-2 shadow-xl">
+                      <button
+                        type="button"
+                        aria-label="Decrease caption font size"
+                        title="Decrease caption font size"
+                        disabled={fontScale <= MIN_FONT_SCALE}
+                        onClick={() =>
+                          setFontScale((currentScale) =>
+                            clampFontScale(currentScale - FONT_SCALE_STEP),
+                          )
+                        }
+                        className="h-8 w-8 cursor-pointer rounded-md border border-white/10 text-xs font-bold text-white/80 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        A−
+                      </button>
+                      <input
+                        aria-label="Caption font size"
+                        type="range"
+                        min={MIN_FONT_SCALE}
+                        max={MAX_FONT_SCALE}
+                        step={FONT_SCALE_STEP}
+                        value={fontScale}
+                        onChange={(event) =>
+                          setFontScale(clampFontScale(event.target.value))
+                        }
+                        className="h-8 w-24 cursor-pointer accent-[#8aeb9e] md:w-32"
+                      />
+                      <button
+                        type="button"
+                        aria-label="Increase caption font size"
+                        title="Increase caption font size"
+                        disabled={fontScale >= MAX_FONT_SCALE}
+                        onClick={() =>
+                          setFontScale((currentScale) =>
+                            clampFontScale(currentScale + FONT_SCALE_STEP),
+                          )
+                        }
+                        className="h-8 w-8 cursor-pointer rounded-md border border-white/10 text-xs font-bold text-white/80 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        A+
+                      </button>
+                      <span className="w-9 text-right font-mono text-[0.65rem] font-semibold text-white/50">
+                        {captionFontPercent}%
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+                {shouldShowMiniCaptionButton ? (
+                  <button
+                    type="button"
+                    aria-label={miniCaptionWindow ? "Focus mini captions window" : "Open mini captions window"}
+                    title={miniCaptionWindow ? "Focus mini captions window" : "Open mini captions window"}
+                    onClick={openMiniCaptionWindow}
+                    className={LIVE_ROOM_CONTROL_CLASS}
+                  >
+                    <PictureInPicture2 aria-hidden="true" size={18} />
+                  </button>
+                ) : null}
+                {selectedCaptionLanguage ? (
+                  <CaptionLanguagePicker
+                    languages={targetLanguages}
+                    language={selectedCaptionLanguage}
+                    hideOriginals={hideOriginals}
+                    onChange={setCaptionLanguage}
+                  />
+                ) : null}
               </div>
-            ) : null}
-            {canShareLiveRoom ? (
-              <button
-                type="button"
-                aria-label="Open room QR code"
-                title="Open room QR code"
-                onClick={() => setIsShareSheetOpen(true)}
-                className="grid h-10 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white lg:hidden"
-              >
-                <Share2 size={16} strokeWidth={2.3} />
-              </button>
-            ) : null}
-            {shouldShowMiniCaptionButton ? (
-              <button
-                type="button"
-                aria-label={
-                  miniCaptionWindow
-                    ? "Focus mini captions window"
-                    : "Open mini captions window"
-                }
-                title={
-                  miniCaptionWindow
-                    ? "Focus mini captions window"
-                    : "Open mini captions window"
-                }
-                onClick={openMiniCaptionWindow}
-                className="grid h-10 w-10 cursor-pointer place-items-center rounded-md border border-white/15 bg-neutral-950/80 text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white"
-              >
-                <PictureInPicture2 size={17} strokeWidth={2.3} />
-              </button>
             ) : null}
             <button
               type="button"
-              aria-label="Caption font size settings"
-              aria-expanded={isFontControlOpen}
-              title="Caption font size"
-              onClick={() => setIsFontControlOpen((isOpen) => !isOpen)}
-              className="h-10 w-10 cursor-pointer rounded-md border border-white/15 bg-neutral-950/80 text-sm font-bold text-white/80 shadow-lg backdrop-blur transition hover:border-white/25 hover:bg-neutral-900 hover:text-white"
+              aria-label={focusModeAction}
+              title={focusModeAction}
+              onClick={() => {
+                setIsFontControlOpen(false);
+                setIsFocusMode((isFocused) => !isFocused);
+              }}
+              className={`${LIVE_ROOM_CONTROL_CLASS} ml-auto`}
             >
-              Aa
+              {isFocusMode ? (
+                <Minimize2 aria-hidden="true" size={18} />
+              ) : (
+                <Maximize2 aria-hidden="true" size={18} />
+              )}
             </button>
           </div>
-          {canShareLiveRoom ? (
-            <DesktopQrCard
-              liveRoomUrl={liveRoomUrl}
-              qrCodeDataUrl={qrCodeDataUrl}
-              onShareClick={() => setIsShareSheetOpen(true)}
-            />
-          ) : null}
         </div>
       </section>
       <AnimatePresence>

@@ -47,17 +47,17 @@ html,
 }
 
 .live-room-page {
+  --live-room-gutter: 0.75rem;
   min-height: 100vh;
   min-height: 100svh;
+  padding: var(--live-room-gutter);
+  padding-bottom: calc(var(--live-room-gutter) + env(safe-area-inset-bottom));
 }
 
 .live-room-shell {
-  min-height: calc(100vh - 24px - env(safe-area-inset-bottom));
-  min-height: calc(100svh - 24px - env(safe-area-inset-bottom));
-}
-
-.live-room-page {
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  --live-room-insets: calc(var(--live-room-gutter) * 2 + env(safe-area-inset-bottom));
+  min-height: calc(100vh - var(--live-room-insets));
+  min-height: calc(100svh - var(--live-room-insets));
 }
 
 .live-caption-text {
@@ -98,13 +98,13 @@ html,
   }
 
   .live-room-shell {
-    min-height: calc(100dvh - 24px - env(safe-area-inset-bottom));
+    min-height: calc(100dvh - var(--live-room-insets));
   }
 }
 
 @media (min-width: 48rem) {
   .live-room-page {
-    padding-bottom: 1.5rem;
+    --live-room-gutter: 1.5rem;
   }
 
   .live-caption-text {
@@ -119,18 +119,10 @@ html,
     font-size: calc(3rem * var(--caption-font-scale, 1));
   }
 
-  .live-room-shell {
-    min-height: calc(100vh - 48px);
-    min-height: calc(100svh - 48px);
-  }
 }
 
-@supports (height: 100dvh) {
-  @media (min-width: 48rem) {
-    .live-room-shell {
-      min-height: calc(100dvh - 48px);
-    }
-  }
+.live-room-page--focused {
+  --live-room-gutter: 0px;
 }
 
 @media (prefers-color-scheme: light) {
