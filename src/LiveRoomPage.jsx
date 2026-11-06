@@ -35,7 +35,6 @@ const FONT_SCALE_STEP = 0.05;
 const ROOM_CODE_PATTERN = /^[A-Z0-9]{6,24}$/;
 const RETRYABLE_ROOM_STATUSES = new Set(["missing", "expired"]);
 const ROOM_FULL_CLOSE_CODE = 4409;
-const DESKTOP_MEDIA_QUERY = "(min-width: 768px) and (hover: hover) and (pointer: fine)";
 const MINI_CAPTION_WINDOW_SIZE = {
   width: 520,
   height: 140,
@@ -1146,12 +1145,12 @@ function LiveRoomPage() {
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
-  const [isMiniCaptionSupported, setIsMiniCaptionSupported] = useState(false);
-  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const [miniCaptionWindow, setMiniCaptionWindow] = useState(null);
   const [miniCaptionRoot, setMiniCaptionRoot] = useState(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [shareFeedback, setShareFeedback] = useState("");
+  const documentPictureInPicture = window.documentPictureInPicture;
+  const isMiniCaptionSupported = typeof documentPictureInPicture?.requestWindow === "function";
   const effectiveRoomMode = roomMode || "captions";
   const liveRoomTitle = getLiveRoomTitle(roomMode);
   const lastActiveCaptionTextRef = useRef("");
@@ -1179,8 +1178,6 @@ function LiveRoomPage() {
     }
     setStatus(normalizedStatus);
   }, []);
-  const shouldShowMiniCaptionButton =
-    isMiniCaptionSupported && isDesktopViewport;
 
   function showShareFeedback(message) {
     window.clearTimeout(shareFeedbackTimerRef.current);
@@ -1191,9 +1188,7 @@ function LiveRoomPage() {
   }
 
   async function openMiniCaptionWindow() {
-    const documentPictureInPicture = window.documentPictureInPicture;
-
-    if (!isDesktopViewport || !documentPictureInPicture) {
+    if (!isMiniCaptionSupported) {
       return;
     }
 
@@ -1275,33 +1270,12 @@ function LiveRoomPage() {
     }
   }, [fontScale]);
 
-  useEffect(() => {
-    setIsMiniCaptionSupported(
-      typeof window.documentPictureInPicture?.requestWindow === "function",
-    );
+  useEffect(() => () => {
+    const activeMiniCaptionWindow = window.documentPictureInPicture?.window;
 
-    return () => {
-      const activeMiniCaptionWindow = window.documentPictureInPicture?.window;
-
-      if (activeMiniCaptionWindow && !activeMiniCaptionWindow.closed) {
-        activeMiniCaptionWindow.close();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
-
-    function updateDesktopViewport(eventOrQuery) {
-      setIsDesktopViewport(eventOrQuery.matches);
+    if (activeMiniCaptionWindow && !activeMiniCaptionWindow.closed) {
+      activeMiniCaptionWindow.close();
     }
-
-    updateDesktopViewport(mediaQuery);
-    mediaQuery.addEventListener("change", updateDesktopViewport);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateDesktopViewport);
-    };
   }, []);
 
   useEffect(() => {
@@ -2016,7 +1990,7 @@ function LiveRoomPage() {
                     </div>
                   ) : null}
                 </div>
-                {shouldShowMiniCaptionButton ? (
+                {isMiniCaptionSupported ? (
                   <button
                     type="button"
                     aria-label={miniCaptionWindow ? "Focus mini captions window" : "Open mini captions window"}
