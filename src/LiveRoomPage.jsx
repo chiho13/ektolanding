@@ -14,6 +14,7 @@ import {
   getSpeakerColor,
   getStructuredMessageRows,
   getStructuredRowKey,
+  getRequestedCaptionLanguage,
   getTargetLanguages,
   getTranslationDisplayRows,
   normalizeLiveAppearance,
@@ -1139,7 +1140,9 @@ function LiveRoomPage() {
   const [structuredRows, setStructuredRows] = useState(null);
   const [targetLanguages, setTargetLanguages] = useState([]);
   const [audienceRows, setAudienceRows] = useState([]);
-  const [captionLanguage, setCaptionLanguage] = useState(null);
+  const [captionLanguage, setCaptionLanguage] = useState(() =>
+    getRequestedCaptionLanguage(window.location.search),
+  );
   const [appearance, setAppearance] = useState(DEFAULT_LIVE_APPEARANCE);
   const [roomMode, setRoomMode] = useState(null);
   const [roomTitle, setRoomTitle] = useState(null);
@@ -1514,8 +1517,11 @@ function LiveRoomPage() {
           (message.type === "status" && Object.hasOwn(message, "targetLanguages"))) {
         const languages = getTargetLanguages(message.targetLanguages);
         setTargetLanguages(languages);
-        setCaptionLanguage((selection) =>
-          resolveCaptionLanguage(languages, selection, "translate", message.hideOriginals === true),
+        // A waiting snapshot can arrive before the host announces languages.
+        // Preserve the link preference until it can be validated against that list.
+        setCaptionLanguage((selection) => languages.length
+          ? resolveCaptionLanguage(languages, selection, "translate", message.hideOriginals === true)
+          : selection,
         );
         if (message.type === "snapshot") {
           setAudienceRows(languages.length && Array.isArray(message.audienceRows)

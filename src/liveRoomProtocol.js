@@ -159,6 +159,13 @@ export function getStructuredRowKey(row) {
 
 const CAPTION_LANGUAGE_CODE = /^[a-z]{2,3}(?:-[a-z]{4})?(?:-(?:[a-z]{2}|[0-9]{3}))?$/i;
 
+export function getRequestedCaptionLanguage(search = "") {
+  const language = new URLSearchParams(search).get("lang");
+  return language && CAPTION_LANGUAGE_CODE.test(language) && language.toLowerCase() !== "und"
+    ? language
+    : null;
+}
+
 export function getTargetLanguages(value) {
   if (!Array.isArray(value) || value.length < 2 || value.length > 5 ||
       !value.every((code) => typeof code === "string" &&

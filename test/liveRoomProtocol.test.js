@@ -12,6 +12,7 @@ import {
   getSpeakerColor,
   getStructuredMessageRows,
   getStructuredRowKey,
+  getRequestedCaptionLanguage,
   getTargetLanguages,
   getTranslationColor,
   getTranslationDisplayRows,
@@ -20,6 +21,24 @@ import {
   resolveCaptionLanguage,
   upsertAudienceCaption,
 } from "../src/liveRoomProtocol.js";
+
+test("language links choose an available initial language and permit later viewer changes", () => {
+  const languages = ["ja", "ko", "zh-Hant"];
+  const requested = getRequestedCaptionLanguage("?room=kept&lang=ko");
+  assert.equal(requested, "ko");
+  assert.equal(resolveCaptionLanguage(languages, requested, "translate", false), "ko");
+  assert.equal(resolveCaptionLanguage(languages, "zh-Hant", "translate", false), "zh-Hant");
+  assert.equal(getRequestedCaptionLanguage("?lang=zh-Hant"), "zh-Hant");
+});
+
+test("default and unavailable language links fall back to the primary", () => {
+  const languages = ["ja", "ko"];
+  for (const query of ["", "?room=kept", "?lang=", "?lang=none", "?lang=auto", "?lang=original", "?lang=und", "?lang=%3Cscript%3E", "?lang=fr"]) {
+    const requested = getRequestedCaptionLanguage(query);
+    assert.equal(resolveCaptionLanguage(languages, requested, "translate", false), "ja");
+  }
+  assert.equal(resolveCaptionLanguage([], "ko", "captions", false), null);
+});
 
 test("status payloads can add or clear a title and support older relays", () => {
   assert.equal(getRoomTitle({ status: "waiting", title: "  春の講演  " }), "春の講演");
