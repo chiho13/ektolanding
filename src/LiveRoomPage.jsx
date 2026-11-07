@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, Maximize2, Minimize2, PictureInPicture2, Share2, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import appIcon from "./assets/ekto.png";
 import {
   DEFAULT_LIVE_APPEARANCE,
@@ -1126,6 +1126,7 @@ function usePacedAudienceCaptionRows(rows, language) {
 }
 
 function LiveRoomPage() {
+  const shouldReduceMotion = useReducedMotion();
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const canShareLiveRoom = Boolean(code && isValidRoomCode(code));
   const liveRoomUrl = useMemo(getLiveRoomUrl, []);
@@ -2011,7 +2012,10 @@ function LiveRoomPage() {
                 ) : null}
               </div>
             ) : null}
-            <button
+            <MotionButton
+              layout={shouldReduceMotion ? false : "position"}
+              layoutDependency={isFocusMode}
+              transition={{ layout: { duration: 0.24, ease: [0.22, 1, 0.36, 1] } }}
               type="button"
               aria-label={focusModeAction}
               title={focusModeAction}
@@ -2026,7 +2030,7 @@ function LiveRoomPage() {
               ) : (
                 <Maximize2 aria-hidden="true" size={18} />
               )}
-            </button>
+            </MotionButton>
           </div>
         </div>
       </section>
