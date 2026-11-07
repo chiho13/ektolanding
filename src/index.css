@@ -48,16 +48,33 @@ html,
 
 .live-room-page {
   --live-room-gutter: 0.75rem;
+  --live-room-focus-duration: 240ms;
+  --live-room-focus-ease: cubic-bezier(0.22, 1, 0.36, 1);
   min-height: 100vh;
   min-height: 100svh;
   padding: var(--live-room-gutter);
   padding-bottom: calc(var(--live-room-gutter) + env(safe-area-inset-bottom));
+  transition:
+    padding var(--live-room-focus-duration) var(--live-room-focus-ease),
+    background-color var(--live-room-focus-duration) var(--live-room-focus-ease);
 }
 
 .live-room-shell {
   --live-room-insets: calc(var(--live-room-gutter) * 2 + env(safe-area-inset-bottom));
   min-height: calc(100vh - var(--live-room-insets));
   min-height: calc(100svh - var(--live-room-insets));
+  transition:
+    max-width var(--live-room-focus-duration) var(--live-room-focus-ease),
+    min-height var(--live-room-focus-duration) var(--live-room-focus-ease);
+}
+
+.live-room-caption-panel,
+.live-room-controls {
+  transition:
+    border-radius var(--live-room-focus-duration) var(--live-room-focus-ease),
+    box-shadow var(--live-room-focus-duration) var(--live-room-focus-ease),
+    border-color var(--live-room-focus-duration) var(--live-room-focus-ease),
+    background-color var(--live-room-focus-duration) var(--live-room-focus-ease);
 }
 
 .live-caption-text {
@@ -123,6 +140,12 @@ html,
 
 .live-room-page--focused {
   --live-room-gutter: 0px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-room-page {
+    --live-room-focus-duration: 0ms;
+  }
 }
 
 @media (prefers-color-scheme: light) {
