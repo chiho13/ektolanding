@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, Maximize2, Minimize2, PictureInPicture2, Share2, X } from "lucide-react";
+import { ChevronDown, Maximize2, Minimize2, PictureInPicture2, QrCode, Share2, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import appIcon from "./assets/ekto.png";
 import {
@@ -1149,6 +1149,7 @@ function LiveRoomPage() {
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
+  const [isJoinQrVisible, setIsJoinQrVisible] = useState(false);
   const [miniCaptionWindow, setMiniCaptionWindow] = useState(null);
   const [miniCaptionRoot, setMiniCaptionRoot] = useState(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
@@ -1820,6 +1821,7 @@ function LiveRoomPage() {
   const shouldShowStatusChip = status === "live" || status === "ended";
   const logoUrl = status === "ended" ? null : roomLogoUrl;
   const focusModeAction = isFocusMode ? "Exit focus mode" : "Enter focus mode";
+  const joinQrAction = isJoinQrVisible ? "Hide join QR" : "Show join QR";
   const emptyCaptionMessage = status === "invalid"
     ? "This live link is invalid."
     : status === "full"
@@ -1885,6 +1887,19 @@ function LiveRoomPage() {
               {canShareLiveRoom ? (
                 <button
                   type="button"
+                  aria-label={joinQrAction}
+                  title={joinQrAction}
+                  aria-pressed={isJoinQrVisible}
+                  aria-controls={isJoinQrVisible ? "live-room-join-qr" : undefined}
+                  onClick={() => setIsJoinQrVisible((isVisible) => !isVisible)}
+                  className={`${LIVE_ROOM_CONTROL_CLASS} aria-pressed:border-[#8aeb9e]/40 aria-pressed:bg-[#8aeb9e]/10 aria-pressed:text-[#8aeb9e]`}
+                >
+                  <QrCode aria-hidden="true" size={18} />
+                </button>
+              ) : null}
+              {canShareLiveRoom ? (
+                <button
+                  type="button"
                   aria-label="Share live room"
                   title="Share live room"
                   onClick={() => setIsShareSheetOpen(true)}
@@ -1898,6 +1913,35 @@ function LiveRoomPage() {
         </MotionDiv>
 
         <div className={`live-room-caption-panel relative flex min-h-0 flex-1 flex-col bg-black ring-1 ${isFocusMode ? "rounded-none ring-transparent" : "rounded-xl ring-white/10"}`}>
+          <AnimatePresence initial={false}>
+            {canShareLiveRoom && isJoinQrVisible ? (
+              <MotionDiv
+                key="join-qr"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: focusTransitionDuration, ease: LIVE_ROOM_FOCUS_EASE }}
+                className="shrink-0 overflow-hidden"
+              >
+                <div className="flex justify-end px-4 pt-4 md:px-8 md:pt-6">
+                  <figure
+                    id="live-room-join-qr"
+                    aria-label="Join this live room"
+                    className="m-0 w-[5.6rem] shrink-0 space-y-2 md:w-[7.28rem] xl:w-[8.4rem]"
+                  >
+                    <LiveRoomQrCode
+                      qrCodeDataUrl={qrCodeDataUrl}
+                      liveRoomUrl={liveRoomUrl}
+                      className="aspect-square w-full"
+                    />
+                    <figcaption className="text-center text-sm font-medium text-white/70">
+                      Scan to join
+                    </figcaption>
+                  </figure>
+                </div>
+              </MotionDiv>
+            ) : null}
+          </AnimatePresence>
           <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden px-4 pb-4 text-center md:px-8 md:pb-6">
             {!hasVisibleCaptions ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
