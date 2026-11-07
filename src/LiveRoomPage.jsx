@@ -52,6 +52,7 @@ const QR_CODE_OPTIONS = {
 };
 const LIVE_ROOM_CONTROL_CLASS = "grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full border border-white/10 bg-white/[0.06] text-white/90 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8aeb9e]";
 const LIVE_ROOM_FOCUS_EASE = [0.22, 1, 0.36, 1];
+const FOCUS_CONTROL_HIDE_DELAY_MS = 1000;
 const MotionDiv = motion.div;
 const MotionButton = motion.button;
 const MotionSection = motion.section;
@@ -1151,6 +1152,7 @@ function LiveRoomPage() {
   const [fontScale, setFontScale] = useState(readStoredFontScale);
   const [isFontControlOpen, setIsFontControlOpen] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [isFocusControlHidden, setIsFocusControlHidden] = useState(false);
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
   const [isJoinQrVisible, setIsJoinQrVisible] = useState(false);
   const [miniCaptionWindow, setMiniCaptionWindow] = useState(null);
@@ -1337,6 +1339,34 @@ function LiveRoomPage() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isFontControlOpen, isFocusMode]);
+
+  useEffect(() => {
+    if (!isFocusMode) return undefined;
+
+    let hideTimer;
+    const screen = document.documentElement;
+
+    function handleMouseLeave() {
+      window.clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(() => {
+        setIsFocusControlHidden(true);
+      }, FOCUS_CONTROL_HIDE_DELAY_MS);
+    }
+
+    function handleMouseEnter() {
+      window.clearTimeout(hideTimer);
+      setIsFocusControlHidden(false);
+    }
+
+    screen.addEventListener("mouseleave", handleMouseLeave);
+    screen.addEventListener("mouseenter", handleMouseEnter);
+
+    return () => {
+      window.clearTimeout(hideTimer);
+      screen.removeEventListener("mouseleave", handleMouseLeave);
+      screen.removeEventListener("mouseenter", handleMouseEnter);
+    };
+  }, [isFocusMode]);
 
   useEffect(() => {
     if (!code || !isValidRoomCode(code)) {
@@ -2094,9 +2124,10 @@ function LiveRoomPage() {
               title={focusModeAction}
               onClick={() => {
                 setIsFontControlOpen(false);
+                setIsFocusControlHidden(false);
                 setIsFocusMode((isFocused) => !isFocused);
               }}
-              className={`${LIVE_ROOM_CONTROL_CLASS} ml-auto`}
+              className={`${LIVE_ROOM_CONTROL_CLASS} ml-auto [transition-property:color,background-color,border-color,opacity] motion-reduce:transition-none ${isFocusMode && isFocusControlHidden ? "pointer-events-none opacity-0 focus-visible:pointer-events-auto focus-visible:opacity-100" : ""}`}
             >
               {isFocusMode ? (
                 <Minimize2 aria-hidden="true" size={18} />
