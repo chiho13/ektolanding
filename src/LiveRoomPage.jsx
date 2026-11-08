@@ -1928,7 +1928,7 @@ function LiveRoomPage() {
                   aria-pressed={isJoinQrVisible}
                   aria-controls={isJoinQrVisible ? "live-room-join-qr" : undefined}
                   onClick={() => setIsJoinQrVisible((isVisible) => !isVisible)}
-                  className={`${LIVE_ROOM_CONTROL_CLASS} aria-pressed:border-[#8aeb9e]/40 aria-pressed:bg-[#8aeb9e]/10 aria-pressed:text-[#8aeb9e]`}
+                  className={`${LIVE_ROOM_CONTROL_CLASS} live-room-join-qr-toggle aria-pressed:border-[#8aeb9e]/40 aria-pressed:bg-[#8aeb9e]/10 aria-pressed:text-[#8aeb9e]`}
                 >
                   <QrCode aria-hidden="true" size={18} />
                 </button>
@@ -1948,44 +1948,42 @@ function LiveRoomPage() {
           </header>
         </MotionDiv>
 
-        <div className={`live-room-caption-panel relative flex min-h-0 flex-1 flex-col bg-black ring-1 ${isFocusMode ? "rounded-none ring-transparent" : "rounded-xl ring-white/10"}`}>
+        <div className={`live-room-caption-panel relative flex min-h-0 flex-1 flex-col bg-black [--join-qr-size:7.28rem] xl:[--join-qr-size:8.4rem] ${isFocusMode ? "rounded-none" : "rounded-xl"}`}>
           <AnimatePresence initial={false}>
             {canShareLiveRoom && isJoinQrVisible ? (
               <MotionDiv
                 key="join-qr"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: focusTransitionDuration, ease: LIVE_ROOM_FOCUS_EASE }}
-                className="shrink-0 overflow-hidden"
+                className="live-room-join-qr absolute right-8 top-6 z-10"
               >
-                <div className="flex justify-end px-4 pt-4 md:px-8 md:pt-6">
-                  <figure
-                    id="live-room-join-qr"
-                    aria-label="Join this live room"
-                    className="m-0 w-[5.6rem] shrink-0 space-y-2 md:w-[7.28rem] xl:w-[8.4rem]"
-                  >
-                    <LiveRoomQrCode
-                      qrCodeDataUrl={qrCodeDataUrl}
-                      liveRoomUrl={liveRoomUrl}
-                      className="aspect-square w-full"
-                    />
-                    <figcaption className="text-center text-sm font-medium text-white/70">
-                      Scan to join
-                    </figcaption>
-                  </figure>
-                </div>
+                <figure
+                  id="live-room-join-qr"
+                  aria-label="Join this live room"
+                  className="m-0 w-[var(--join-qr-size)] space-y-2"
+                >
+                  <LiveRoomQrCode
+                    qrCodeDataUrl={qrCodeDataUrl}
+                    liveRoomUrl={liveRoomUrl}
+                    className="aspect-square w-full"
+                  />
+                  <figcaption className="text-center text-sm font-medium text-white/70">
+                    Scan to join
+                  </figcaption>
+                </figure>
               </MotionDiv>
             ) : null}
           </AnimatePresence>
-          <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden px-4 pb-4 text-center md:px-8 md:pb-6">
+          <div className={`grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden px-4 pb-4 text-center md:px-8 md:pb-6 ${canShareLiveRoom && isJoinQrVisible ? "live-room-caption-stage--with-qr" : ""}`}>
             {!hasVisibleCaptions ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 {emptyCaptionMessage}
               </div>
             ) : (
               <div className="relative min-h-0 overflow-hidden">
-                <div className="absolute inset-x-0 bottom-0 mx-auto max-w-5xl space-y-2 md:space-y-3">
+                <div className="absolute inset-x-0 bottom-0 mx-auto max-w-5xl space-y-2 pb-[calc(0.25rem*var(--caption-font-scale))] md:space-y-3 md:pb-[calc(0.5rem*var(--caption-font-scale))]">
                   {visibleStructuredRows !== null
                     ? visibleStructuredRows.map((row, index) => (
                         <StructuredCaptionRow
@@ -2025,7 +2023,7 @@ function LiveRoomPage() {
           <div
             role="group"
             aria-label="Caption controls"
-            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 border-t px-3 pt-2 md:px-4 ${isFocusMode ? "border-transparent bg-black pb-3 md:pb-4" : "rounded-b-xl border-white/10 bg-neutral-950 pb-2"}`}
+            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 px-3 pt-2 md:px-4 ${isFocusMode ? "bg-black pb-3 md:pb-4" : "rounded-b-xl bg-neutral-950 pb-2"}`}
           >
             <MotionDiv
               initial={false}

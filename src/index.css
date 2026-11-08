@@ -77,6 +77,25 @@ html,
     background-color var(--live-room-focus-duration) var(--live-room-focus-ease);
 }
 
+.live-room-join-qr-toggle,
+.live-room-join-qr {
+  display: none;
+}
+
+@media (width > 1200px) {
+  .live-room-join-qr-toggle {
+    display: grid;
+  }
+
+  .live-room-join-qr {
+    display: block;
+  }
+
+  .live-room-caption-stage--with-qr {
+    padding-inline: calc(var(--join-qr-size) + 3.5rem);
+  }
+}
+
 .live-caption-text {
   font-family: var(--caption-font-family, "Poppins", system-ui, sans-serif);
   font-size: calc(1.5rem * var(--caption-font-scale, 1));
