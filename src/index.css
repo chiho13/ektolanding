@@ -53,14 +53,14 @@ html,
   min-height: 100vh;
   min-height: 100svh;
   padding: var(--live-room-gutter);
-  padding-bottom: calc(var(--live-room-gutter) + env(safe-area-inset-bottom));
+  padding-bottom: 0;
   transition:
     padding var(--live-room-focus-duration) var(--live-room-focus-ease),
     background-color var(--live-room-focus-duration) var(--live-room-focus-ease);
 }
 
 .live-room-shell {
-  --live-room-insets: calc(var(--live-room-gutter) * 2 + env(safe-area-inset-bottom));
+  --live-room-insets: var(--live-room-gutter);
   min-height: calc(100vh - var(--live-room-insets));
   min-height: calc(100svh - var(--live-room-insets));
   transition:
@@ -69,12 +69,19 @@ html,
 }
 
 .live-room-caption-panel,
+.live-room-caption-stage,
 .live-room-controls {
   transition:
     border-radius var(--live-room-focus-duration) var(--live-room-focus-ease),
     box-shadow var(--live-room-focus-duration) var(--live-room-focus-ease),
     border-color var(--live-room-focus-duration) var(--live-room-focus-ease),
     background-color var(--live-room-focus-duration) var(--live-room-focus-ease);
+}
+
+.live-room-controls--standard {
+  --live-room-control-inset: calc(0.5rem + var(--live-room-gutter) * 0.5);
+  padding-top: var(--live-room-control-inset);
+  padding-bottom: calc(var(--live-room-control-inset) + env(safe-area-inset-bottom));
 }
 
 .live-room-join-qr-toggle,

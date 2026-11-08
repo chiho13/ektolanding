@@ -1948,7 +1948,7 @@ function LiveRoomPage() {
           </header>
         </MotionDiv>
 
-        <div className={`live-room-caption-panel relative flex min-h-0 flex-1 flex-col bg-black [--join-qr-size:7.28rem] xl:[--join-qr-size:8.4rem] ${isFocusMode ? "rounded-none" : "rounded-xl"}`}>
+        <div className="live-room-caption-panel relative flex min-h-0 flex-1 flex-col [--join-qr-size:7.28rem] xl:[--join-qr-size:8.4rem]">
           <AnimatePresence initial={false}>
             {canShareLiveRoom && isJoinQrVisible ? (
               <MotionDiv
@@ -1976,7 +1976,7 @@ function LiveRoomPage() {
               </MotionDiv>
             ) : null}
           </AnimatePresence>
-          <div className={`grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden px-4 pb-4 text-center md:px-8 md:pb-6 ${canShareLiveRoom && isJoinQrVisible ? "live-room-caption-stage--with-qr" : ""}`}>
+          <div className={`live-room-caption-stage grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] overflow-hidden bg-black px-4 pb-4 text-center md:px-8 md:pb-6 ${isFocusMode ? "rounded-none" : "rounded-xl"} ${canShareLiveRoom && isJoinQrVisible ? "live-room-caption-stage--with-qr" : ""}`}>
             {!hasVisibleCaptions ? (
               <div className="mx-auto flex h-full max-w-2xl items-end text-xl font-bold leading-snug text-white/60 md:text-4xl">
                 {emptyCaptionMessage}
@@ -2023,7 +2023,7 @@ function LiveRoomPage() {
           <div
             role="group"
             aria-label="Caption controls"
-            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 px-3 pt-2 md:px-4 ${isFocusMode ? "bg-black pb-3 md:pb-4" : "rounded-b-xl bg-neutral-900 pb-2"}`}
+            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 px-3 md:px-4 ${isFocusMode ? "bg-black pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-[calc(1rem+env(safe-area-inset-bottom))]" : "live-room-controls--standard"}`}
           >
             <MotionDiv
               initial={false}
