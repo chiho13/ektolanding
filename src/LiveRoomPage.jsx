@@ -1870,7 +1870,7 @@ function LiveRoomPage() {
 
   return (
     <main
-      className={`live-room-page text-white ${isFocusMode ? "live-room-page--focused bg-black" : "bg-neutral-950"}`}
+      className={`live-room-page text-white ${isFocusMode ? "live-room-page--focused bg-black" : "bg-neutral-900"}`}
       style={{
         "--caption-font-scale": fontScale,
         "--caption-font-family": getLiveFontFamily(appearance.fontStyle),
@@ -2023,7 +2023,7 @@ function LiveRoomPage() {
           <div
             role="group"
             aria-label="Caption controls"
-            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 px-3 pt-2 md:px-4 ${isFocusMode ? "bg-black pb-3 md:pb-4" : "rounded-b-xl bg-neutral-950 pb-2"}`}
+            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 px-3 pt-2 md:px-4 ${isFocusMode ? "bg-black pb-3 md:pb-4" : "rounded-b-xl bg-neutral-900 pb-2"}`}
           >
             <MotionDiv
               initial={false}
