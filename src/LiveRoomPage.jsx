@@ -1131,7 +1131,8 @@ function usePacedAudienceCaptionRows(rows, language) {
 function LiveRoomPage() {
   const shouldReduceMotion = useReducedMotion();
   const focusTransitionDuration = shouldReduceMotion ? 0 : 0.24;
-  const chromeTransitionDuration = shouldReduceMotion ? 0 : 0.16;
+  const chromeFadeOutDuration = shouldReduceMotion ? 0 : 0.12;
+  const chromeFadeInDuration = shouldReduceMotion ? 0 : 0.16;
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const canShareLiveRoom = Boolean(code && isValidRoomCode(code));
   const liveRoomUrl = useMemo(getLiveRoomUrl, []);
@@ -1887,7 +1888,10 @@ function LiveRoomPage() {
           transition={{
             duration: focusTransitionDuration,
             ease: LIVE_ROOM_FOCUS_EASE,
-            opacity: { duration: chromeTransitionDuration },
+            opacity: {
+              duration: isFocusMode ? chromeFadeOutDuration : chromeFadeInDuration,
+              ease: "easeOut",
+            },
           }}
           aria-hidden={isFocusMode}
           inert={isFocusMode}
@@ -2031,7 +2035,14 @@ function LiveRoomPage() {
                 opacity: isFocusMode ? 0 : 1,
                 y: isFocusMode && !shouldReduceMotion ? 6 : 0,
               }}
-              transition={{ duration: chromeTransitionDuration, ease: LIVE_ROOM_FOCUS_EASE }}
+              transition={{
+                duration: focusTransitionDuration,
+                ease: LIVE_ROOM_FOCUS_EASE,
+                opacity: {
+                  duration: isFocusMode ? chromeFadeOutDuration : chromeFadeInDuration,
+                  ease: "easeOut",
+                },
+              }}
               aria-hidden={isFocusMode}
               inert={isFocusMode}
               className="flex min-w-0 items-center gap-2"
