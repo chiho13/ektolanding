@@ -1987,7 +1987,7 @@ function LiveRoomPage() {
               </div>
             ) : (
               <div className="relative min-h-0 overflow-hidden">
-                <div className="absolute inset-x-0 bottom-0 mx-auto max-w-5xl space-y-2 pb-[calc(0.25rem*var(--caption-font-scale))] md:space-y-3 md:pb-[calc(0.5rem*var(--caption-font-scale))]">
+                <div className="live-room-caption-stack absolute inset-x-0 bottom-0 mx-auto max-w-5xl space-y-2 md:space-y-3">
                   {visibleStructuredRows !== null
                     ? visibleStructuredRows.map((row, index) => (
                         <StructuredCaptionRow
@@ -2027,13 +2027,13 @@ function LiveRoomPage() {
           <div
             role="group"
             aria-label="Caption controls"
-            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 px-3 md:px-4 ${isFocusMode ? "bg-black pt-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-[calc(1rem+env(safe-area-inset-bottom))]" : "live-room-controls--standard"}`}
+            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 px-3 md:px-4 ${isFocusMode ? "bg-black pt-0 pb-0" : "live-room-controls--standard"}`}
           >
             <MotionDiv
               initial={false}
               animate={{
+                height: isFocusMode ? 0 : "auto",
                 opacity: isFocusMode ? 0 : 1,
-                y: isFocusMode && !shouldReduceMotion ? 6 : 0,
               }}
               transition={{
                 duration: focusTransitionDuration,
@@ -2045,7 +2045,7 @@ function LiveRoomPage() {
               }}
               aria-hidden={isFocusMode}
               inert={isFocusMode}
-              className="flex min-w-0 items-center gap-2"
+              className={`mr-14 flex min-w-0 items-center gap-2 ${isFocusMode ? "overflow-hidden" : ""}`}
             >
               <div ref={fontControlRef} className="relative shrink-0">
                 <button
@@ -2136,7 +2136,7 @@ function LiveRoomPage() {
                 setIsFocusControlHidden(false);
                 setIsFocusMode((isFocused) => !isFocused);
               }}
-              className={`${LIVE_ROOM_CONTROL_CLASS} ml-auto [transition-property:color,background-color,border-color,opacity] motion-reduce:transition-none ${isFocusMode && isFocusControlHidden ? "pointer-events-none opacity-0 focus-visible:pointer-events-auto focus-visible:opacity-100" : ""}`}
+              className={`${LIVE_ROOM_CONTROL_CLASS} absolute right-3 md:right-4 ${isFocusMode ? "bottom-[calc(0.75rem+env(safe-area-inset-bottom))] md:bottom-[calc(1rem+env(safe-area-inset-bottom))]" : "bottom-[calc(var(--live-room-control-inset)+env(safe-area-inset-bottom))]"} [transition-property:color,background-color,border-color,opacity] motion-reduce:transition-none ${isFocusMode && isFocusControlHidden ? "pointer-events-none opacity-0 focus-visible:pointer-events-auto focus-visible:opacity-100" : ""}`}
             >
               {isFocusMode ? (
                 <Minimize2 aria-hidden="true" size={18} />

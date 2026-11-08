@@ -48,6 +48,8 @@ html,
 
 .live-room-page {
   --live-room-gutter: 0.75rem;
+  --live-room-caption-padding: calc(0.25rem * var(--caption-font-scale, 1));
+  --live-room-focused-caption-bottom: 48px;
   --live-room-focus-duration: 240ms;
   --live-room-focus-ease: cubic-bezier(0.22, 1, 0.36, 1);
   min-height: 100vh;
@@ -72,10 +74,16 @@ html,
 .live-room-caption-stage,
 .live-room-controls {
   transition:
+    padding-top var(--live-room-focus-duration) var(--live-room-focus-ease),
+    padding-bottom var(--live-room-focus-duration) var(--live-room-focus-ease),
     border-radius var(--live-room-focus-duration) var(--live-room-focus-ease),
     box-shadow var(--live-room-focus-duration) var(--live-room-focus-ease),
     border-color var(--live-room-focus-duration) var(--live-room-focus-ease),
     background-color var(--live-room-focus-duration) var(--live-room-focus-ease);
+}
+
+.live-room-caption-stack {
+  padding-bottom: var(--live-room-caption-padding);
 }
 
 .live-room-controls--standard {
@@ -148,6 +156,8 @@ html,
 @media (min-width: 48rem) {
   .live-room-page {
     --live-room-gutter: 1.5rem;
+    --live-room-caption-padding: calc(0.5rem * var(--caption-font-scale, 1));
+    --live-room-focused-caption-bottom: 64px;
   }
 
   .live-caption-text {
@@ -166,6 +176,10 @@ html,
 
 .live-room-page--focused {
   --live-room-gutter: 0px;
+}
+
+.live-room-page--focused .live-room-caption-stage {
+  padding-bottom: max(0px, calc(var(--live-room-focused-caption-bottom) - var(--live-room-caption-padding)));
 }
 
 @media (prefers-reduced-motion: reduce) {
