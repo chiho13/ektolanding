@@ -1131,7 +1131,7 @@ function usePacedAudienceCaptionRows(rows, language) {
 function LiveRoomPage() {
   const shouldReduceMotion = useReducedMotion();
   const focusTransitionDuration = shouldReduceMotion ? 0 : 0.24;
-  const chromeFadeOutDuration = shouldReduceMotion ? 0 : 0.12;
+  const chromeFadeOutDuration = shouldReduceMotion ? 0 : 0.06;
   const chromeFadeInDuration = shouldReduceMotion ? 0 : 0.16;
   const code = useMemo(() => normalizeCode(window.location.pathname), []);
   const canShareLiveRoom = Boolean(code && isValidRoomCode(code));
