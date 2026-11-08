@@ -1064,7 +1064,7 @@ function CaptionLanguagePicker({ languages, language, hideOriginals, onChange })
   if (!hideOriginals) options.push({ code: "original", label: "Original" });
 
   return (
-    <div className="relative flex h-11 w-36 min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 text-sm text-white/90 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#8aeb9e]">
+    <div className="relative flex h-11 w-36 min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 text-sm text-white/90 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#8aeb9e]">
       <span aria-hidden="true" className="pointer-events-none min-w-0 flex-1 truncate">
         {options.find((option) => option.code === language)?.label}
       </span>
@@ -2025,7 +2025,7 @@ function LiveRoomPage() {
           <div
             role="group"
             aria-label="Caption controls"
-            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 border-t px-3 py-2 md:px-4 ${isFocusMode ? "border-transparent bg-black" : "rounded-b-xl border-white/10 bg-neutral-950"}`}
+            className={`live-room-controls relative z-20 flex shrink-0 items-center gap-2 border-t px-3 pt-2 md:px-4 ${isFocusMode ? "border-transparent bg-black pb-3 md:pb-4" : "rounded-b-xl border-white/10 bg-neutral-950 pb-2"}`}
           >
             <MotionDiv
               initial={false}
