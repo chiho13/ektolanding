@@ -14,16 +14,16 @@ export const guideCopy = {
     apps: {
       ekto: {
         name: "ekto",
-        fit: "For continuous translated captions in person",
-        detail: "Start a session and read the translation as the speaker continues. In a lecture or meeting, leave it running while the speaker moves through several points. You can also use same-language captions or save the transcript to revisit what you missed.",
-        limit: "Live translation needs an internet connection and microphone access. Check how clearly your iPhone picks up the speaker from your seat.",
-        links: ["ekto on the App Store"],
+        fit: "For following a long lecture or talk from your seat",
+        detail: "Open ekto on your own iPhone and tap once to read translated captions while the speaker keeps talking. You can start without an ekto account or any setup from the organiser. A paid session can run for up to two hours, and you can keep a text transcript without ekto storing the audio.",
+        limit: "Live translation needs an internet connection and microphone access. If you’re near the back, check how clearly your iPhone picks up the speaker from your seat.",
+        links: ["ekto on the App Store", "Session limits and audio storage"],
       },
       transync: {
         name: "Transync AI",
         fit: "For bilingual meetings with voice playback",
         detail: "Both ekto and Transync show live translated captions and can keep them visible in a floating window. For following a speaker from your seat, start with ekto’s continuous caption mode. For a back-and-forth meeting, try Transync’s dual-panel view with the original and translation side by side and the option to play the translation aloud.",
-        limit: "For Zoom, Teams, or Google Meet, Transync recommends using its desktop app when possible for more reliable capture of meeting audio.",
+        limit: "Transync’s mobile guide asks you to sign in first. For Zoom, Teams, or Google Meet, Transync recommends its desktop app when possible for more reliable capture of meeting audio.",
         links: ["Transync mobile guide"],
       },
       apple: {
@@ -76,16 +76,16 @@ export const guideCopy = {
     apps: {
       ekto: {
         name: "ekto",
-        fit: "講義や対面会議で翻訳字幕を読み続けたいとき",
-        detail: "セッションを開始すると、話が続く間も翻訳字幕が更新されます。講義や会議では、話題が変わっても起動したまま追えます。原語の字幕に切り替えたり、聞き逃した部分を後から文字起こしで確認したりすることもできます。",
-        limit: "リアルタイム翻訳にはインターネット接続とマイクの許可が必要です。いつもの席で話者の声を拾えるか確認してください。",
-        links: ["ektoをApp Storeで見る"],
+        fit: "長い講義や講演を自分の席から字幕で追いたいとき",
+        detail: "自分のiPhoneでektoを開いて一度タップすると、話が続く間も翻訳字幕が更新されます。ektoのアカウント登録も、主催者側での設定も不要です。有料プランでは1回のセッションが最長2時間で、音声を保存せずに文字起こしだけを残せます。",
+        limit: "リアルタイム翻訳にはインターネット接続とマイクの許可が必要です。後ろの席では、iPhoneが話者の声をはっきり拾えるか確認してください。",
+        links: ["ektoをApp Storeで見る", "利用時間と音声の取り扱い"],
       },
       transync: {
         name: "Transync AI",
         fit: "原文と訳文の両方を表示し、訳を音声でも聞きたい会議",
         detail: "ektoもTransyncも、その場で話している人の言葉を翻訳し、小窓にも字幕を表示できます。自分の席で話を追うなら、まずektoの翻訳字幕を。発言のやりとりが多い会議なら、原文と訳文を並べて表示し、訳を読み上げられるTransyncの2画面表示を試してみてください。",
-        limit: "Zoom、Teams、Google Meetでは、会議の音声を取り込みやすいデスクトップ版をTransyncが推奨しています。",
+        limit: "Transyncのモバイルガイドでは、最初にアカウントへのログインが必要です。Zoom、Teams、Google Meetでは、会議の音声を取り込みやすいデスクトップ版を推奨しています。",
         links: ["Transyncのモバイルガイド"],
       },
       apple: {
@@ -138,16 +138,16 @@ export const guideCopy = {
     apps: {
       ekto: {
         name: "ekto",
-        fit: "강의와 대면 회의에서 번역 자막을 계속 읽고 싶을 때",
-        detail: "번역을 시작하면 말이 이어지는 동안 자막이 계속 갱신됩니다. 강의나 회의에서 화제가 바뀌어도 앱을 켜 둔 채 내용을 따라갈 수 있습니다. 원문 자막을 보거나, 놓친 부분을 나중에 저장된 기록으로 확인할 수도 있습니다.",
-        limit: "실시간 번역에는 인터넷 연결과 마이크 권한이 필요합니다. 평소 앉는 자리에서 아이폰에 발표자의 목소리가 잘 들어오는지 확인하세요.",
-        links: ["App Store에서 ekto 보기"],
+        fit: "긴 강의나 발표를 내 자리에서 자막으로 따라갈 때",
+        detail: "내 아이폰에서 ekto를 열고 한 번 탭하면 발표자가 말하는 동안 번역 자막이 계속 갱신됩니다. ekto에 가입할 필요도, 행사 주최자가 따로 설정할 필요도 없습니다. 유료 플랜에서는 한 번에 최대 2시간까지 사용할 수 있고, 음성은 저장하지 않으면서 텍스트 기록을 남길 수 있습니다.",
+        limit: "실시간 번역에는 인터넷 연결과 마이크 권한이 필요합니다. 뒷자리에 앉는다면 아이폰에 발표자의 목소리가 잘 들어오는지 확인하세요.",
+        links: ["App Store에서 ekto 보기", "이용 시간과 음성 저장 안내"],
       },
       transync: {
         name: "Transync AI",
         fit: "회의에서 원문과 번역을 함께 보고 번역 음성도 듣고 싶을 때",
         detail: "ekto와 Transync 모두 말하는 동안 번역 자막을 보여 주고, 다른 앱 위에 작은 창으로 띄울 수 있습니다. 자리에서 발표를 따라가려면 ekto의 연속 자막을 먼저 써 보세요. 발언을 주고받는 회의라면 원문과 번역을 나란히 보고 번역을 소리로 들을 수 있는 Transync의 두 칸 보기도 고려할 만합니다.",
-        limit: "Zoom, Teams, Google Meet 등 온라인 회의에서는 Transync가 회의 소리를 더 안정적으로 받아들이는 데스크톱 앱을 권장합니다.",
+        limit: "Transync의 모바일 사용 안내에 따르면 먼저 계정에 로그인해야 합니다. Zoom, Teams, Google Meet 등 온라인 회의에서는 회의 소리를 더 안정적으로 받아들이는 데스크톱 앱을 권장합니다.",
         links: ["Transync 모바일 사용 안내"],
       },
       apple: {
@@ -195,16 +195,16 @@ export const guideCopy = {
     apps: {
       ekto: {
         name: "ekto",
-        fit: "Para leer subtítulos traducidos durante clases y reuniones presenciales",
-        detail: "Inicia una sesión y lee la traducción mientras la persona sigue hablando. Puedes dejarla activa mientras el profesor explica varios puntos o cambia el tema de la reunión. También puedes leer subtítulos en el idioma original o guardar la transcripción para repasar lo que se te haya escapado.",
-        limit: "La traducción en directo requiere conexión a internet y acceso al micrófono. Comprueba que tu iPhone capta bien la voz desde donde sueles sentarte.",
-        links: ["ekto en el App Store"],
+        fit: "Para seguir una clase o una charla larga desde tu asiento",
+        detail: "Abre ekto en tu iPhone y toca una vez para leer los subtítulos traducidos mientras la persona sigue hablando. Puedes empezar sin crear una cuenta de ekto ni pedir al organizador que configure nada. Con un plan de pago, cada sesión puede durar hasta dos horas y puedes guardar la transcripción sin que ekto almacene el audio.",
+        limit: "La traducción en directo requiere conexión a internet y acceso al micrófono. Si te sientas al fondo, comprueba que el iPhone capta bien la voz desde tu asiento.",
+        links: ["ekto en el App Store", "Duración de las sesiones y almacenamiento de audio"],
       },
       transync: {
         name: "Transync AI",
         fit: "Para reuniones con subtítulos bilingües y traducción por voz",
         detail: "Tanto ekto como Transync muestran subtítulos traducidos en directo y permiten mantenerlos en una ventana flotante. Si quieres seguir una presentación desde tu asiento, empieza por los subtítulos continuos de ekto. Para una reunión con mucho intercambio, prueba la vista de Transync que muestra el original junto a la traducción y permite reproducirla en voz alta.",
-        limit: "Para Zoom, Teams o Google Meet, Transync recomienda usar su app de escritorio cuando sea posible, ya que capta con más fiabilidad el audio de la reunión.",
+        limit: "La guía de Transync para móviles indica que primero hay que iniciar sesión. Para Zoom, Teams o Google Meet, recomienda usar su app de escritorio cuando sea posible porque capta mejor el audio de la reunión.",
         links: ["Guía de Transync para móviles"],
       },
       apple: {

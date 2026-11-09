@@ -12,7 +12,7 @@
 
 ## What ekto does
 
-ekto listens continuously and turns speech into accurate live captions or translated subtitles on an iPhone. It supports 37+ languages and is designed to help people understand fast, quiet, or accented speech without repeatedly asking the speaker to slow down or repeat themselves.
+An attendee can start continuous translated captions on their own iPhone during an in-person lecture, talk, or meeting. They can start without an ekto account or setup by the organiser. Paid sessions run for up to two hours. ekto supports 37+ languages and can save a text transcript without storing the audio. Live translation requires internet access and a microphone; distance and background noise affect speech capture.
 
 ## Use cases
 
@@ -38,6 +38,7 @@ ekto listens continuously and turns speech into accurate live captions or transl
 - Website: https://voicetranslate.app/
 - App Store: https://apps.apple.com/app/id6740196773
 - Blog: https://voicetranslate.app/blog/
+- Best live translation apps for iPhone in 2027: https://www.voicetranslate.app/blog/best-live-translation-apps-for-iphone/
 - Korean blog: https://voicetranslate.app/ko/blog/
 - Spanish blog: https://voicetranslate.app/es/blog/
 - Real-time conversation translation into Spanish (Spanish guide): https://voicetranslate.app/es/blog/traductor-de-conversaciones-en-tiempo-real/

@@ -7,7 +7,7 @@ function LiveTranslationGuidePage({ guide }) {
   const apps = Object.entries(copy.apps);
   const googleHelp = (id) => `https://support.google.com/translate/answer/${id}?co=GENIE.Platform%3DiOS&hl=${locale.code === "en" ? "en-GB" : locale.lang}`;
   const sources = {
-    ekto: [guide.appStoreUrl],
+    ekto: [guide.appStoreUrl, locale.path],
     transync: ["https://www.transyncai.com/docs/mobile-quickstart/"],
     apple: [
       "https://support.apple.com/guide/iphone/translate-text-voice-and-conversations-iphd74cb450f/26/ios/26",
