@@ -44,7 +44,7 @@ function LiveTranslationGuidePage({ guide }) {
           <div className="rounded-3xl border border-blue-100 bg-blue-50 px-5 py-7 sm:px-9 sm:py-10">
             <p className="mb-3 text-sm font-semibold text-blue-800">{guide.category}</p>
             <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight sm:text-5xl">{guide.title}</h1>
-            <p className="mt-5 text-lg leading-8 text-slate-800">{copy.taglinePrefix}<strong>{copy.tagline}</strong>{" "}{copy.intro}</p>
+            <p className="mt-5 text-lg leading-8 text-slate-800"><strong>{copy.tagline}</strong>{" "}{copy.intro}</p>
             <p className="mt-4 text-sm leading-6 text-slate-700">{copy.disclosure}</p>
           </div>
 

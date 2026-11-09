@@ -1,7 +1,6 @@
 export const guideCopy = {
   en: {
-    taglinePrefix: "Everyday ",
-    tagline: "Life. Subtitled.",
+    tagline: "Everyday Life. Subtitled.",
     intro: "The lecturer is already on the next slide. Someone across the table has just asked you a question. In both cases, you need the translation while people are still speaking, so you can follow along and respond in the moment. This guide compares six iPhone apps, starting with ekto for continuous translated captions in person.",
     disclosure: "We make ekto and publish this guide. The comparison is based on each app’s published features.",
     languageLabel: "Article language",

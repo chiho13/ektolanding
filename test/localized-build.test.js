@@ -71,7 +71,7 @@ test("the iPhone translation guide is prerendered and discoverable in all four b
       assert.ok(body.includes(`href="#${id}"`) && body.includes(`id="${id}"`), `${lang}: ${id} comparison is missing`);
     }
     assert.equal(body.includes("id1147874819"), lang === "ja" || lang === "ko");
-    if (lang === "en") assert.ok(body.includes("Everyday <strong>Life. Subtitled.</strong>"));
+    if (lang === "en") assert.ok(body.includes("<strong>Everyday Life. Subtitled.</strong>"));
     for (const [alternateLang, alternatePath] of Object.entries(guidePaths)) {
       assert.ok(head.includes(`hreflang="${alternateLang}" href="${sitemapOrigin}${alternatePath}"`));
       if (alternateLang !== lang) assert.ok(body.includes(`href="${alternatePath}"`));
