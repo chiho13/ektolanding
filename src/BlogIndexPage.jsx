@@ -1,6 +1,8 @@
 import appIcon from "./assets/ekto.png";
+import { liveTranslationGuide } from "./content/live-translation-guide.js";
 
 const articles = [
+  liveTranslationGuide.en,
   {
     title: "How to Practice English with Korean-to-English Live Translation",
     description:

@@ -18,6 +18,8 @@ import ForeignLanguageLecturesPageKo from "./ForeignLanguageLecturesPageKo.jsx";
 import BlogIndexPageEs from "./BlogIndexPageEs.jsx";
 import SpanishLecturesWorkPage from "./SpanishLecturesWorkPage.jsx";
 import SpanishConversationsPage from "./SpanishConversationsPage.jsx";
+import LiveTranslationGuidePage from "./LiveTranslationGuidePage.jsx";
+import { liveTranslationGuides } from "./content/live-translation-guide.js";
 
 // Maps each built HTML file (relative to dist/) to the component that should be
 // rendered into its <div id="root"> at build time. Keep this in sync with the
@@ -48,6 +50,9 @@ export function renderAll() {
   const out = {};
   for (const [htmlPath, Component] of pages) {
     out[htmlPath] = renderToString(<Component />);
+  }
+  for (const guide of liveTranslationGuides) {
+    out[`${guide.href.slice(1)}index.html`] = renderToString(<LiveTranslationGuidePage guide={guide} />);
   }
   return out;
 }

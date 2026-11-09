@@ -6,6 +6,7 @@ import { getTranslation } from "../src/i18n/translations.js";
 import { escapeHtml } from "../src/i18n/seo.js";
 
 const built = existsSync("dist/index.html");
+const sitemapOrigin = "https://www.voicetranslate.app";
 const decode = (text) => text.replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
 test("built locale pages contain complete visible content, SEO, working internal destinations and shared assets", { skip: !built && "Run npm run build first" }, () => {
@@ -32,15 +33,55 @@ test("built locale pages contain complete visible content, SEO, working internal
       assert.ok(existsSync(`dist${path}index.html`));
     }
     for (const match of html.matchAll(/(?:src|href)="(\/assets\/[^"?]+)"/g)) assert.ok(existsSync(`dist${match[1]}`));
-    assert.ok(sitemap.includes(`<loc>${SITE_URL}${locale.path}</loc>`));
+    assert.ok(sitemap.includes(`<loc>${sitemapOrigin}${locale.path}</loc>`));
     assert.equal(html.includes('id="root"></div>'), false);
   }
   for (const path of ["/for-event-organizers/", "/ja/blog/", "/ko/blog/", "/es/blog/", "/es/blog/como-entender-clases-y-reuniones-de-trabajo-en-ingles/", "/es/blog/traductor-de-conversaciones-en-tiempo-real/", "/blog/"]) {
     const html = readFileSync(`dist${path}index.html`, "utf8");
     assert.ok(html.includes(`<link rel="canonical" href="${SITE_URL}${path}"`));
     assert.equal(html.includes("landing-language-menu"), false);
-    assert.ok(sitemap.includes(`<loc>${SITE_URL}${path}</loc>`));
+    assert.ok(sitemap.includes(`<loc>${sitemapOrigin}${path}</loc>`));
   }
   assert.ok(existsSync("dist/live/index.html"));
   assert.ok(readFileSync("vercel.json", "utf8").includes('"source": "/live/:code"'));
+});
+
+test("the iPhone translation guide is prerendered and discoverable in all four blog languages", { skip: !built && "Run npm run build first" }, () => {
+  const slug = "best-live-translation-apps-for-iphone";
+  const guidePaths = {
+    en: `/blog/${slug}/`,
+    ja: `/ja/blog/${slug}/`,
+    ko: `/ko/blog/${slug}/`,
+    es: "/es/blog/mejores-apps-de-traduccion-en-tiempo-real-para-iphone/",
+  };
+  const sitemap = readFileSync("dist/sitemap.xml", "utf8");
+  assert.ok(readFileSync("dist/robots.txt", "utf8").includes(`Sitemap: ${sitemapOrigin}/sitemap.xml`));
+  assert.ok([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].every(([, url]) => new URL(url).origin === sitemapOrigin));
+  for (const [lang, path] of Object.entries(guidePaths)) {
+    const html = readFileSync(`dist${path}index.html`, "utf8");
+    const [head, body] = html.split("<body>");
+    assert.ok(head.includes(`<html lang="${lang}">`));
+    assert.match(head, /<title>[^<]*2027[^<]*<\/title>/);
+    assert.ok(head.includes(`<link rel="canonical" href="${sitemapOrigin}${path}"`));
+    assert.ok(head.includes(`<link rel="alternate" hreflang="x-default" href="${sitemapOrigin}${guidePaths.en}"`));
+    assert.equal([...head.matchAll(/hreflang=/g)].length, 5);
+    assert.equal([...body.matchAll(/<h1\b/g)].length, 1);
+    assert.doesNotMatch(body, /<div id="root"><\/div>|\b2026\b/);
+    for (const id of ["ekto", "transync", "apple", "google", "soniox", "hono"]) {
+      assert.ok(body.includes(`href="#${id}"`) && body.includes(`id="${id}"`), `${lang}: ${id} comparison is missing`);
+    }
+    assert.equal(body.includes("id1147874819"), lang === "ja" || lang === "ko");
+    if (lang === "en") assert.ok(body.includes("<strong>Life. Subtitled.</strong>"));
+    for (const [alternateLang, alternatePath] of Object.entries(guidePaths)) {
+      assert.ok(head.includes(`hreflang="${alternateLang}" href="${sitemapOrigin}${alternatePath}"`));
+      if (alternateLang !== lang) assert.ok(body.includes(`href="${alternatePath}"`));
+    }
+    for (const match of body.matchAll(/<a\b[^>]*\bhref="(\/[^"#?]*)"/g)) {
+      assert.ok(existsSync(`dist${match[1]}index.html`), `${lang}: broken link ${match[1]}`);
+    }
+    const blogPath = path.slice(0, path.lastIndexOf("/blog/") + "/blog/".length);
+    const blog = readFileSync(`dist${blogPath}index.html`, "utf8");
+    assert.ok(blog.includes(`href="${path}"`));
+    assert.ok(sitemap.includes(`<loc>${sitemapOrigin}${path}</loc>`));
+  }
 });

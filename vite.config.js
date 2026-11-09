@@ -4,6 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getLocaleFromPath, isLandingPath } from "./src/i18n/locales.js";
+import { liveTranslationGuides } from "./src/content/live-translation-guide.js";
+import { addGuideSeo, GUIDE_SEO_MARKER } from "./src/i18n/live-translation-guide-seo.js";
 import { localizeHtml } from "./src/i18n/seo.js";
 import { validateTranslations } from "./src/i18n/translations.js";
 
@@ -21,10 +23,24 @@ export default defineConfig({
         return isLandingPath(pathname) ? localizeHtml(html, getLocaleFromPath(pathname).code) : html;
       },
     },
+    {
+      name: "live-translation-guide-seo",
+      transformIndexHtml(html, context) {
+        if (!html.includes(GUIDE_SEO_MARKER)) return html;
+        const pathname = (context.originalUrl || context.path).split("?")[0].replace(/index\.html$/, "");
+        const guide = liveTranslationGuides.find(({ href }) => href === pathname || href === `${pathname}/`);
+        if (!guide) throw new Error(`Missing live translation guide for ${pathname}`);
+        return addGuideSeo(html, guide);
+      },
+    },
   ],
   build: {
     rollupOptions: {
       input: {
+        ...Object.fromEntries(liveTranslationGuides.map(({ href, locale }) => [
+          `liveTranslationGuide-${locale.code}`,
+          resolve(rootDir, `${href.slice(1)}index.html`),
+        ])),
         main: resolve(rootDir, "index.html"),
         liveRoom: resolve(rootDir, "live/index.html"),
         eventOrganizers: resolve(rootDir, "for-event-organizers/index.html"),

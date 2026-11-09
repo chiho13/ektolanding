@@ -1,6 +1,8 @@
 import appIcon from "./assets/ekto.png";
+import { liveTranslationGuide } from "./content/live-translation-guide.js";
 
 const articles = [
+  liveTranslationGuide.ja,
   {
     title: "聴覚障害・難聴の人のための対面イベント向けライブ字幕",
     description:

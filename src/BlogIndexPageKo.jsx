@@ -1,6 +1,8 @@
 import appIcon from "./assets/ekto.png";
+import { liveTranslationGuide } from "./content/live-translation-guide.js";
 
 function BlogIndexPageKo() {
+  const guide = liveTranslationGuide.ko;
   return (
     <div className="min-h-screen bg-slate-50" lang="ko">
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white px-6 py-4">
@@ -25,6 +27,14 @@ function BlogIndexPageKo() {
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-5xl">실시간 번역과 영어 회화 연습 가이드</h1>
           <p className="mb-12 max-w-3xl text-lg leading-8 text-slate-700">강의와 일상에서 실시간 자막과 번역을 활용하는 방법을 소개합니다. 외국어 강의를 따라가고 영어 표현을 연습하는 과정을 ekto와 함께 시작해 보세요.</p>
 
+          <article className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-lg">
+            <p className="mb-3 text-sm font-semibold text-blue-700">{guide.category}</p>
+            <h2 className="mb-3 text-2xl font-bold text-slate-900">
+              <a href={guide.href} className="hover:text-blue-700">{guide.title}</a>
+            </h2>
+            <p className="mb-4 text-lg leading-8 text-slate-700">{guide.description}</p>
+            <a href={guide.href} className="inline-flex font-semibold text-blue-700 hover:text-blue-800">가이드 읽기 →</a>
+          </article>
           <article className="rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-lg">
             <p className="mb-3 text-sm font-semibold text-blue-700">영어 회화 연습</p>
             <h2 className="mb-3 text-2xl font-bold text-slate-900">

@@ -1,6 +1,8 @@
 import appIcon from "./assets/ekto.png";
+import { liveTranslationGuide } from "./content/live-translation-guide.js";
 
 function BlogIndexPageEs() {
+  const guide = liveTranslationGuide.es;
   return (
     <div className="min-h-screen bg-slate-50" lang="es">
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white px-6 py-4">
@@ -25,6 +27,14 @@ function BlogIndexPageEs() {
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-5xl">Guías de traducción y subtítulos en vivo</h1>
           <p className="mb-12 max-w-3xl text-lg leading-8 text-slate-700">Consejos prácticos para entender conversaciones, clases y reuniones en otro idioma con subtítulos y traducción en tiempo real.</p>
 
+          <article className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-lg">
+            <p className="mb-3 text-sm font-semibold text-blue-700">{guide.category}</p>
+            <h2 className="mb-3 text-2xl font-bold text-slate-900">
+              <a href={guide.href} className="hover:text-blue-700">{guide.title}</a>
+            </h2>
+            <p className="mb-4 text-lg leading-8 text-slate-700">{guide.description}</p>
+            <a href={guide.href} className="inline-flex font-semibold text-blue-700 hover:text-blue-800">Leer la guía →</a>
+          </article>
           <article className="rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-lg">
             <p className="mb-3 text-sm font-semibold text-blue-700">Conversaciones en otro idioma</p>
             <h2 className="mb-3 text-2xl font-bold text-slate-900">
