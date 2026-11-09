@@ -1,5 +1,6 @@
 export const guideCopy = {
   en: {
+    taglinePrefix: "Everyday ",
     tagline: "Life. Subtitled.",
     intro: "The lecturer is already on the next slide. Someone across the table has just asked you a question. In both cases, you need the translation while people are still speaking, so you can follow along and respond in the moment. This guide compares six iPhone apps, starting with ekto for continuous translated captions in person.",
     disclosure: "We make ekto and publish this guide. The comparison is based on each app’s published features.",
@@ -181,7 +182,7 @@ export const guideCopy = {
     },
   },
   es: {
-    tagline: "La vida, con subtítulos.",
+    tagline: "La vida cotidiana, con subtítulos.",
     intro: "En clase, el profesor ya ha pasado a la siguiente diapositiva. En una reunión, alguien al otro lado de la mesa acaba de hacerte una pregunta. Si puedes leer la traducción mientras la otra persona habla, puedes seguir el hilo y responder en el momento. Comparamos seis apps para iPhone, empezando por ekto, que muestra subtítulos traducidos durante clases, reuniones y conversaciones presenciales.",
     disclosure: "Somos el equipo que desarrolla ekto y publica esta guía. La comparación se basa en las funciones que documenta cada app.",
     languageLabel: "Idioma del artículo",
